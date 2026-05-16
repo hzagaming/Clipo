@@ -36,7 +36,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     func applicationWillFinishLaunching(_ notification: Notification) {
         // Set activation policy as early as possible to prevent any Dock icon flicker
         // before SwiftUI creates its default WindowGroup.
-        NSApp.setActivationPolicy(.accessory)
+        let policy: NSApplication.ActivationPolicy = ClipStore.shared.settings.showDockIcon ? .regular : .accessory
+        NSApp.setActivationPolicy(policy)
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {

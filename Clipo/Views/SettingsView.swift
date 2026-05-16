@@ -121,7 +121,29 @@ struct SettingsView: View {
                         }
                     
                     AnimatedToggle("Show Dock Icon", isOn: $store.settings.showDockIcon)
-                        .disabled(true)
+                        .onChange(of: store.settings.showDockIcon) { newValue in
+                            let policy: NSApplication.ActivationPolicy = newValue ? .regular : .accessory
+                            let success = NSApp.setActivationPolicy(policy)
+                            if success {
+                                if newValue {
+                                    NSApp.activate(ignoringOtherApps: true)
+                                    NotificationService.shared.showNotification(
+                                        title: "Dock Icon Enabled",
+                                        body: "The Clipo icon now appears in the Dock."
+                                    )
+                                } else {
+                                    NotificationService.shared.showNotification(
+                                        title: "Dock Icon Hidden",
+                                        body: "The Dock icon will disappear after you restart Clipo."
+                                    )
+                                }
+                            } else {
+                                NotificationService.shared.showNotification(
+                                    title: "Setting Saved",
+                                    body: "The change will take effect after you restart Clipo."
+                                )
+                            }
+                        }
                 }
                 
                 SettingsCard(title: "Sound Effects") {
