@@ -14,6 +14,7 @@ struct AppSettings: Codable, Equatable {
     var autoDeletePolicy: AutoDeletePolicy = .never
     var showDockIcon: Bool = false
     var soundEnabled: Bool = true
+    var hotkeyPreferences: HotkeyPreferences = HotkeyPreferences()
     
     // MARK: - Backward Compatibility
     
@@ -36,6 +37,7 @@ struct AppSettings: Codable, Equatable {
         self.autoDeletePolicy = try container.decodeIfPresent(AutoDeletePolicy.self, forKey: .autoDeletePolicy) ?? .never
         self.showDockIcon = try container.decodeIfPresent(Bool.self, forKey: .showDockIcon) ?? false
         self.soundEnabled = try container.decodeIfPresent(Bool.self, forKey: .soundEnabled) ?? true
+        self.hotkeyPreferences = try container.decodeIfPresent(HotkeyPreferences.self, forKey: .hotkeyPreferences) ?? HotkeyPreferences()
     }
     
     init() {}

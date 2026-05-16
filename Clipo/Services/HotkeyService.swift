@@ -34,8 +34,12 @@ class HotkeyService {
     private var eventHandlerUPP: EventHandlerUPP?
     
     /// Registers all global hotkeys used by Clipo.
+    /// Reads modifier/key configuration from AppSettings so changes
+    /// made in Settings take effect immediately after re-registration.
     func registerAllHotkeys() {
         unregisterAllHotkeys()
+        
+        let prefs = ClipStore.shared.settings.hotkeyPreferences
         
         // Install a single Carbon event handler for hotkey presses.
         var eventType = EventTypeSpec(
@@ -59,26 +63,26 @@ class HotkeyService {
             return
         }
         
-        // Save hotkeys: Cmd + Option + 1..9
+        // Save hotkeys: user-configured modifier + 1..9
         for i in 1...9 {
             let keyCode = keyCodeForNumber(i)
             let id = UInt32(i)
-            registerHotkey(keyCode: keyCode, modifiers: UInt32(cmdKey) | UInt32(optionKey), id: id) { [weak self] in
+            registerHotkey(keyCode: keyCode, modifiers: prefs.saveSlotModifiers, id: id) { [weak self] in
                 self?.onSaveSlot(slotNumber: i)
             }
         }
         
-        // Paste hotkeys: Ctrl + Option + 1..9
+        // Paste hotkeys: user-configured modifier + 1..9
         for i in 1...9 {
             let keyCode = keyCodeForNumber(i)
             let id = UInt32(100 + i)
-            registerHotkey(keyCode: keyCode, modifiers: UInt32(controlKey) | UInt32(optionKey), id: id) { [weak self] in
+            registerHotkey(keyCode: keyCode, modifiers: prefs.pasteSlotModifiers, id: id) { [weak self] in
                 self?.onPasteSlot(slotNumber: i)
             }
         }
         
-        // Open Panel: Option + Space
-        registerHotkey(keyCode: 49, modifiers: UInt32(optionKey), id: 200) { [weak self] in
+        // Open Panel: user-configured key + modifier
+        registerHotkey(keyCode: prefs.openPanelKeyCode, modifiers: prefs.openPanelModifiers, id: 200) { [weak self] in
             self?.onOpenPanel()
         }
     }

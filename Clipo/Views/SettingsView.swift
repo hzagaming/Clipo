@@ -129,9 +129,79 @@ struct SettingsView: View {
                 }
                 
                 SettingsCard(title: "Shortcuts") {
-                    ShortcutRow(title: "Open Clipo Panel", shortcut: "⌥ Space")
-                    ShortcutRow(title: "Save to Slot 1–9", shortcut: "⌘ ⌥ 1–9")
-                    ShortcutRow(title: "Paste from Slot", shortcut: "⌃ ⌥ 1–9")
+                    // Open Panel
+                    HStack {
+                        Text("Open Clipo Panel")
+                            .font(.system(size: 13))
+                        Spacer()
+                        Picker("", selection: $store.settings.hotkeyPreferences.openPanelKeyCode) {
+                            ForEach(HotkeyPreferences.openPanelKeyPresets, id: \.code) { preset in
+                                Text(preset.label).tag(preset.code)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .frame(width: 90)
+                        .labelsHidden()
+                        Picker("", selection: $store.settings.hotkeyPreferences.openPanelModifiers) {
+                            ForEach(HotkeyPreferences.modifierPresets, id: \.mask) { preset in
+                                Text(preset.label).tag(preset.mask)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .frame(width: 140)
+                        .labelsHidden()
+                    }
+                    .onChange(of: store.settings.hotkeyPreferences.openPanelKeyCode) { _ in reRegisterHotkeys() }
+                    .onChange(of: store.settings.hotkeyPreferences.openPanelModifiers) { _ in reRegisterHotkeys() }
+                    
+                    Divider().padding(.vertical, 2)
+                    
+                    // Save Slot
+                    HStack {
+                        Text("Save to Slot 1–9")
+                            .font(.system(size: 13))
+                        Spacer()
+                        Picker("", selection: $store.settings.hotkeyPreferences.saveSlotModifiers) {
+                            ForEach(HotkeyPreferences.modifierPresets, id: \.mask) { preset in
+                                Text(preset.label).tag(preset.mask)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .frame(width: 140)
+                        .labelsHidden()
+                    }
+                    .onChange(of: store.settings.hotkeyPreferences.saveSlotModifiers) { _ in reRegisterHotkeys() }
+                    
+                    Divider().padding(.vertical, 2)
+                    
+                    // Paste Slot
+                    HStack {
+                        Text("Paste from Slot")
+                            .font(.system(size: 13))
+                        Spacer()
+                        Picker("", selection: $store.settings.hotkeyPreferences.pasteSlotModifiers) {
+                            ForEach(HotkeyPreferences.modifierPresets, id: \.mask) { preset in
+                                Text(preset.label).tag(preset.mask)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .frame(width: 140)
+                        .labelsHidden()
+                    }
+                    .onChange(of: store.settings.hotkeyPreferences.pasteSlotModifiers) { _ in reRegisterHotkeys() }
+                    
+                    // Conflict warning
+                    if store.settings.hotkeyPreferences.saveSlotModifiers == store.settings.hotkeyPreferences.pasteSlotModifiers {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                            Text("Save and Paste modifiers are identical — slots will conflict.")
+                                .font(.caption2)
+                                .foregroundColor(.orange.opacity(0.85))
+                        }
+                        .padding(.top, 4)
+                    }
                 }
             }
             .padding(.vertical, 4)
@@ -263,6 +333,11 @@ struct SettingsView: View {
             .padding(.vertical, 4)
         }
     }
+    
+    private func reRegisterHotkeys() {
+        HotkeyService.shared.registerAllHotkeys()
+    }
+    
     // MARK: - Import / Export
     
     private func exportJSON() {
