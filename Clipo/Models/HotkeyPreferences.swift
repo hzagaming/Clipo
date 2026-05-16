@@ -42,4 +42,14 @@ struct HotkeyPreferences: Codable, Equatable {
     static func label(forKeyCode code: UInt32) -> String {
         openPanelKeyPresets.first { $0.code == code }?.label ?? "Key \(code)"
     }
+
+    /// Short symbol string for menu labels (e.g. "⌘⌥", "⌃⌥").
+    static func shortMenuLabel(forModifiers mask: UInt32) -> String {
+        var parts: [String] = []
+        if mask & 0x1000 != 0 { parts.append("⌃") } // control
+        if mask & 0x0800 != 0 { parts.append("⌥") } // option
+        if mask & 0x0200 != 0 { parts.append("⇧") } // shift
+        if mask & 0x0100 != 0 { parts.append("⌘") } // command
+        return parts.joined()
+    }
 }

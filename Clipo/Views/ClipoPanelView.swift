@@ -211,21 +211,26 @@ struct ClipoPanelView: View {
                 selectedIndex = globalIndex
             }
             copyItem(row.item)
+            PanelWindowService.shared.hidePanel()
         }
         .contextMenu {
             Button("Copy") { copyItem(row.item) }
+                .keyboardShortcut(.return, modifiers: [])
             Button("Paste") { pasteItem(row.item) }
+                .keyboardShortcut(.return, modifiers: .command)
             if !row.isSlot {
                 Divider()
                 Button(row.item.isPinned ? "Unpin" : "Pin") {
                     store.togglePin(id: row.item.id)
                 }
+                .keyboardShortcut("p", modifiers: .command)
                 Button("Delete") {
                     store.deleteHistoryItem(id: row.item.id)
                     if selectedIndex >= allItems.count {
                         selectedIndex = max(0, allItems.count - 1)
                     }
                 }
+                .keyboardShortcut(.delete, modifiers: [])
             }
         }
         .animation(.spring(response: 0.2, dampingFraction: 0.8), value: selectedIndex)
@@ -242,7 +247,7 @@ struct ClipoPanelView: View {
                 .foregroundColor(.secondary.opacity(0.5))
             
             if searchText.isEmpty {
-                Text("Select text and press ⌘⌥1–9 to save")
+                Text(emptyStateHint)
                     .font(.caption)
                     .foregroundColor(.secondary.opacity(0.35))
             }
@@ -251,6 +256,14 @@ struct ClipoPanelView: View {
         .padding(.top, 60)
         .opacity(appearAnimation ? 1 : 0)
         .animation(.easeOut(duration: 0.4).delay(0.2), value: appearAnimation)
+    }
+    
+    private var emptyStateHint: String {
+        let prefs = store.settings.hotkeyPreferences
+        let modLabel = HotkeyPreferences.shortMenuLabel(forModifiers: prefs.saveSlotModifiers)
+        return modLabel.isEmpty
+            ? "Select text and press 1–9 to save"
+            : "Select text and press \(modLabel)1–9 to save"
     }
     
     // MARK: - Keyboard Handling
@@ -272,7 +285,7 @@ struct ClipoPanelView: View {
         case 36: // Return
             guard selectedIndex < allItems.count else { return }
             let row = allItems[selectedIndex]
-            if event.modifierFlags.contains(.command) {
+            if isOnlyCommandPressed(event) {
                 pasteItem(row.item)
             } else {
                 copyItem(row.item)
@@ -292,7 +305,7 @@ struct ClipoPanelView: View {
                 }
             }
         case 35: // 'P'
-            if event.modifierFlags.contains(.command) {
+            if isOnlyCommandPressed(event) {
                 guard selectedIndex < allItems.count else { return }
                 let row = allItems[selectedIndex]
                 if !row.isSlot {
@@ -302,6 +315,12 @@ struct ClipoPanelView: View {
         default:
             break
         }
+    }
+    
+    /// Checks that the only modifier pressed is Command (no Shift, Option, or Control).
+    private func isOnlyCommandPressed(_ event: NSEvent) -> Bool {
+        let mods = event.modifierFlags.intersection([.command, .shift, .option, .control])
+        return mods == .command
     }
     
     // MARK: - Actions

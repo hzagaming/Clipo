@@ -5,32 +5,50 @@ import AppKit
 /// UNUserNotificationCenter alerts. This eliminates the recurring
 /// `-[NSXPCDecoder validateAllowedClass:forKey:]` console warnings
 /// caused by XPC decoding inside the notification daemon.
+///
+/// Toasts are queued so rapid-fire notifications do not overwrite each
+/// other; each toast displays for its full duration before the next
+/// one appears.
 class NotificationService {
     static let shared = NotificationService()
     
+    private var queue: [(title: String, body: String, isError: Bool)] = []
+    private var isDisplaying = false
     private var toastWindow: ToastWindow?
     private var dismissTimer: Timer?
     
     private init() {}
     
-    func showNotification(title: String, body: String) {
+    func showNotification(title: String, body: String, isError: Bool = false) {
         DispatchQueue.main.async { [weak self] in
-            self?.presentToast(title: title, body: body)
+            self?.queue.append((title, body, isError))
+            self?.processQueue()
         }
     }
     
     // MARK: - Private
     
-    private func presentToast(title: String, body: String) {
+    private func processQueue() {
+        guard !isDisplaying, !queue.isEmpty else { return }
+        isDisplaying = true
+        let next = queue.removeFirst()
+        presentToast(title: next.title, body: next.body, isError: next.isError)
+    }
+    
+    private func presentToast(title: String, body: String, isError: Bool) {
         dismissTimer?.invalidate()
         
         if toastWindow == nil {
             toastWindow = ToastWindow()
         }
         
-        guard let window = toastWindow else { return }
+        guard let window = toastWindow else {
+            isDisplaying = false
+            processQueue()
+            return
+        }
         
-        window.contentView = NSHostingView(rootView: ToastView(title: title, message: body))
+        window.contentView = NSHostingView(rootView: ToastView(title: title, message: body, isError: isError))
         positionWindow(window)
         
         window.alphaValue = 0
@@ -48,7 +66,11 @@ class NotificationService {
     }
     
     private func dismissToast() {
-        guard let window = toastWindow else { return }
+        guard let window = toastWindow else {
+            isDisplaying = false
+            processQueue()
+            return
+        }
         
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.3
@@ -57,11 +79,22 @@ class NotificationService {
         } completionHandler: { [weak self] in
             window.orderOut(nil)
             self?.dismissTimer = nil
+            self?.isDisplaying = false
+            self?.processQueue()
         }
     }
     
     private func positionWindow(_ window: NSWindow) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
+        // Use the screen that currently contains the mouse cursor so
+        // the toast always appears on the active display.
+        let screen: NSScreen
+        if let mouseLocation = NSEvent.mouseLocation as NSPoint?,
+           let targetScreen = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) {
+            screen = targetScreen
+        } else {
+            screen = NSScreen.main ?? NSScreen.screens.first!
+        }
+        
         let visibleFrame = screen.visibleFrame
         let size = window.frame.size
         let padding: CGFloat = 20
@@ -102,12 +135,13 @@ private class ToastWindow: NSPanel {
 private struct ToastView: View {
     let title: String
     let message: String
+    let isError: Bool
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill")
+            Image(systemName: isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                 .font(.system(size: 22))
-                .foregroundColor(.green)
+                .foregroundColor(isError ? .orange : .green)
             
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)

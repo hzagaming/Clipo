@@ -183,7 +183,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         menu.addItem(NSMenuItem.separator())
         
         // Actions
-        let openPanelItem = NSMenuItem(title: "Open Clipo Panel    ⌥Space", action: #selector(openPanel), keyEquivalent: "")
+        let openPanelItem = NSMenuItem(title: openPanelMenuTitle(), action: #selector(openPanel), keyEquivalent: "")
         openPanelItem.target = self
         menu.addItem(openPanelItem)
         
@@ -214,10 +214,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     @objc func slotCopyClicked(_ sender: NSMenuItem) {
         let slotNumber = sender.tag
-        if let item = ClipStore.shared.slots[slotNumber] {
-            SoundService.shared.playCopy()
-            ClipboardService.shared.writeTextToPasteboard(item.content)
-            NotificationService.shared.showNotification(title: "Copied", body: item.preview)
+        guard let item = ClipStore.shared.slots[slotNumber] else {
+            SoundService.shared.playError()
+            return
+        }
+        SoundService.shared.playCopy()
+        ClipboardService.shared.writeTextToPasteboard(item.content)
+        NotificationService.shared.showNotification(title: "Copied", body: item.preview)
+        
+        if var updated = ClipStore.shared.slots[slotNumber] {
+            updated.lastUsedAt = Date()
+            ClipStore.shared.slots[slotNumber] = updated
+            ClipStore.shared.save()
         }
     }
     
@@ -231,6 +239,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         SoundService.shared.playPaste()
         let shouldRestore = ClipStore.shared.settings.restoreClipboardAfterPaste
         PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
+        
+        if var updated = ClipStore.shared.slots[slotNumber] {
+            updated.lastUsedAt = Date()
+            ClipStore.shared.slots[slotNumber] = updated
+        }
+        if let histIndex = ClipStore.shared.history.firstIndex(where: { $0.content == item.content }) {
+            ClipStore.shared.history[histIndex].lastUsedAt = Date()
+        }
+        ClipStore.shared.save()
     }
     
     @objc func openPanel() {
@@ -282,6 +299,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         SoundService.shared.playCopy()
         ClipboardService.shared.writeTextToPasteboard(item.content)
         NotificationService.shared.showNotification(title: "Copied", body: item.preview)
+    }
+    
+    // MARK: - Dynamic Menu Labels
+    
+    private func openPanelMenuTitle() -> String {
+        let prefs = ClipStore.shared.settings.hotkeyPreferences
+        let keyLabel = HotkeyPreferences.label(forKeyCode: prefs.openPanelKeyCode)
+        let modLabel = HotkeyPreferences.shortMenuLabel(forModifiers: prefs.openPanelModifiers)
+        let shortcut = modLabel.isEmpty ? keyLabel : "\(modLabel)\(keyLabel)"
+        return "Open Clipo Panel    \(shortcut)"
     }
     
     // MARK: - Permission Window
@@ -378,6 +405,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                     item.submenu?.items.forEach { $0.isEnabled = false }
                 }
             }
+        }
+        
+        // 3. Update Open Panel title to reflect current shortcut.
+        if let openPanelItem = menu.items.first(where: { $0.action == #selector(openPanel) }) {
+            openPanelItem.title = openPanelMenuTitle()
         }
     }
 }

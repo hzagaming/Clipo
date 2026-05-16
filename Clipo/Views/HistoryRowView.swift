@@ -45,6 +45,7 @@ struct HistoryRowView: View {
                         Text(app)
                             .font(.caption2)
                             .foregroundColor(.secondary.opacity(0.7))
+                            .lineLimit(1)
                     }
                     
                     TypeBadge(type: item.type)

@@ -35,7 +35,8 @@ class PasteService {
         guard PermissionService.shared.hasAccessibilityPermission() else {
             NotificationService.shared.showNotification(
                 title: "Permission Required",
-                body: "Clipo needs Accessibility permission to paste text."
+                body: "Clipo needs Accessibility permission to paste text.",
+                isError: true
             )
             return
         }

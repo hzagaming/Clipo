@@ -77,9 +77,12 @@ class PanelWindowService {
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard self?.panelWindow?.isVisible == true else { return event }
             NotificationCenter.default.post(name: .panelKeyboardEvent, object: event)
-            // Consume navigation keys so they don't leak through to the search field.
+            // Consume navigation and action keys so they don't leak through
+            // to the search field.
             switch event.keyCode {
             case 126, 125, 36, 53: // Up, Down, Return, Escape
+                return nil
+            case 35 where event.modifierFlags.contains(.command): // Cmd+P
                 return nil
             default:
                 return event
@@ -97,7 +100,7 @@ class PanelWindowService {
     private func createPanel() {
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 600, height: 500),
-            styleMask: [.nonactivatingPanel, .titled, .closable, .resizable],
+            styleMask: [.nonactivatingPanel, .titled, .closable],
             backing: .buffered,
             defer: false
         )

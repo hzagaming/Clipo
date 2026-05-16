@@ -16,7 +16,8 @@ class LaunchAtLoginService {
                 print("[Clipo] Failed to set launch at login: \(error)")
                 NotificationService.shared.showNotification(
                     title: "Launch at Login Failed",
-                    body: "Please ensure the app is code-signed to use this feature."
+                    body: "Please ensure the app is code-signed to use this feature.",
+                    isError: true
                 )
             }
         }

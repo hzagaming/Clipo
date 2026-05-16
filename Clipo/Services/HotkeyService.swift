@@ -127,7 +127,8 @@ class HotkeyService {
             print("[Clipo] Failed to register hotkey id \(id), status: \(status)")
             NotificationService.shared.showNotification(
                 title: "Hotkey Registration Failed",
-                body: "Shortcut id \(id) could not be registered. It may conflict with another app."
+                body: "Shortcut id \(id) could not be registered. It may conflict with another app.",
+                isError: true
             )
         }
     }
@@ -144,7 +145,8 @@ class HotkeyService {
         guard PermissionService.shared.hasAccessibilityPermission() else {
             NotificationService.shared.showNotification(
                 title: "Permission Required",
-                body: "Clipo needs Accessibility permission to save text."
+                body: "Clipo needs Accessibility permission to save text.",
+                isError: true
             )
             return
         }
@@ -161,7 +163,8 @@ class HotkeyService {
             guard let text = text, !text.isEmpty else {
                 NotificationService.shared.showNotification(
                     title: "Save Failed",
-                    body: "No text selected or clipboard is empty."
+                    body: "No text selected or clipboard is empty.",
+                    isError: true
                 )
                 return
             }
@@ -196,10 +199,13 @@ class HotkeyService {
         SoundService.shared.playPaste()
         PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
         
-        // Update lastUsedAt timestamp.
-        if var item = ClipStore.shared.slots[slotNumber] {
-            item.lastUsedAt = Date()
-            ClipStore.shared.slots[slotNumber] = item
+        // Update lastUsedAt timestamp in both slot and matching history.
+        if var updated = ClipStore.shared.slots[slotNumber] {
+            updated.lastUsedAt = Date()
+            ClipStore.shared.slots[slotNumber] = updated
+        }
+        if let histIndex = ClipStore.shared.history.firstIndex(where: { $0.content == item.content }) {
+            ClipStore.shared.history[histIndex].lastUsedAt = Date()
         }
         ClipStore.shared.save()
     }
