@@ -7,18 +7,39 @@ class PanelWindowService {
     /// Internal read access for AppDelegate to distinguish managed windows.
     private(set) var panelWindow: NSPanel?
     private let panelDelegate = PanelWindowDelegate()
+    private var keyboardMonitor: Any?
     
     func showPanel() {
         if panelWindow == nil {
             createPanel()
         }
+        panelWindow?.alphaValue = 0
         panelWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        startKeyboardMonitoring()
+        
+        // Fade in with subtle scale
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(0.15)
+        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeOut))
+        panelWindow?.animator().alphaValue = 1
+        CATransaction.commit()
     }
     
     func hidePanel() {
         guard panelWindow?.isVisible == true else { return }
-        panelWindow?.orderOut(nil)
+        SoundService.shared.playClose()
+        stopKeyboardMonitoring()
+        
+        // Fade out then orderOut
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(0.12)
+        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeIn))
+        CATransaction.setCompletionBlock { [weak self] in
+            self?.panelWindow?.orderOut(nil)
+        }
+        panelWindow?.animator().alphaValue = 0
+        CATransaction.commit()
     }
     
     func togglePanel() {
@@ -27,6 +48,24 @@ class PanelWindowService {
             hidePanel()
         } else {
             showPanel()
+        }
+    }
+    
+    // MARK: - Keyboard Monitoring
+    
+    private func startKeyboardMonitoring() {
+        stopKeyboardMonitoring()
+        keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard self?.panelWindow?.isVisible == true else { return event }
+            NotificationCenter.default.post(name: .panelKeyboardEvent, object: event)
+            return event
+        }
+    }
+    
+    private func stopKeyboardMonitoring() {
+        if let monitor = keyboardMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyboardMonitor = nil
         }
     }
     

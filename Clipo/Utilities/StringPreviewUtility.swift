@@ -1,3 +1,5 @@
+import Foundation
+
 struct StringPreviewUtility {
     static func makePreview(from content: String, maxLength: Int = 60) -> String {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)

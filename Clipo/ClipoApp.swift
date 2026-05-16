@@ -6,15 +6,20 @@ struct ClipoApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
-        // SwiftUI requires at least one Scene. We use a minimal WindowGroup
-        // and manage all UI via AppKit (NSStatusItem, NSPanel) in AppDelegate.
-        WindowGroup {
+        // Use a Settings scene instead of WindowGroup to avoid creating
+        // a visible main window. All UI is managed via AppKit in AppDelegate.
+        Settings {
             EmptyView()
-                .frame(width: 0, height: 0)
-                .hidden()
         }
-        .windowStyle(.hiddenTitleBar)
     }
+}
+
+// MARK: - SplashWindow
+
+/// A borderless window that can become key, used for the splash screen.
+class SplashWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { false }
 }
 
 // MARK: - AppDelegate
@@ -23,6 +28,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     var statusItem: NSStatusItem?
     var settingsWindow: NSWindow?
     var permissionWindow: NSWindow?
+    var splashWindow: NSWindow?
+    private var hasFinishedSplash = false
+    private var splashCloseTimer: Timer?
+    private var permissionCheckTimer: Timer?
     
     func applicationWillFinishLaunching(_ notification: Notification) {
         // Set activation policy as early as possible to prevent any Dock icon flicker
@@ -31,17 +40,83 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // SwiftUI WindowGroup creates a default window even with hidden content.
-        // Close any window that is not one of our explicitly managed windows.
+        // Close any stray system windows
         NSApp.windows
-            .filter { $0 !== settingsWindow && $0 !== permissionWindow && $0 !== PanelWindowService.shared.panelWindow }
+            .filter { $0 !== settingsWindow && $0 !== permissionWindow && $0 !== PanelWindowService.shared.panelWindow && $0 !== splashWindow }
             .forEach { $0.close() }
         
-        setupStatusItem()
-        HotkeyService.shared.registerAllHotkeys()
+        showSplashScreen()
+    }
+    
+    private func continueLaunch() {
+        guard !hasFinishedSplash else { return }
         
-        if !PermissionService.shared.hasAccessibilityPermission() {
+        if PermissionService.shared.hasAccessibilityPermission() {
+            // Permission already granted — proceed normally
+            hasFinishedSplash = true
+            setupStatusItem()
+            HotkeyService.shared.registerAllHotkeys()
+        } else {
+            // No permission — show permission window with live monitoring
             showPermissionWindow()
+            startPermissionMonitoring()
+        }
+    }
+    
+    private func startPermissionMonitoring() {
+        permissionCheckTimer?.invalidate()
+        permissionCheckTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            if PermissionService.shared.hasAccessibilityPermission() {
+                self.permissionCheckTimer?.invalidate()
+                self.permissionCheckTimer = nil
+                
+                // Animate the granted state in the permission view
+                DispatchQueue.main.async {
+                    self.permissionWindow?.close()
+                    self.permissionWindow = nil
+                    
+                    // Now continue with full launch
+                    if !self.hasFinishedSplash {
+                        self.hasFinishedSplash = true
+                        self.setupStatusItem()
+                        HotkeyService.shared.registerAllHotkeys()
+                        NotificationService.shared.showNotification(
+                            title: "Clipo Ready",
+                            body: "Accessibility permission granted. Hotkeys are now active."
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
+    private func showSplashScreen() {
+        let window = SplashWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 520),
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.hasShadow = true
+        window.level = .floating
+        window.center()
+        window.contentView = NSHostingView(rootView: SplashScreenView())
+        window.orderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        splashWindow = window
+        
+        // Close after animation completes (2.8s total)
+        splashCloseTimer = Timer.scheduledTimer(withTimeInterval: 2.8, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            // Release contentView first to safely tear down SwiftUI @State
+            self.splashWindow?.contentView = nil
+            self.splashWindow?.close()
+            self.splashWindow = nil
+            self.splashCloseTimer = nil
+            self.continueLaunch()
         }
     }
     
@@ -54,7 +129,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     // MARK: - Status Item Setup
     
     func setupStatusItem() {
-        statusItem = NSStatusBar.shared.statusItem(withLength: NSStatusItem.variableLength)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         let button = statusItem?.button
         button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clipo")
             ?? NSImage(named: NSImage.Name("NSActionTemplate"))
@@ -133,6 +208,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     @objc func slotCopyClicked(_ sender: NSMenuItem) {
         let slotNumber = sender.tag
         if let item = ClipStore.shared.slots[slotNumber] {
+            SoundService.shared.playCopy()
             ClipboardService.shared.writeTextToPasteboard(item.content)
             NotificationService.shared.showNotification(title: "Copied", body: item.preview)
         }
@@ -141,14 +217,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     @objc func slotPasteClicked(_ sender: NSMenuItem) {
         let slotNumber = sender.tag
         guard let item = ClipStore.shared.slots[slotNumber] else {
+            SoundService.shared.playError()
             NotificationService.shared.showNotification(title: "Slot \(slotNumber) Empty", body: "Nothing has been saved to this slot yet.")
             return
         }
+        SoundService.shared.playPaste()
         let shouldRestore = ClipStore.shared.settings.restoreClipboardAfterPaste
         PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
     }
     
     @objc func openPanel() {
+        SoundService.shared.playOpen()
         PanelWindowService.shared.showPanel()
     }
     
@@ -172,11 +251,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     @objc func clearHistory() {
+        SoundService.shared.playReset()
         ClipStore.shared.clearHistory()
         NotificationService.shared.showNotification(title: "History Cleared", body: "All unpinned history items removed.")
     }
     
     @objc func resetSlots() {
+        SoundService.shared.playReset()
         ClipStore.shared.resetSlots()
         NotificationService.shared.showNotification(title: "Slots Reset", body: "All slots cleared.")
     }
@@ -191,6 +272,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
               let item = ClipStore.shared.history.first(where: { $0.id == uuid }) else {
             return
         }
+        SoundService.shared.playCopy()
         ClipboardService.shared.writeTextToPasteboard(item.content)
         NotificationService.shared.showNotification(title: "Copied", body: item.preview)
     }
@@ -199,7 +281,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     func showPermissionWindow() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 280),
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 340),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -212,6 +294,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         permissionWindow = window
+    }
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        splashCloseTimer?.invalidate()
+        splashCloseTimer = nil
+        permissionCheckTimer?.invalidate()
+        permissionCheckTimer = nil
+        HotkeyService.shared.unregisterAllHotkeys()
     }
     
     // MARK: - NSWindowDelegate

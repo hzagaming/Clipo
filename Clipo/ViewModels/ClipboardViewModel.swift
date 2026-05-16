@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 class ClipboardViewModel: ObservableObject {
     @Published var store = ClipStore.shared

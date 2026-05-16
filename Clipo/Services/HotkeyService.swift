@@ -42,7 +42,7 @@ class HotkeyService {
             eventClass: OSType(kEventClassKeyboard),
             eventKind: OSType(kEventHotKeyPressed)
         )
-        let callback = NewEventHandlerUPP(carbonHotkeyCallback)
+        let callback: EventHandlerUPP = carbonHotkeyCallback
         self.eventHandlerUPP = callback
         InstallEventHandler(
             GetEventDispatcherTarget(),
@@ -57,7 +57,7 @@ class HotkeyService {
         for i in 1...9 {
             let keyCode = keyCodeForNumber(i)
             let id = UInt32(i)
-            registerHotkey(keyCode: keyCode, modifiers: cmdKey | optionKey, id: id) { [weak self] in
+            registerHotkey(keyCode: keyCode, modifiers: UInt32(cmdKey) | UInt32(optionKey), id: id) { [weak self] in
                 self?.onSaveSlot(slotNumber: i)
             }
         }
@@ -66,13 +66,13 @@ class HotkeyService {
         for i in 1...9 {
             let keyCode = keyCodeForNumber(i)
             let id = UInt32(100 + i)
-            registerHotkey(keyCode: keyCode, modifiers: controlKey | optionKey, id: id) { [weak self] in
+            registerHotkey(keyCode: keyCode, modifiers: UInt32(controlKey) | UInt32(optionKey), id: id) { [weak self] in
                 self?.onPasteSlot(slotNumber: i)
             }
         }
         
         // Open Panel: Option + Space
-        registerHotkey(keyCode: 49, modifiers: optionKey, id: 200) { [weak self] in
+        registerHotkey(keyCode: 49, modifiers: UInt32(optionKey), id: 200) { [weak self] in
             self?.onOpenPanel()
         }
     }
@@ -88,10 +88,7 @@ class HotkeyService {
             RemoveEventHandler(ref)
             eventHandlerRef = nil
         }
-        if let upp = eventHandlerUPP {
-            DisposeEventHandlerUPP(upp)
-            eventHandlerUPP = nil
-        }
+        eventHandlerUPP = nil
     }
     
     private func registerHotkey(
@@ -102,7 +99,7 @@ class HotkeyService {
     ) {
         var eventHotKey: EventHotKeyRef?
         let signature = FourCharCode(string: "CLIP")
-        var gHotKeyID = EventHotKeyID(signature: OSType(signature), id: id)
+        let gHotKeyID = EventHotKeyID(signature: OSType(signature), id: id)
         let status = RegisterEventHotKey(
             keyCode,
             modifiers,
@@ -166,6 +163,7 @@ class HotkeyService {
                 sourceApp: appName,
                 sourceBundleIdentifier: bundleId
             )
+            SoundService.shared.playSave()
             NotificationService.shared.showNotification(
                 title: "Saved to Slot \(slotNumber)",
                 body: StringPreviewUtility.makePreview(from: text)
@@ -183,14 +181,19 @@ class HotkeyService {
         }
         
         let shouldRestore = ClipStore.shared.settings.restoreClipboardAfterPaste
+        SoundService.shared.playPaste()
         PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
         
         // Update lastUsedAt timestamp.
-        ClipStore.shared.slots[slotNumber]?.lastUsedAt = Date()
+        if var item = ClipStore.shared.slots[slotNumber] {
+            item.lastUsedAt = Date()
+            ClipStore.shared.slots[slotNumber] = item
+        }
         ClipStore.shared.save()
     }
     
     private func onOpenPanel() {
+        SoundService.shared.playOpen()
         PanelWindowService.shared.togglePanel()
     }
     
