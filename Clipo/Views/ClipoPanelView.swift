@@ -212,6 +212,22 @@ struct ClipoPanelView: View {
             }
             copyItem(row.item)
         }
+        .contextMenu {
+            Button("Copy") { copyItem(row.item) }
+            Button("Paste") { pasteItem(row.item) }
+            if !row.isSlot {
+                Divider()
+                Button(row.item.isPinned ? "Unpin" : "Pin") {
+                    store.togglePin(id: row.item.id)
+                }
+                Button("Delete") {
+                    store.deleteHistoryItem(id: row.item.id)
+                    if selectedIndex >= allItems.count {
+                        selectedIndex = max(0, allItems.count - 1)
+                    }
+                }
+            }
+        }
         .animation(.spring(response: 0.2, dampingFraction: 0.8), value: selectedIndex)
     }
     
@@ -265,6 +281,24 @@ struct ClipoPanelView: View {
         case 53: // Esc
             SoundService.shared.playClose()
             PanelWindowService.shared.hidePanel()
+        case 51: // Delete (Backspace)
+            guard searchText.isEmpty else { return }
+            guard selectedIndex < allItems.count else { return }
+            let row = allItems[selectedIndex]
+            if !row.isSlot {
+                store.deleteHistoryItem(id: row.item.id)
+                if selectedIndex >= allItems.count {
+                    selectedIndex = max(0, allItems.count - 1)
+                }
+            }
+        case 35: // 'P'
+            if event.modifierFlags.contains(.command) {
+                guard selectedIndex < allItems.count else { return }
+                let row = allItems[selectedIndex]
+                if !row.isSlot {
+                    store.togglePin(id: row.item.id)
+                }
+            }
         default:
             break
         }
