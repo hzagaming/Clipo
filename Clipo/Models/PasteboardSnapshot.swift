@@ -1,32 +1,37 @@
 import AppKit
 
 /// A runtime snapshot of the system pasteboard for restoration.
-/// This is intentionally not Codable because NSPasteboardItem is an AppKit object.
+/// Stores only plain Swift data — no long-term Objective-C object references —
+/// to avoid use-after-free crashes when the pasteboard changes or items are
+/// deallocated on a background queue.
 class PasteboardSnapshot {
-    private let items: [NSPasteboardItem]
+    private let items: [[(type: NSPasteboard.PasteboardType, data: Data)]]
     
     init() {
         guard let pbItems = NSPasteboard.general.pasteboardItems else {
             self.items = []
             return
         }
-        // Deep copy pasteboard items because NSPasteboard general may change.
-        self.items = pbItems.compactMap { item in
-            let newItem = NSPasteboardItem()
-            for type in item.types {
-                if let data = item.data(forType: type) {
-                    newItem.setData(data, forType: type)
-                }
+        self.items = pbItems.map { item in
+            item.types.compactMap { type in
+                guard let data = item.data(forType: type) else { return nil }
+                return (type: type, data: data)
             }
-            return newItem
         }
     }
     
     func restore() {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        if !items.isEmpty {
-            pasteboard.writeObjects(items)
+        let newItems: [NSPasteboardItem] = items.map { typesAndData in
+            let newItem = NSPasteboardItem()
+            for (type, data) in typesAndData {
+                newItem.setData(data, forType: type)
+            }
+            return newItem
+        }
+        if !newItems.isEmpty {
+            pasteboard.writeObjects(newItems)
         }
     }
 }

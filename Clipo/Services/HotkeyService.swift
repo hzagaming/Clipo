@@ -44,7 +44,7 @@ class HotkeyService {
         )
         let callback: EventHandlerUPP = carbonHotkeyCallback
         self.eventHandlerUPP = callback
-        InstallEventHandler(
+        let installStatus = InstallEventHandler(
             GetEventDispatcherTarget(),
             callback,
             1,
@@ -52,6 +52,12 @@ class HotkeyService {
             nil,
             &eventHandlerRef
         )
+        
+        guard installStatus == noErr else {
+            print("[Clipo] Failed to install Carbon event handler, status: \(installStatus)")
+            eventHandlerUPP = nil
+            return
+        }
         
         // Save hotkeys: Cmd + Option + 1..9
         for i in 1...9 {
@@ -78,17 +84,19 @@ class HotkeyService {
     }
     
     func unregisterAllHotkeys() {
-        for hotkey in hotkeys {
-            UnregisterEventHotKey(hotkey)
-        }
-        hotkeys.removeAll()
-        handlers.removeAll()
-        
+        // Remove the event handler first, so no further callbacks can arrive.
         if let ref = eventHandlerRef {
             RemoveEventHandler(ref)
             eventHandlerRef = nil
         }
         eventHandlerUPP = nil
+        
+        // Unregister individual hotkeys after the handler is gone.
+        for hotkey in hotkeys {
+            UnregisterEventHotKey(hotkey)
+        }
+        hotkeys.removeAll()
+        handlers.removeAll()
     }
     
     private func registerHotkey(
@@ -121,8 +129,8 @@ class HotkeyService {
     }
     
     func handleHotkeyEvent(id: UInt32) {
-        DispatchQueue.main.async {
-            self.handlers[id]?()
+        DispatchQueue.main.async { [weak self] in
+            self?.handlers[id]?()
         }
     }
     

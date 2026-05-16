@@ -89,7 +89,7 @@ struct ClipoPanelView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .panelKeyboardEvent)) { notification in
             guard let event = notification.object as? NSEvent else { return }
-            _ = handleKeyEvent(event)
+            handleKeyEvent(event)
         }
     }
     
@@ -237,11 +237,7 @@ struct ClipoPanelView: View {
     
     // MARK: - Keyboard Handling
     
-    func handleKeyEvent(_ event: NSEvent) -> NSEvent? {
-        if isSearchFocused && event.keyCode != 53 && event.keyCode != 36 && !(event.keyCode == 125 || event.keyCode == 126) {
-            return event
-        }
-        
+    func handleKeyEvent(_ event: NSEvent) {
         switch event.keyCode {
         case 126: // Up arrow
             if selectedIndex > 0 {
@@ -249,16 +245,14 @@ struct ClipoPanelView: View {
                     selectedIndex -= 1
                 }
             }
-            return nil
         case 125: // Down arrow
             if selectedIndex < allItems.count - 1 {
                 withAnimation(.easeOut(duration: 0.1)) {
                     selectedIndex += 1
                 }
             }
-            return nil
         case 36: // Return
-            guard selectedIndex < allItems.count else { return nil }
+            guard selectedIndex < allItems.count else { return }
             let row = allItems[selectedIndex]
             if event.modifierFlags.contains(.command) {
                 pasteItem(row.item)
@@ -266,13 +260,11 @@ struct ClipoPanelView: View {
                 copyItem(row.item)
                 PanelWindowService.shared.hidePanel()
             }
-            return nil
         case 53: // Esc
             SoundService.shared.playClose()
             PanelWindowService.shared.hidePanel()
-            return nil
         default:
-            return event
+            break
         }
     }
     

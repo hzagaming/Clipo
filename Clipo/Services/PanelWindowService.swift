@@ -8,12 +8,16 @@ class PanelWindowService {
     private(set) var panelWindow: NSPanel?
     private let panelDelegate = PanelWindowDelegate()
     private var keyboardMonitor: Any?
+    private var isHiding = false
     
     func showPanel() {
         if panelWindow == nil {
             createPanel()
         }
-        panelWindow?.alphaValue = 0
+        // Cancel any in-progress hide animation so the panel doesn't get
+        // ordered out immediately after we show it.
+        isHiding = false
+        panelWindow?.alphaValue = 1
         panelWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         startKeyboardMonitoring()
@@ -27,18 +31,21 @@ class PanelWindowService {
     }
     
     func hidePanel() {
-        guard panelWindow?.isVisible == true else { return }
+        guard let panel = panelWindow, panel.isVisible, !isHiding else { return }
+        isHiding = true
         SoundService.shared.playClose()
         stopKeyboardMonitoring()
         
-        // Fade out then orderOut
+        // Fade out then orderOut. Capture the local panel reference so the
+        // completion block never accesses a deallocated or replaced window.
         CATransaction.begin()
         CATransaction.setAnimationDuration(0.12)
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeIn))
         CATransaction.setCompletionBlock { [weak self] in
-            self?.panelWindow?.orderOut(nil)
+            panel.orderOut(nil)
+            self?.isHiding = false
         }
-        panelWindow?.animator().alphaValue = 0
+        panel.animator().alphaValue = 0
         CATransaction.commit()
     }
     
@@ -51,6 +58,18 @@ class PanelWindowService {
         }
     }
     
+    /// Full teardown used on app termination or when resetting UI state.
+    func tearDown() {
+        stopKeyboardMonitoring()
+        if let panel = panelWindow {
+            panel.delegate = nil
+            panel.contentView = nil
+            panel.close()
+        }
+        panelWindow = nil
+        isHiding = false
+    }
+    
     // MARK: - Keyboard Monitoring
     
     private func startKeyboardMonitoring() {
@@ -58,7 +77,13 @@ class PanelWindowService {
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard self?.panelWindow?.isVisible == true else { return event }
             NotificationCenter.default.post(name: .panelKeyboardEvent, object: event)
-            return event
+            // Consume navigation keys so they don't leak through to the search field.
+            switch event.keyCode {
+            case 126, 125, 36, 53: // Up, Down, Return, Escape
+                return nil
+            default:
+                return event
+            }
         }
     }
     
@@ -98,5 +123,12 @@ class PanelWindowDelegate: NSObject, NSWindowDelegate {
         if window.isVisible {
             PanelWindowService.shared.hidePanel()
         }
+    }
+    
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSPanel else { return }
+        // If the user closes the panel via the close button, break the delegate
+        // link so no further callbacks arrive on a potentially deallocated path.
+        window.delegate = nil
     }
 }

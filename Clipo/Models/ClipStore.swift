@@ -75,8 +75,10 @@ class ClipStore: ObservableObject {
         var pinned = history.filter { $0.isPinned }
         var unpinned = history.filter { !$0.isPinned }
         
-        // Respect the total limit: pinned items are preserved first,
-        // then unpinned items fill the remaining quota.
+        // Respect the total limit: cap pinned at maxItems, then fill remainder with unpinned.
+        if pinned.count > maxItems {
+            pinned = Array(pinned.prefix(maxItems))
+        }
         let availableForUnpinned = max(0, maxItems - pinned.count)
         if unpinned.count > availableForUnpinned {
             unpinned = Array(unpinned.prefix(availableForUnpinned))

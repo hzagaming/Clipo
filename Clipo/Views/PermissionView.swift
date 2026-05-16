@@ -89,7 +89,7 @@ struct PermissionView: View {
                     .opacity(appear ? 1 : 0)
                     .offset(y: appear ? 0 : 8)
                     
-                    Text("Please add Clipo to Accessibility, then restart the app.")
+                    Text("Add Clipo to Accessibility — it will continue automatically.")
                         .font(.caption)
                         .foregroundColor(.secondary.opacity(0.7))
                         .opacity(appear ? 1 : 0)

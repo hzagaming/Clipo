@@ -40,10 +40,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Close any stray system windows
+        // Hide any stray system windows created by SwiftUI internals.
+        // orderOut is safer than close because it avoids triggering dealloc
+        // of windows whose delegates may still be referenced by the runtime.
         NSApp.windows
             .filter { $0 !== settingsWindow && $0 !== permissionWindow && $0 !== PanelWindowService.shared.panelWindow && $0 !== splashWindow }
-            .forEach { $0.close() }
+            .forEach { $0.orderOut(nil) }
         
         showSplashScreen()
     }
@@ -104,6 +106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         window.level = .floating
         window.center()
         window.contentView = NSHostingView(rootView: SplashScreenView())
+        window.isReleasedWhenClosed = false
         window.orderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         splashWindow = window
@@ -111,11 +114,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         // Close after animation completes (2.8s total)
         splashCloseTimer = Timer.scheduledTimer(withTimeInterval: 2.8, repeats: false) { [weak self] _ in
             guard let self = self else { return }
-            // Release contentView first to safely tear down SwiftUI @State
-            self.splashWindow?.contentView = nil
+            self.splashCloseTimer = nil
+            
+            // Resign first responder so SwiftUI view hierarchy tears down safely
+            // before the window closes. Let NSWindow handle contentView lifecycle.
+            self.splashWindow?.makeFirstResponder(nil)
             self.splashWindow?.close()
             self.splashWindow = nil
-            self.splashCloseTimer = nil
+            
             self.continueLaunch()
         }
     }
@@ -234,7 +240,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     @objc func openSettings() {
         if settingsWindow == nil {
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 520, height: 380),
+                contentRect: NSRect(x: 0, y: 0, width: 560, height: 440),
                 styleMask: [.titled, .closable, .miniaturizable],
                 backing: .buffered,
                 defer: false
@@ -301,6 +307,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         splashCloseTimer = nil
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = nil
+        PanelWindowService.shared.tearDown()
         HotkeyService.shared.unregisterAllHotkeys()
     }
     
@@ -309,8 +316,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow else { return }
         if window == settingsWindow {
+            // Break delegate / contentView references before nulling our strong ref
+            // to avoid any stale callbacks during deallocation.
+            window.delegate = nil
+            window.contentView = nil
             settingsWindow = nil
         } else if window == permissionWindow {
+            window.delegate = nil
+            window.contentView = nil
             permissionWindow = nil
         }
     }
