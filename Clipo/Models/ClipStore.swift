@@ -114,6 +114,17 @@ class ClipStore: ObservableObject {
         save()
     }
     
+    /// Replaces in-memory data with imported values and persists immediately.
+    /// Used by Settings > Data > Import JSON.
+    func importData(slots: [Int: ClipItem], history: [ClipItem], settings: AppSettings) {
+        isLoading = true
+        self.slots = slots
+        self.history = history
+        self.settings = settings
+        isLoading = false
+        save()
+    }
+    
     private func detectType(content: String) -> ClipType {
         if URLDetector.isValidURL(content) {
             return .url

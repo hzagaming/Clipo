@@ -1,10 +1,12 @@
 import SwiftUI
+import AppKit
 
 struct SettingsView: View {
     @StateObject private var store = ClipStore.shared
     @State private var showLaunchAtLoginAlert = false
     @State private var confirmationAlert: ConfirmationAlert?
     @State private var selectedTab = 0
+    @State private var importExportAlert: ImportExportAlert?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -80,6 +82,13 @@ struct SettingsView: View {
                     alert.action()
                 },
                 secondaryButton: .cancel()
+            )
+        }
+        .alert(item: $importExportAlert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK"))
             )
         }
     }
@@ -227,8 +236,12 @@ struct SettingsView: View {
             VStack(spacing: 16) {
                 SettingsCard(title: "Import / Export") {
                     HStack(spacing: 12) {
-                        SettingsActionButton(title: "Export JSON", icon: "square.and.arrow.up", isEnabled: false)
-                        SettingsActionButton(title: "Import JSON", icon: "square.and.arrow.down", isEnabled: false)
+                        SettingsActionButton(title: "Export JSON", icon: "square.and.arrow.up") {
+                            exportJSON()
+                        }
+                        SettingsActionButton(title: "Import JSON", icon: "square.and.arrow.down") {
+                            importJSON()
+                        }
                     }
                     
                     SettingsActionButton(title: "Open Data Folder", icon: "folder") {
@@ -248,6 +261,62 @@ struct SettingsView: View {
                 }
             }
             .padding(.vertical, 4)
+        }
+    }
+    // MARK: - Import / Export
+    
+    private func exportJSON() {
+        let panel = NSSavePanel()
+        panel.title = "Export Clipo Data"
+        panel.nameFieldStringValue = "clipo-data.json"
+        panel.canCreateDirectories = true
+        
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        
+        do {
+            try StorageService.shared.exportStore(
+                slots: store.slots,
+                history: store.history,
+                settings: store.settings,
+                to: url
+            )
+            NotificationService.shared.showNotification(
+                title: "Export Successful",
+                body: "Data saved to \(url.lastPathComponent)"
+            )
+        } catch {
+            importExportAlert = ImportExportAlert(
+                title: "Export Failed",
+                message: error.localizedDescription
+            )
+        }
+    }
+    
+    private func importJSON() {
+        let panel = NSOpenPanel()
+        panel.title = "Import Clipo Data"
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        
+        do {
+            let imported = try StorageService.shared.validateAndImportStore(from: url)
+            store.importData(
+                slots: imported.slots,
+                history: imported.history,
+                settings: imported.settings
+            )
+            NotificationService.shared.showNotification(
+                title: "Import Successful",
+                body: "Data restored from \(url.lastPathComponent)"
+            )
+        } catch {
+            importExportAlert = ImportExportAlert(
+                title: "Import Failed",
+                message: "The selected file is invalid or corrupted. Your existing data was not changed."
+            )
         }
     }
 }
@@ -418,7 +487,8 @@ struct SettingsActionButton: View {
     }
 }
 
-// MARK: - Confirmation Alert Model
+
+// MARK: - Alert Models
 
 struct ConfirmationAlert: Identifiable {
     let id = UUID()
@@ -426,6 +496,12 @@ struct ConfirmationAlert: Identifiable {
     let message: String
     let confirmButtonTitle: String
     let action: () -> Void
+}
+
+struct ImportExportAlert: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
 }
 
 // MARK: - Preview

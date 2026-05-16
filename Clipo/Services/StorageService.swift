@@ -66,6 +66,30 @@ class StorageService {
         }
     }
     
+    // MARK: - Export / Import
+    
+    /// Exports the current store to a user-selected JSON file.
+    func exportStore(slots: [Int: ClipItem], history: [ClipItem], settings: AppSettings, to url: URL) throws {
+        let container = StorageContainer(slots: slots, history: history, settings: settings)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(container)
+        try data.write(to: url, options: .atomic)
+    }
+    
+    /// Reads and validates an external JSON file. Returns the decoded data
+    /// on success so the caller can decide whether to apply it.
+    func validateAndImportStore(from url: URL) throws -> (slots: [Int: ClipItem], history: [ClipItem], settings: AppSettings) {
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let container = try decoder.decode(StorageContainer.self, from: data)
+        return (container.slots, container.history, container.settings)
+    }
+    
+    // MARK: - Internal
+    
     private struct StorageContainer: Codable {
         var slots: [Int: ClipItem]
         var history: [ClipItem]
