@@ -89,10 +89,28 @@ struct PermissionView: View {
                     .opacity(appear ? 1 : 0)
                     .offset(y: appear ? 0 : 8)
                     
-                    Text("Add Clipo to Accessibility — it will continue automatically.")
-                        .font(.caption)
-                        .foregroundColor(.secondary.opacity(0.7))
-                        .opacity(appear ? 1 : 0)
+                    VStack(spacing: 6) {
+                        Text("1. Open System Settings → Privacy & Security → Accessibility")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.7))
+                        Text("2. Add Clipo to the list and enable the checkbox")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.7))
+                        Text("3. The app will detect it and continue automatically")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.7))
+                        
+                        // Debug-build hint: ad-hoc signed apps change identity on every rebuild,
+                        // so the old permission entry becomes stale.
+                        #if DEBUG
+                        Text("Debug build: if permission is already on but not working, remove the old Clipo entry in Accessibility and re-add the current build.")
+                            .font(.caption2)
+                            .foregroundColor(.orange.opacity(0.85))
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 4)
+                        #endif
+                    }
+                    .opacity(appear ? 1 : 0)
                 }
                 .padding(.bottom, 8)
             }
