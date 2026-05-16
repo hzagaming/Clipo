@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HistoryRowView: View {
     let item: ClipItem
+    var onTogglePin: () -> Void = {}
     @State private var isHovering = false
     
     var body: some View {
@@ -55,6 +56,21 @@ struct HistoryRowView: View {
                         .foregroundColor(.secondary.opacity(0.5))
                 }
             }
+            
+            // Pin / Unpin button
+            Button(action: onTogglePin) {
+                Image(systemName: item.isPinned ? "pin.fill" : "pin")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(
+                        item.isPinned
+                            ? .accentColor
+                            : (isHovering ? .secondary.opacity(0.6) : .clear)
+                    )
+                    .frame(width: 20, height: 20)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+            .help(item.isPinned ? "Unpin" : "Pin")
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)

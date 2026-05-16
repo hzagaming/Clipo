@@ -186,7 +186,9 @@ struct ClipoPanelView: View {
             if row.isSlot, let num = row.slotNumber {
                 SlotRowView(item: row.item, slotNumber: num)
             } else {
-                HistoryRowView(item: row.item)
+                HistoryRowView(item: row.item, onTogglePin: {
+                    store.togglePin(id: row.item.id)
+                })
             }
         }
         .contentShape(Rectangle())
