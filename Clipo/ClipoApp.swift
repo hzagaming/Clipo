@@ -345,9 +345,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     func showPermissionWindow() {
         // Tear down any existing permission window / timer before creating a new one.
+        // Do NOT nil delegate before close(); windowWillClose handles cleanup.
         if let existing = permissionWindow {
             isReplacingPermissionWindow = true
-            existing.delegate = nil
             existing.close()
             isReplacingPermissionWindow = false
         }

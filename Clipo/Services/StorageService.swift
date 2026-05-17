@@ -40,6 +40,11 @@ class StorageService {
         } catch {
             print("[Clipo] Failed to load store: \(error). Creating backup and resetting.")
             backupCorruptedStoreIfNeeded()
+            NotificationService.shared.showNotification(
+                title: "Data Reset",
+                body: "Your saved data was corrupted and has been reset. A backup was created.",
+                isError: true
+            )
             return ([:], [], AppSettings())
         }
     }
@@ -54,6 +59,11 @@ class StorageService {
             try data.write(to: storageURL, options: .atomic)
         } catch {
             print("[Clipo] Failed to save store: \(error)")
+            NotificationService.shared.showNotification(
+                title: "Save Failed",
+                body: "Clipo could not write to disk. Your changes may not persist.",
+                isError: true
+            )
         }
     }
     

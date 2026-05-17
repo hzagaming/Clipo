@@ -111,6 +111,7 @@ class ClipStore: ObservableObject {
     func clearHistory() {
         let pinned = history.filter { $0.isPinned }
         history = pinned
+        trimHistory()
         save()
     }
     
