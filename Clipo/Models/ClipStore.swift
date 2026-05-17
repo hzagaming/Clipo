@@ -35,6 +35,9 @@ class ClipStore: ObservableObject {
         self.slots = store.slots
         self.history = store.history
         self.settings = store.settings
+        
+        // Ensure loaded history respects the current max limit.
+        trimHistory()
     }
     
     func save() {

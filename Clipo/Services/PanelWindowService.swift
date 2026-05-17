@@ -47,8 +47,10 @@ class PanelWindowService {
         CATransaction.setAnimationDuration(0.12)
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeIn))
         CATransaction.setCompletionBlock { [weak self] in
+            // If showPanel() cancelled the hide in the meantime, don't orderOut.
+            guard let self = self, self.isHiding else { return }
             panel.orderOut(nil)
-            self?.isHiding = false
+            self.isHiding = false
         }
         panel.animator().alphaValue = 0
         CATransaction.commit()

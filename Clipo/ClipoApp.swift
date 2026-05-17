@@ -136,8 +136,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        // As a menu-bar-only app, we do not want to show any window when the user
-        // double-clicks the app icon in Finder.
+        // When the Dock icon is visible, let the user reopen the app by
+        // showing the Clipo panel. Otherwise ignore the Dock click.
+        if ClipStore.shared.settings.showDockIcon {
+            PanelWindowService.shared.showPanel()
+            return true
+        }
         return false
     }
     
