@@ -9,6 +9,9 @@ class ClipStore: ObservableObject {
     @Published var settings: AppSettings = AppSettings() {
         didSet {
             if !isLoading {
+                if oldValue.maxHistoryItems != settings.maxHistoryItems {
+                    trimHistory()
+                }
                 save()
             }
         }

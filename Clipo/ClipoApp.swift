@@ -331,6 +331,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     // MARK: - Permission Window
     
     func showPermissionWindow() {
+        // Tear down any existing permission window / timer before creating a new one.
+        if let existing = permissionWindow {
+            existing.delegate = nil
+            existing.contentView = nil
+            existing.close()
+        }
+        permissionCheckTimer?.invalidate()
+        permissionCheckTimer = nil
+        
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 420),
             styleMask: [.titled, .closable],
@@ -377,6 +386,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             window.delegate = nil
             window.contentView = nil
             permissionWindow = nil
+            
+            // If the user closes the permission window via the close button
+            // without clicking Skip, treat it as a skip so the app doesn't hang.
+            if !hasFinishedSplash {
+                permissionCheckTimer?.invalidate()
+                permissionCheckTimer = nil
+                continueLaunch(skippingPermission: true)
+            }
         }
     }
     
