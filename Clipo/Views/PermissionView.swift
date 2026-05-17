@@ -4,8 +4,8 @@ struct PermissionView: View {
     @State private var appear = false
     @State private var iconScale: CGFloat = 0.5
     @State private var iconRotation: Double = -30
-    @State private var permissionGranted = false
     var onPermissionGranted: (() -> Void)? = nil
+    var onSkip: (() -> Void)? = nil
     
     var body: some View {
         ZStack {
@@ -20,7 +20,7 @@ struct PermissionView: View {
             )
             .ignoresSafeArea()
             
-            VStack(spacing: 28) {
+            VStack(spacing: 24) {
                 // Animated icon
                 ZStack {
                     Circle()
@@ -64,8 +64,8 @@ struct PermissionView: View {
                 
                 Spacer()
                 
-                // Action button
-                VStack(spacing: 14) {
+                // Action buttons
+                VStack(spacing: 12) {
                     Button(action: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                             iconScale = 0.85
@@ -88,6 +88,15 @@ struct PermissionView: View {
                     .buttonStyle(GlassButtonStyle())
                     .opacity(appear ? 1 : 0)
                     .offset(y: appear ? 0 : 8)
+                    
+                    Button("Skip for now") {
+                        onSkip?()
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary.opacity(0.6))
+                    .opacity(appear ? 1 : 0)
+                    .offset(y: appear ? 0 : 6)
                     
                     VStack(spacing: 6) {
                         Text("1. Open System Settings → Privacy & Security → Accessibility")
@@ -116,7 +125,7 @@ struct PermissionView: View {
             }
             .padding(32)
         }
-        .frame(width: 480, height: 320)
+        .frame(width: 480, height: 360)
         .onAppear(perform: startAnimation)
     }
     
@@ -165,6 +174,6 @@ struct GlassButtonStyle: ButtonStyle {
 
 struct PermissionView_Previews: PreviewProvider {
     static var previews: some View {
-        PermissionView(onPermissionGranted: nil)
+        PermissionView(onPermissionGranted: nil, onSkip: nil)
     }
 }

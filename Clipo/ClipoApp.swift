@@ -51,14 +51,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         showSplashScreen()
     }
     
-    private func continueLaunch() {
+    private func continueLaunch(skippingPermission: Bool = false) {
         guard !hasFinishedSplash else { return }
         
-        if PermissionService.shared.hasAccessibilityPermission() {
-            // Permission already granted — proceed normally
+        if PermissionService.shared.hasAccessibilityPermission() || skippingPermission {
+            // Permission already granted — or user chose to skip — proceed with launch
             hasFinishedSplash = true
             setupStatusItem()
             HotkeyService.shared.registerAllHotkeys()
+            
+            if skippingPermission && !PermissionService.shared.hasAccessibilityPermission() {
+                NotificationService.shared.showNotification(
+                    title: "Accessibility Permission Skipped",
+                    body: "You can enable it later in System Settings. Clipo will remind you when needed."
+                )
+            }
         } else {
             // No permission — show permission window with live monitoring
             showPermissionWindow()
@@ -315,13 +322,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     func showPermissionWindow() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 340),
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 380),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
         )
         window.title = "Clipo Permissions"
-        window.contentView = NSHostingView(rootView: PermissionView())
+        window.contentView = NSHostingView(rootView: PermissionView(onSkip: { [weak self] in
+            guard let self = self else { return }
+            self.permissionCheckTimer?.invalidate()
+            self.permissionCheckTimer = nil
+            self.permissionWindow?.close()
+            self.permissionWindow = nil
+            self.continueLaunch(skippingPermission: true)
+        }))
         window.delegate = self
         window.isReleasedWhenClosed = false
         window.center()
