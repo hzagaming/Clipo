@@ -62,8 +62,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             
             if skippingPermission && !PermissionService.shared.hasAccessibilityPermission() {
                 NotificationService.shared.showNotification(
-                    title: "Accessibility Permission Skipped",
-                    body: "You can enable it later in System Settings. Clipo will remind you when needed."
+                    title: "Clipo is Running",
+                    body: "Look for the clipboard icon in your menu bar. You can enable Accessibility later via the menu."
                 )
             }
         } else {
@@ -210,6 +210,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         
         menu.addItem(NSMenuItem.separator())
         
+        let permissionItem = NSMenuItem(title: "Request Accessibility Permission…", action: #selector(showPermissionWindowFromMenu), keyEquivalent: "")
+        permissionItem.target = self
+        menu.addItem(permissionItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
         let quitItem = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -293,6 +299,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         NotificationService.shared.showNotification(title: "Slots Reset", body: "All slots cleared.")
     }
     
+    @objc func showPermissionWindowFromMenu() {
+        showPermissionWindow()
+    }
+    
     @objc func quitApp() {
         NSApp.terminate(nil)
     }
@@ -322,7 +332,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     func showPermissionWindow() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 380),
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 420),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -424,6 +434,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         // 3. Update Open Panel title to reflect current shortcut.
         if let openPanelItem = menu.items.first(where: { $0.action == #selector(openPanel) }) {
             openPanelItem.title = openPanelMenuTitle()
+        }
+        
+        // 4. Update permission reminder state.
+        let hasPermission = PermissionService.shared.hasAccessibilityPermission()
+        for item in menu.items {
+            if item.action == #selector(showPermissionWindowFromMenu) {
+                if hasPermission {
+                    item.title = "Accessibility Permission Granted"
+                    item.isEnabled = false
+                } else {
+                    item.title = "Request Accessibility Permission…"
+                    item.isEnabled = true
+                }
+            }
         }
     }
 }

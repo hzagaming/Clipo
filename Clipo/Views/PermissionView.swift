@@ -60,6 +60,22 @@ struct PermissionView: View {
                         .padding(.horizontal, 32)
                         .opacity(appear ? 1 : 0)
                         .offset(y: appear ? 0 : 10)
+                    
+                    HStack(spacing: 6) {
+                        Image(systemName: "menubar.rectangle")
+                            .font(.system(size: 11))
+                        Text("Clipo lives in your menu bar — look for the clipboard icon.")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .foregroundColor(.accentColor.opacity(0.8))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Color.accentColor.opacity(0.08))
+                    )
+                    .opacity(appear ? 1 : 0)
+                    .offset(y: appear ? 0 : 8)
                 }
                 
                 Spacer()
@@ -125,7 +141,7 @@ struct PermissionView: View {
             }
             .padding(32)
         }
-        .frame(width: 480, height: 360)
+        .frame(width: 480, height: 400)
         .onAppear(perform: startAnimation)
     }
     
