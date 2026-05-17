@@ -32,6 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private var hasFinishedSplash = false
     private var splashCloseTimer: Timer?
     private var permissionCheckTimer: Timer?
+    private var isReplacingPermissionWindow = false
     
     func applicationWillFinishLaunching(_ notification: Notification) {
         // Set activation policy as early as possible to prevent any Dock icon flicker
@@ -341,8 +342,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     func showPermissionWindow() {
         // Tear down any existing permission window / timer before creating a new one.
         if let existing = permissionWindow {
+            isReplacingPermissionWindow = true
             existing.delegate = nil
             existing.close()
+            isReplacingPermissionWindow = false
         }
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = nil
@@ -397,7 +400,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             
             // If the user closes the permission window via the close button
             // without clicking Skip, treat it as a skip so the app doesn't hang.
-            if !hasFinishedSplash {
+            if !hasFinishedSplash && !isReplacingPermissionWindow {
                 permissionCheckTimer?.invalidate()
                 permissionCheckTimer = nil
                 continueLaunch(skippingPermission: true)

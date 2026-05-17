@@ -338,7 +338,7 @@ struct ClipoPanelView: View {
                 body: "Clipo needs Accessibility permission to paste text.",
                 isError: true
             )
-            PanelWindowService.shared.hidePanel()
+            // Keep the panel open so the user can continue browsing or copy instead.
             return
         }
         SoundService.shared.playPaste()

@@ -43,8 +43,10 @@ class NotificationService {
         }
         
         guard let window = toastWindow else {
+            // If ToastWindow init failed, drop the entire queue to avoid an
+            // infinite loop between processQueue and presentToast.
             isDisplaying = false
-            processQueue()
+            queue.removeAll()
             return
         }
         
