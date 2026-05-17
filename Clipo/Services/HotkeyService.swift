@@ -187,6 +187,15 @@ class HotkeyService {
     }
     
     private func onPasteSlot(slotNumber: Int) {
+        guard PermissionService.shared.hasAccessibilityPermission() else {
+            NotificationService.shared.showNotification(
+                title: "Permission Required",
+                body: "Clipo needs Accessibility permission to paste text.",
+                isError: true
+            )
+            return
+        }
+        
         guard let item = ClipStore.shared.slots[slotNumber] else {
             NotificationService.shared.showNotification(
                 title: "Slot \(slotNumber) Empty",

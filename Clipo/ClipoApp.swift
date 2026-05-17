@@ -249,6 +249,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             NotificationService.shared.showNotification(title: "Slot \(slotNumber) Empty", body: "Nothing has been saved to this slot yet.")
             return
         }
+        guard PermissionService.shared.hasAccessibilityPermission() else {
+            NotificationService.shared.showNotification(
+                title: "Permission Required",
+                body: "Clipo needs Accessibility permission to paste text.",
+                isError: true
+            )
+            return
+        }
         SoundService.shared.playPaste()
         let shouldRestore = ClipStore.shared.settings.restoreClipboardAfterPaste
         PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
@@ -334,7 +342,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         // Tear down any existing permission window / timer before creating a new one.
         if let existing = permissionWindow {
             existing.delegate = nil
-            existing.contentView = nil
             existing.close()
         }
         permissionCheckTimer?.invalidate()
@@ -377,14 +384,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow else { return }
         if window == settingsWindow {
-            // Break delegate / contentView references before nulling our strong ref
+            // Break delegate reference before nulling our strong ref
             // to avoid any stale callbacks during deallocation.
+            // Do NOT set contentView = nil; it can crash NSHostingView.
             window.delegate = nil
-            window.contentView = nil
             settingsWindow = nil
         } else if window == permissionWindow {
             window.delegate = nil
-            window.contentView = nil
+            // Do NOT set contentView = nil here; it can trigger deallocation
+            // crashes on NSHostingView. Let isReleasedWhenClosed=false handle it.
             permissionWindow = nil
             
             // If the user closes the permission window via the close button

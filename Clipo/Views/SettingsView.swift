@@ -405,6 +405,7 @@ struct SettingsView: View {
                 history: imported.history,
                 settings: imported.settings
             )
+            HotkeyService.shared.registerAllHotkeys()
             NotificationService.shared.showNotification(
                 title: "Import Successful",
                 body: "Data restored from \(url.lastPathComponent)"

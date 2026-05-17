@@ -105,12 +105,20 @@ struct PermissionView: View {
                     .opacity(appear ? 1 : 0)
                     .offset(y: appear ? 0 : 8)
                     
-                    Button("Skip for now") {
+                    Button(action: {
                         onSkip?()
+                    }) {
+                        Text("Skip for now")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary.opacity(0.6))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .fill(Color.secondary.opacity(0.06))
+                            )
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary.opacity(0.6))
                     .opacity(appear ? 1 : 0)
                     .offset(y: appear ? 0 : 6)
                     

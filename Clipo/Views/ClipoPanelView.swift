@@ -332,6 +332,15 @@ struct ClipoPanelView: View {
     }
     
     private func pasteItem(_ item: ClipItem) {
+        guard PermissionService.shared.hasAccessibilityPermission() else {
+            NotificationService.shared.showNotification(
+                title: "Permission Required",
+                body: "Clipo needs Accessibility permission to paste text.",
+                isError: true
+            )
+            PanelWindowService.shared.hidePanel()
+            return
+        }
         SoundService.shared.playPaste()
         let shouldRestore = store.settings.restoreClipboardAfterPaste
         PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)

@@ -7,6 +7,11 @@ class PanelWindowService {
     /// Internal read access for AppDelegate to distinguish managed windows.
     private(set) var panelWindow: NSPanel?
     private let panelDelegate = PanelWindowDelegate()
+    
+    func panelDidClose() {
+        panelWindow = nil
+        isHiding = false
+    }
     private var keyboardMonitor: Any?
     private var isHiding = false
     
@@ -133,5 +138,6 @@ class PanelWindowDelegate: NSObject, NSWindowDelegate {
         // If the user closes the panel via the close button, break the delegate
         // link so no further callbacks arrive on a potentially deallocated path.
         window.delegate = nil
+        PanelWindowService.shared.panelDidClose()
     }
 }
