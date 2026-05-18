@@ -45,7 +45,7 @@ struct SettingsView: View {
             Alert(
                 title: Text(L10n.string(.alertLaunchAtLoginTitle)),
                 message: Text(L10n.string(.alertLaunchAtLoginMessage)),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text(L10n.string(.okButton)))
             )
         }
         .alert(item: $confirmationAlert) { alert in
@@ -62,7 +62,7 @@ struct SettingsView: View {
             Alert(
                 title: Text(alert.title),
                 message: Text(alert.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text(L10n.string(.okButton)))
             )
         }
     }

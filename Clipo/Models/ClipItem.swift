@@ -65,3 +65,29 @@ struct ClipItem: Identifiable, Codable, Equatable {
         )
     }
 }
+
+extension ClipItem {
+    /// Returns a human-readable, localized description suitable for toast notifications.
+    /// For text/URL/code: returns the truncated preview.
+    /// For image/file/richText: returns a localized type-specific description.
+    var notificationBody: String {
+        switch type {
+        case .image:
+            return L10n.string(.notificationCopiedImageBody)
+        case .file:
+            if let payload = pasteboardPayload {
+                let urls = payload.fileURLs
+                if urls.count == 1 {
+                    return L10n.string(.notificationCopiedFileBody, urls[0].lastPathComponent)
+                } else if urls.count > 1 {
+                    return L10n.string(.notificationCopiedFilesBody, urls.count)
+                }
+            }
+            return preview
+        case .richText:
+            return L10n.string(.notificationCopiedRichTextBody)
+        default:
+            return preview
+        }
+    }
+}

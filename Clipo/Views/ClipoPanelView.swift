@@ -102,6 +102,11 @@ struct ClipoPanelView: View {
                 selectedIndex = 0
             }
         }
+        .onChange(of: store.settings.showEmptySlots) { _ in
+            if selectedIndex >= allNavigableItems.count {
+                selectedIndex = max(0, allNavigableItems.count - 1)
+            }
+        }
         .onChange(of: selectedTypeFilter) { _ in
             withAnimation(.easeOut(duration: 0.2)) {
                 selectedIndex = 0
@@ -502,8 +507,8 @@ struct ClipoPanelView: View {
     private var footerBar: some View {
         HStack(spacing: 14) {
             FooterShortcut(keys: "↑↓", label: L10n.string(.footerSelect))
-            FooterShortcut(keys: "↵", label: L10n.string(.footerCopy))
-            FooterShortcut(keys: "⌘↵", label: L10n.string(.footerPaste))
+            FooterShortcut(keys: "↵", label: store.settings.pasteOnSelection ? L10n.string(.footerPaste) : L10n.string(.footerCopy))
+            FooterShortcut(keys: "⌘↵", label: store.settings.pasteOnSelection ? L10n.string(.footerCopy) : L10n.string(.footerPaste))
             FooterShortcut(keys: "⌘P", label: L10n.string(.footerPin))
             FooterShortcut(keys: "⌫", label: L10n.string(.footerDelete))
             Spacer()
@@ -683,7 +688,7 @@ struct ClipoPanelView: View {
         let changeCount = ClipboardService.shared.writeClipItemToPasteboard(item)
         ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
         store.recordHistoryItem(item)
-        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.preview)
+        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.notificationBody)
     }
     
     private func pasteItem(_ item: ClipItem) {

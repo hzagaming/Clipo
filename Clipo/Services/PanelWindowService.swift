@@ -34,7 +34,13 @@ class PanelWindowService {
         // Cancel any in-progress hide animation so the panel doesn't get
         // ordered out immediately after we show it.
         isHiding = false
-        panel.alphaValue = 0
+        
+        // Only reset alpha if the panel is not already mostly visible.
+        // This prevents a flicker when the user rapidly toggles the panel
+        // while a hide animation is still in progress.
+        if panel.alphaValue < 0.5 {
+            panel.alphaValue = 0
+        }
         
         let reduceAnimations = ClipStore.shared.settings.reduceAnimations
         

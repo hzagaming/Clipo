@@ -170,6 +170,7 @@ class HotkeyService {
         
         PasteService.shared.copySelectionAndReadItem(sourceApp: appName, sourceBundleIdentifier: bundleId) { item in
             guard let item = item else {
+                SoundService.shared.playError()
                 NotificationService.shared.showNotification(
                     title: L10n.string(.notificationSaveFailedTitle),
                     body: L10n.string(.notificationSaveFailedBody),
@@ -189,6 +190,7 @@ class HotkeyService {
     
     private func onCopySlotToClipboard(slotNumber: Int) {
         guard let item = ClipStore.shared.slots[slotNumber] else {
+            SoundService.shared.playError()
             NotificationService.shared.showNotification(
                 title: L10n.string(.notificationSlotEmptyTemplate, slotNumber),
                 body: L10n.string(.notificationSlotEmptyBody)
@@ -202,7 +204,7 @@ class HotkeyService {
         SoundService.shared.playCopy()
         NotificationService.shared.showNotification(
             title: L10n.string(.notificationCopiedTitle),
-            body: L10n.string(.notificationCopiedBody)
+            body: item.notificationBody
         )
         
         // Update lastUsedAt timestamp in both slot and matching history.

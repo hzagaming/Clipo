@@ -1,30 +1,28 @@
 import SwiftUI
 
 struct InsightsView: View {
-    @StateObject private var store = ClipStore.shared
+    @ObservedObject private var store = ClipStore.shared
     @State private var appearAnimation = false
+    @State private var hasAppeared = false
+    
+    @State private var dailyTrendData: [(date: Date, label: String, count: Int)] = []
+    @State private var hourlyData: [Int: Int] = [:]
+    @State private var peakHourValue: Int? = nil
+    @State private var typeDistData: [(type: ClipType, count: Int, percentage: Double)] = []
+    @State private var topSourcesData: [(name: String, count: Int, percentage: Double)] = []
+    @State private var slotUtilData: [(number: Int, isFilled: Bool, useCount: Int)] = []
+    @State private var filledSlotCountValue: Int = 0
     
     private var service: InsightsService { InsightsService.shared }
     
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
-                // Top stat cards
                 statCardsRow
-                
-                // Daily trend chart
                 trendSection
-                
-                // Hourly activity
                 hourlySection
-                
-                // Content type distribution
                 typeDistributionSection
-                
-                // Top source apps
                 topSourcesSection
-                
-                // Slot utilization grid
                 slotGridSection
             }
             .padding(.horizontal, 20)
@@ -33,13 +31,26 @@ struct InsightsView: View {
             .offset(y: appearAnimation ? 0 : 12)
         }
         .onAppear {
-            withAnimation(.easeOut(duration: 0.3)) {
-                appearAnimation = true
+            refreshAllData()
+            if !hasAppeared {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    appearAnimation = true
+                }
+                hasAppeared = true
             }
         }
-        .onDisappear {
-            appearAnimation = false
-        }
+        .onReceive(store.$history) { _ in refreshAllData() }
+        .onReceive(store.$slots) { _ in refreshAllData() }
+    }
+    
+    private func refreshAllData() {
+        dailyTrendData = service.dailyTrend()
+        hourlyData = service.hourlyActivity()
+        peakHourValue = service.peakHour()
+        typeDistData = service.typeDistribution()
+        topSourcesData = service.topSourceApps(limit: 5)
+        slotUtilData = service.slotUtilization()
+        filledSlotCountValue = service.filledSlotCount()
     }
     
     // MARK: - Stat Cards
@@ -47,7 +58,7 @@ struct InsightsView: View {
     private var statCardsRow: some View {
         let stats: [(value: String, label: String, icon: String, color: Color)] = [
             ("\(service.copiesToday())", L10n.string(.statTodayLabel), "doc.on.clipboard", .blue),
-            ("\(service.copiesThisWeek())", L10n.string(.statWeekLabel), "calendar", .purple),
+            ("\(service.copiesLast7Days())", L10n.string(.statWeekLabel), "calendar", .purple),
             ("\(service.totalCopies())", L10n.string(.statTotalLabel), "archivebox", .green),
             ("\(service.uniqueSourcesCount())", L10n.string(.statSourcesLabel), "app.badge", .orange)
         ]
@@ -65,7 +76,7 @@ struct InsightsView: View {
     // MARK: - Daily Trend
     
     private var trendSection: some View {
-        let data = service.dailyTrend()
+        let data = dailyTrendData
         let maxCount = max(data.map(\.count).max() ?? 1, 1)
         
         return InsightCard(title: L10n.string(.trendTitle), icon: "chart.line.uptrend.xyaxis") {
@@ -74,7 +85,7 @@ struct InsightsView: View {
                     VStack(spacing: 4) {
                         RoundedRectangle(cornerRadius: 4, style: .continuous)
                             .fill(Color.accentColor.opacity(point.count == 0 ? 0.15 : 0.7))
-                            .frame(width: 28, height: CGFloat(point.count) / CGFloat(maxCount) * 100)
+                            .frame(width: 28, height: max(CGFloat(point.count) / CGFloat(maxCount) * 100, 4))
                             .animation(.easeOut(duration: 0.4).delay(Double(index) * 0.04), value: appearAnimation)
                         
                         Text(point.label)
@@ -91,9 +102,9 @@ struct InsightsView: View {
     // MARK: - Hourly Activity
     
     private var hourlySection: some View {
-        let data = service.hourlyActivity()
+        let data = hourlyData
         let maxCount = max(data.values.max() ?? 1, 1)
-        let peak = service.peakHour()
+        let peak = peakHourValue
         
         return InsightCard(title: L10n.string(.hourlyTitle), icon: "clock") {
             VStack(spacing: 6) {
@@ -106,12 +117,12 @@ struct InsightsView: View {
                                 ? Color.accentColor
                                 : Color.accentColor.opacity(count == 0 ? 0.08 : 0.5)
                             )
-                            .frame(height: CGFloat(count) / CGFloat(maxCount) * 60)
+                            .frame(height: max(CGFloat(count) / CGFloat(maxCount) * 60, 2))
                     }
                 }
                 
                 HStack {
-                    Text("00:00")
+                    Text(L10n.string(.hourlyStartLabel))
                     Spacer()
                     if let peak = peak {
                         Text(L10n.string(.peakHourTemplate, peak))
@@ -119,7 +130,7 @@ struct InsightsView: View {
                             .foregroundColor(.accentColor)
                     }
                     Spacer()
-                    Text("23:00")
+                    Text(L10n.string(.hourlyEndLabel))
                 }
                 .font(.system(size: 9))
                 .foregroundColor(.secondary.opacity(0.4))
@@ -131,7 +142,7 @@ struct InsightsView: View {
     // MARK: - Type Distribution
     
     private var typeDistributionSection: some View {
-        let data = service.typeDistribution()
+        let data = typeDistData
         
         return InsightCard(title: L10n.string(.typeDistTitle), icon: "chart.pie") {
             if data.isEmpty {
@@ -162,6 +173,7 @@ struct InsightsView: View {
                                     .frame(width: 8, height: 8)
                                 Text(segment.type.displayName)
                                     .font(.system(size: 11))
+                                    .lineLimit(1)
                                 Text("\(Int(segment.percentage * 100))%")
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.secondary)
@@ -179,7 +191,7 @@ struct InsightsView: View {
     // MARK: - Top Sources
     
     private var topSourcesSection: some View {
-        let data = service.topSourceApps(limit: 5)
+        let data = topSourcesData
         let maxCount = max(data.map(\.count).max() ?? 1, 1)
         
         return InsightCard(title: L10n.string(.topSourcesTitle), icon: "app") {
@@ -239,12 +251,12 @@ struct InsightsView: View {
     // MARK: - Slot Grid
     
     private var slotGridSection: some View {
-        let slots = service.slotUtilization()
-        let filled = service.filledSlotCount()
+        let slots = slotUtilData
+        let filled = filledSlotCountValue
         
         return InsightCard(title: L10n.string(.slotUtilTitle), icon: "square.grid.2x2") {
             VStack(spacing: 10) {
-                HStack(spacing: 8) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 8) {
                     ForEach(slots, id: \.number) { slot in
                         VStack(spacing: 3) {
                             ZStack {
@@ -272,7 +284,7 @@ struct InsightsView: View {
                                     .font(.system(size: 9, weight: .medium))
                                     .foregroundColor(.accentColor.opacity(0.8))
                             } else {
-                                Text("—")
+                                Text(L10n.string(.slotUtilEmptyLabel))
                                     .font(.system(size: 9))
                                     .foregroundColor(.secondary.opacity(0.25))
                             }
@@ -313,6 +325,8 @@ private struct StatCard: View {
                 Text(value)
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 Text(label)
                     .font(.system(size: 11))
                     .foregroundColor(.secondary.opacity(0.6))
@@ -368,10 +382,13 @@ private struct DonutChart: View {
             let radius = min(size.width, size.height) / 2 - 8
             let lineWidth: CGFloat = 14
             
+            let total = segments.reduce(0) { $0 + $1.percentage }
+            let scale = total > 0 ? 1.0 / total : 0
+            
             var startAngle = -Double.pi / 2
             
             for segment in segments {
-                let sweep = segment.percentage * 2 * Double.pi
+                let sweep = segment.percentage * scale * 2 * Double.pi
                 let endAngle = startAngle + sweep
                 
                 var path = Path()

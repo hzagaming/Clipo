@@ -83,12 +83,12 @@ class ClipStore: ObservableObject {
         newItem.slotNumber = nil
         
         if settings.ignoreDuplicateHistory,
-           let mostRecent = history.first(where: { !$0.isPinned }),
-           mostRecent.content == newItem.content {
-            // Update timestamp of existing duplicate instead of adding a new entry.
-            if let index = history.firstIndex(where: { $0.id == mostRecent.id }) {
-                history[index].lastUsedAt = Date()
-            }
+           let index = history.firstIndex(where: { $0.content == newItem.content }) {
+            // Move the existing duplicate to the top and update its timestamp
+            // so the user sees it as the most recent item.
+            var existing = history.remove(at: index)
+            existing.lastUsedAt = Date()
+            history.insert(existing, at: 0)
             return
         }
         

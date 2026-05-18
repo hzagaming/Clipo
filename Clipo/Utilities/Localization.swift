@@ -99,6 +99,10 @@ enum LocKey: String {
     case notificationClipoReadyBody
     case notificationCopiedTitle
     case notificationCopiedBody
+    case notificationCopiedImageBody
+    case notificationCopiedFileBody
+    case notificationCopiedFilesBody
+    case notificationCopiedRichTextBody
     case notificationSavedToSlotTemplate
     case notificationSlotEmptyTemplate
     case notificationSlotEmptyBody
@@ -179,6 +183,10 @@ enum LocKey: String {
     case noDataLabel
     case unknownSource
     case todayLabel
+    case hourlyStartLabel
+    case hourlyEndLabel
+    case slotUtilEmptyLabel
+    case okButton
 }
 
 struct L10n {
@@ -1800,6 +1808,54 @@ struct L10n {
             "ru": "Нажмите Command+V, чтобы вставить в любом месте.",
             "pt": "Pressione Command+V para colar em qualquer lugar."
         ],
+        "notificationCopiedImageBody": [
+            "en": "Image",
+            "zh-Hans": "图片",
+            "zh-Hant": "圖片",
+            "ja": "画像",
+            "ko": "이미지",
+            "fr": "Image",
+            "de": "Bild",
+            "es": "Imagen",
+            "ru": "Изображение",
+            "pt": "Imagem"
+        ],
+        "notificationCopiedFileBody": [
+            "en": "File: %@",
+            "zh-Hans": "文件: %@",
+            "zh-Hant": "檔案: %@",
+            "ja": "ファイル: %@",
+            "ko": "파일: %@",
+            "fr": "Fichier: %@",
+            "de": "Datei: %@",
+            "es": "Archivo: %@",
+            "ru": "Файл: %@",
+            "pt": "Arquivo: %@"
+        ],
+        "notificationCopiedFilesBody": [
+            "en": "%d Files",
+            "zh-Hans": "%d 个文件",
+            "zh-Hant": "%d 個檔案",
+            "ja": "%d ファイル",
+            "ko": "%d개 파일",
+            "fr": "%d fichiers",
+            "de": "%d Dateien",
+            "es": "%d archivos",
+            "ru": "%d файлов",
+            "pt": "%d arquivos"
+        ],
+        "notificationCopiedRichTextBody": [
+            "en": "Rich Text",
+            "zh-Hans": "富文本",
+            "zh-Hant": "富文字",
+            "ja": "リッチテキスト",
+            "ko": "서식 있는 텍스트",
+            "fr": "Texte enrichi",
+            "de": "Rich Text",
+            "es": "Texto enriquecido",
+            "ru": "Форматированный текст",
+            "pt": "Texto Rico"
+        ],
         "notificationSavedToSlotTemplate": [
             "en": "Saved to Slot %d",
             "zh-Hans": "已保存到槽位 %d",
@@ -2759,6 +2815,54 @@ struct L10n {
             "es": "Hoy",
             "ru": "Сегодня",
             "pt": "Hoje"
+        ],
+        "hourlyStartLabel": [
+            "en": "00:00",
+            "zh-Hans": "00:00",
+            "zh-Hant": "00:00",
+            "ja": "00:00",
+            "ko": "00:00",
+            "fr": "00:00",
+            "de": "00:00",
+            "es": "00:00",
+            "ru": "00:00",
+            "pt": "00:00"
+        ],
+        "hourlyEndLabel": [
+            "en": "23:00",
+            "zh-Hans": "23:00",
+            "zh-Hant": "23:00",
+            "ja": "23:00",
+            "ko": "23:00",
+            "fr": "23:00",
+            "de": "23:00",
+            "es": "23:00",
+            "ru": "23:00",
+            "pt": "23:00"
+        ],
+        "slotUtilEmptyLabel": [
+            "en": "—",
+            "zh-Hans": "—",
+            "zh-Hant": "—",
+            "ja": "—",
+            "ko": "—",
+            "fr": "—",
+            "de": "—",
+            "es": "—",
+            "ru": "—",
+            "pt": "—"
+        ],
+        "okButton": [
+            "en": "OK",
+            "zh-Hans": "确定",
+            "zh-Hant": "確定",
+            "ja": "OK",
+            "ko": "확인",
+            "fr": "OK",
+            "de": "OK",
+            "es": "Aceptar",
+            "ru": "OK",
+            "pt": "OK"
         ]
     ]
 }

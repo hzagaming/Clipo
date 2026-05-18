@@ -20,9 +20,9 @@ class NotificationService {
     private init() {}
     
     func showNotification(title: String, body: String, isError: Bool = false) {
-        guard ClipStore.shared.settings.showNotifications else { return }
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
+            guard ClipStore.shared.settings.showNotifications else { return }
             // Cap the queue to prevent unbounded growth during rapid-fire events.
             if self.queue.count >= 10 {
                 self.queue.removeFirst()

@@ -275,7 +275,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         let changeCount = ClipboardService.shared.writeClipItemToPasteboard(item)
         ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
         ClipStore.shared.recordHistoryItem(item)
-        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.preview)
+        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.notificationBody)
         
         if var updated = ClipStore.shared.slots[slotNumber] {
             updated.lastUsedAt = Date()
@@ -292,6 +292,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             return
         }
         guard PermissionService.shared.hasAccessibilityPermission() else {
+            SoundService.shared.playError()
             NotificationService.shared.showNotification(
                 title: L10n.string(.notificationPastePermissionTitle),
                 body: PermissionService.shared.accessibilityRequiredMessage(action: L10n.string(.footerPaste).lowercased()),
@@ -368,7 +369,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         let changeCount = ClipboardService.shared.writeClipItemToPasteboard(item)
         ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
         ClipStore.shared.recordHistoryItem(item)
-        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.preview)
+        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.notificationBody)
     }
     
     // MARK: - Dynamic Menu Labels
