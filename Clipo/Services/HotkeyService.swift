@@ -159,6 +159,11 @@ class HotkeyService {
             return
         }
         
+        // Capture the frontmost app *before* the async copy delay
+        // so we record the correct source even if the user switches apps.
+        let appName = AppDetectionService.shared.currentFrontmostAppName()
+        let bundleId = AppDetectionService.shared.currentFrontmostBundleIdentifier()
+        
         PasteService.shared.copySelectionAndReadText { text in
             guard let text = text, !text.isEmpty else {
                 NotificationService.shared.showNotification(
@@ -168,9 +173,6 @@ class HotkeyService {
                 )
                 return
             }
-            
-            let appName = AppDetectionService.shared.currentFrontmostAppName()
-            let bundleId = AppDetectionService.shared.currentFrontmostBundleIdentifier()
             
             ClipStore.shared.saveToSlot(
                 number: slotNumber,

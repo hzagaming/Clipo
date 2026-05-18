@@ -277,7 +277,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     @objc func openPanel() {
-        SoundService.shared.playOpen()
         PanelWindowService.shared.showPanel()
     }
     

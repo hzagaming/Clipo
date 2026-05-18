@@ -21,8 +21,9 @@ class PanelWindowService {
         }
         guard let panel = panelWindow else { return }
         
-        // If the panel is already fully visible, just bring it forward.
-        if panel.isVisible && panel.alphaValue == 1 {
+        // If the panel is already fully visible and not in the middle of hiding,
+        // just bring it forward.
+        if panel.isVisible && !isHiding {
             panel.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             return

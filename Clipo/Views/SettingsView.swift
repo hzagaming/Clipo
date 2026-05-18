@@ -408,11 +408,18 @@ struct SettingsView: View {
             HotkeyService.shared.registerAllHotkeys()
             // Apply imported Dock icon policy immediately.
             let policy: NSApplication.ActivationPolicy = store.settings.showDockIcon ? .regular : .accessory
-            NSApp.setActivationPolicy(policy)
-            NotificationService.shared.showNotification(
-                title: "Import Successful",
-                body: "Data restored from \(url.lastPathComponent)"
-            )
+            let policyApplied = NSApp.setActivationPolicy(policy)
+            if policyApplied {
+                NotificationService.shared.showNotification(
+                    title: "Import Successful",
+                    body: "Data restored from \(url.lastPathComponent)"
+                )
+            } else {
+                NotificationService.shared.showNotification(
+                    title: "Import Successful",
+                    body: "Data restored. Dock icon change will take effect after restart."
+                )
+            }
         } catch {
             importExportAlert = ImportExportAlert(
                 title: "Import Failed",
