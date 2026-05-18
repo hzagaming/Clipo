@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SlotRowView: View {
-    let item: ClipItem
+    let item: ClipItem?
     let slotNumber: Int
     var onDelete: () -> Void = {}
     var onCopy: () -> Void = {}
@@ -10,77 +10,102 @@ struct SlotRowView: View {
     
     var body: some View {
         HStack(spacing: 10) {
-            // Slot number badge with gradient
+            // Slot number badge
             ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.accentColor.opacity(0.9),
-                                Color.accentColor.opacity(0.7)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                if let _ = item {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.accentColor.opacity(0.9),
+                                    Color.accentColor.opacity(0.7)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .frame(width: 30, height: 30)
-                    .shadow(
-                        color: Color.accentColor.opacity(0.25),
-                        radius: 4,
-                        x: 0,
-                        y: 2
-                    )
+                        .frame(width: 30, height: 30)
+                        .shadow(
+                            color: Color.accentColor.opacity(0.25),
+                            radius: 4,
+                            x: 0,
+                            y: 2
+                        )
+                } else {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Color.secondary.opacity(0.15), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                        .frame(width: 30, height: 30)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.secondary.opacity(0.04))
+                        )
+                }
                 
                 Text("\(slotNumber)")
                     .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(item != nil ? .white : .secondary.opacity(0.5))
             }
             
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.preview)
-                    .lineLimit(1)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundColor(.primary)
-                
-                HStack(spacing: 6) {
-                    TypeBadge(type: item.type)
+            if let item = item {
+                // Filled slot
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.preview)
+                        .lineLimit(1)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.primary)
                     
-                    Spacer()
-                    
-                    HStack(spacing: 3) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 8))
-                        Text(DateFormatterUtility.formattedString(from: item.lastUsedAt))
-                            .font(.caption2)
+                    HStack(spacing: 6) {
+                        TypeBadge(type: item.type)
+                        
+                        Spacer()
+                        
+                        HStack(spacing: 3) {
+                            Image(systemName: "clock")
+                                .font(.system(size: 8))
+                            Text(DateFormatterUtility.formattedString(from: item.lastUsedAt))
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.secondary.opacity(0.5))
                     }
-                    .foregroundColor(.secondary.opacity(0.5))
                 }
-            }
-            
-            // Hover action buttons
-            HStack(spacing: 2) {
-                Button(action: onPaste) {
-                    Image(systemName: "arrow.down.doc")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.secondary.opacity(0.5))
-                        .frame(width: 24, height: 24)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainButtonStyle())
-                .help("Paste")
                 
-                Button(action: onDelete) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.secondary.opacity(0.5))
-                        .frame(width: 24, height: 24)
-                        .contentShape(Rectangle())
+                // Hover action buttons
+                HStack(spacing: 2) {
+                    Button(action: onPaste) {
+                        Image(systemName: "arrow.down.doc")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.secondary.opacity(0.5))
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .help("Paste")
+                    
+                    Button(action: onDelete) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.secondary.opacity(0.5))
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .help("Remove from slot")
                 }
-                .buttonStyle(PlainButtonStyle())
-                .help("Remove from slot")
+                .opacity(isHovering ? 1 : 0)
+                .animation(.easeInOut(duration: 0.15), value: isHovering)
+            } else {
+                // Empty slot placeholder
+                HStack(spacing: 4) {
+                    Text("Empty")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary.opacity(0.35))
+                    Text("— press ⌥\(slotNumber) to save")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary.opacity(0.25))
+                }
+                
+                Spacer()
             }
-            .opacity(isHovering ? 1 : 0)
-            .animation(.easeInOut(duration: 0.15), value: isHovering)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
@@ -117,11 +142,12 @@ struct SlotRowView_Previews: PreviewProvider {
                 slotNumber: 2
             )
             SlotRowView(
-                item: ClipItem(
-                    content: "Meeting notes for tomorrow at 3pm",
-                    type: .plainText
-                ),
+                item: nil,
                 slotNumber: 3
+            )
+            SlotRowView(
+                item: nil,
+                slotNumber: 4
             )
         }
         .padding()

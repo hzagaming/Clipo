@@ -50,6 +50,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             .filter { $0 !== settingsWindow && $0 !== permissionWindow && $0 !== PanelWindowService.shared.panelWindow && $0 !== splashWindow }
             .forEach { $0.orderOut(nil) }
         
+        // Listen for in-panel Settings requests.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(openSettings),
+            name: .openClipoSettings,
+            object: nil
+        )
+        
         showSplashScreen()
     }
     

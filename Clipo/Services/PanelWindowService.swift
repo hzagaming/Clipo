@@ -18,7 +18,6 @@ class PanelWindowService {
     private var ignoreOutsideClicksUntil = Date.distantPast
     
     func showPanel() {
-        print("[DEBUG] showPanel called")
         if panelWindow == nil {
             createPanel()
         }
@@ -27,7 +26,6 @@ class PanelWindowService {
         // If the panel is already fully visible and not in the middle of hiding,
         // just bring it forward.
         if panel.isVisible && !isHiding {
-            print("[DEBUG] showPanel: panel already visible, bringing forward")
             NSApp.activate(ignoringOtherApps: true)
             panel.orderFrontRegardless()
             return
@@ -43,8 +41,6 @@ class PanelWindowService {
         panel.makeKeyAndOrderFront(nil)
         panel.orderFrontRegardless()
         
-        print("[DEBUG] showPanel: alpha=\(panel.alphaValue), isVisible=\(panel.isVisible), frame=\(panel.frame)")
-        
         startKeyboardMonitoring()
         // Delay starting click-outside monitoring so that the very click
         // that opened the panel (e.g. a menu-bar icon click or hotkey) does
@@ -54,8 +50,7 @@ class PanelWindowService {
             self.startClickOutsideMonitoring()
         }
         
-        // TEMP: sound disabled to rule out CoreAudio log noise
-        // SoundService.shared.playOpen()
+        SoundService.shared.playOpen()
         
         // Fade in
         CATransaction.begin()
@@ -65,17 +60,11 @@ class PanelWindowService {
         CATransaction.commit()
     }
     
-    func hidePanel(reason: String = "") {
-        print("[DEBUG] hidePanel called, reason=\(reason)")
-        guard let panel = panelWindow, panel.isVisible, !isHiding else {
-            print("[DEBUG] hidePanel: early exit – panel.isVisible=\(panelWindow?.isVisible ?? false), isHiding=\(isHiding)")
-            return
-        }
+    func hidePanel() {
+        guard let panel = panelWindow, panel.isVisible, !isHiding else { return }
         isHiding = true
         
-        // TEMP: sound disabled
-        // SoundService.shared.playClose()
-        
+        SoundService.shared.playClose()
         stopKeyboardMonitoring()
         stopClickOutsideMonitoring()
         
@@ -86,13 +75,9 @@ class PanelWindowService {
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeIn))
         CATransaction.setCompletionBlock { [weak self] in
             // If showPanel() cancelled the hide in the meantime, don't orderOut.
-            guard let self = self, self.isHiding else {
-                print("[DEBUG] hidePanel completion: hide was cancelled, skipping orderOut")
-                return
-            }
+            guard let self = self, self.isHiding else { return }
             panel.orderOut(nil)
             self.isHiding = false
-            print("[DEBUG] hidePanel completion: panel ordered out")
         }
         panel.animator().alphaValue = 0
         CATransaction.commit()
@@ -101,7 +86,7 @@ class PanelWindowService {
     func togglePanel() {
         // isVisible is more reliable than isKeyWindow for NSPanel across Spaces.
         if panelWindow?.isVisible == true {
-            hidePanel(reason: "toggle")
+            hidePanel()
         } else {
             showPanel()
         }
@@ -168,24 +153,17 @@ class PanelWindowService {
     }
     
     private func handleOutsideClick() {
-        guard Date() >= ignoreOutsideClicksUntil else {
-            print("[DEBUG] handleOutsideClick: ignored (grace period)")
-            return
-        }
-        guard let panel = panelWindow, panel.isVisible, !isHiding else {
-            print("[DEBUG] handleOutsideClick: early exit – panel.isVisible=\(panelWindow?.isVisible ?? false), isHiding=\(isHiding)")
-            return
-        }
+        guard Date() >= ignoreOutsideClicksUntil else { return }
+        guard let panel = panelWindow, panel.isVisible, !isHiding else { return }
         let mouse = NSEvent.mouseLocation
         let inside = panel.frame.contains(mouse)
-        print("[DEBUG] handleOutsideClick: mouseLocation=\(mouse), panelFrame=\(panel.frame), inside=\(inside)")
         guard !inside else { return }
-        hidePanel(reason: "outsideClick")
+        hidePanel()
     }
     
     private func createPanel() {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 600, height: 500),
+            contentRect: NSRect(x: 0, y: 0, width: 620, height: 640),
             styleMask: [.nonactivatingPanel, .titled, .closable],
             backing: .buffered,
             defer: false

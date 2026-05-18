@@ -1,7 +1,9 @@
 import SwiftUI
+import AppKit
 
 extension Notification.Name {
     static let panelKeyboardEvent = Notification.Name("panelKeyboardEvent")
+    static let openClipoSettings = Notification.Name("openClipoSettings")
 }
 
 // MARK: - ClipType UI Helpers
@@ -24,7 +26,7 @@ struct ClipoPanelView: View {
     @State private var appearAnimation = false
     @State private var searchFieldScale: CGFloat = 0.95
     @State private var searchFieldOpacity: Double = 0
-    @State private var showPermissionOverlay = false
+    @State private var showPermissionBanner = false
     @State private var permissionCheckTimer: Timer?
     @State private var selectedTypeFilter: ClipType? = nil
     
@@ -40,7 +42,7 @@ struct ClipoPanelView: View {
         return items
     }
     
-    private var allItems: [PanelListItem] {
+    private var allNavigableItems: [PanelListItem] {
         var items: [PanelListItem] = []
         for i in 1...9 {
             if let item = store.slots[i] {
@@ -53,60 +55,52 @@ struct ClipoPanelView: View {
         return items
     }
     
-    private var slotSection: [PanelListItem] {
-        allItems.filter { $0.isSlot }
+    private var slotNavigableIndices: [Int: Int] {
+        var map: [Int: Int] = [:]
+        for (index, item) in allNavigableItems.enumerated() {
+            if item.isSlot, let num = item.slotNumber {
+                map[num] = index
+            }
+        }
+        return map
     }
     
     private var historySection: [PanelListItem] {
-        allItems.filter { !$0.isSlot }
+        allNavigableItems.filter { !$0.isSlot }
     }
     
     // MARK: - Body
     
     var body: some View {
-        ZStack {
-            VStack(spacing: 0) {
-                // Header: search + type filters
-                VStack(spacing: 0) {
-                    searchBar
-                    typeFilterBar
-                }
-                
-                // Content list
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            if !slotSection.isEmpty {
-                                slotSectionView
-                            }
-                            
-                            if !historySection.isEmpty {
-                                historySectionView
-                            }
-                            
-                            if allItems.isEmpty {
-                                emptyStateView
-                            }
-                        }
-                        .padding(.vertical, 6)
-                    }
-                    .onChange(of: selectedIndex) { newValue in
-                        withAnimation(.easeInOut(duration: 0.15)) {
-                            proxy.scrollTo(newValue, anchor: .center)
-                        }
-                    }
-                }
-                
-                // Footer shortcuts bar
-                footerBar
-            }
-            .frame(minWidth: 580, minHeight: 480)
-            .background(Color(NSColor.windowBackgroundColor))
+        VStack(spacing: 0) {
+            headerBar
             
-            if showPermissionOverlay {
-                permissionOverlay
+            if showPermissionBanner {
+                permissionBanner
             }
+            
+            searchBar
+            typeFilterBar
+            
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        slotSectionView
+                        historySectionView
+                    }
+                    .padding(.vertical, 6)
+                }
+                .onChange(of: selectedIndex) { newValue in
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        proxy.scrollTo(newValue, anchor: .center)
+                    }
+                }
+            }
+            
+            footerBar
         }
+        .frame(minWidth: 580, minHeight: 480)
+        .background(Color(NSColor.windowBackgroundColor))
         .onAppear(perform: onAppear)
         .onDisappear(perform: onDisappear)
         .onChange(of: searchText) { _ in
@@ -146,14 +140,14 @@ struct ClipoPanelView: View {
     }
     
     private func startPermissionCheck() {
-        showPermissionOverlay = !PermissionService.shared.hasAccessibilityPermission()
+        showPermissionBanner = !PermissionService.shared.hasAccessibilityPermission()
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             let hasPermission = PermissionService.shared.hasAccessibilityPermission()
-            if hasPermission && showPermissionOverlay {
+            if hasPermission && showPermissionBanner {
                 DispatchQueue.main.async {
                     withAnimation(.easeOut(duration: 0.3)) {
-                        showPermissionOverlay = false
+                        showPermissionBanner = false
                     }
                 }
             }
@@ -166,6 +160,99 @@ struct ClipoPanelView: View {
     }
     
     // MARK: - Subviews
+    
+    private var headerBar: some View {
+        HStack(spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: "doc.on.clipboard")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.accentColor)
+                Text("Clipo")
+                    .font(.system(size: 15, weight: .bold))
+            }
+            
+            Spacer()
+            
+            if !PermissionService.shared.hasAccessibilityPermission() {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 9))
+                        .foregroundColor(.orange)
+                    Text("Needs Permission")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .foregroundColor(.orange.opacity(0.8))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(4)
+            }
+            
+            Button(action: {
+                NotificationCenter.default.post(name: .openClipoSettings, object: nil)
+            }) {
+                Image(systemName: "gear")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary.opacity(0.6))
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+            .help("Settings")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            Color(NSColor.windowBackgroundColor)
+                .overlay(
+                    Rectangle()
+                        .frame(height: 0.5)
+                        .foregroundColor(Color.secondary.opacity(0.08)),
+                    alignment: .bottom
+                )
+        )
+    }
+    
+    private var permissionBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.shield.fill")
+                .font(.system(size: 12))
+                .foregroundColor(.orange)
+            Text("Accessibility permission is required for paste hotkeys.")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary.opacity(0.8))
+            Spacer()
+            Button(action: {
+                PermissionService.shared.requestAccessibilityPermission()
+                PermissionService.shared.openAccessibilitySettings()
+            }) {
+                Text("Open System Settings")
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .buttonStyle(PlainButtonStyle())
+            .foregroundColor(.accentColor)
+            
+            Button(action: {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showPermissionBanner = false
+                }
+            }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary.opacity(0.5))
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(Color.orange.opacity(0.06))
+        .overlay(
+            Rectangle()
+                .frame(height: 0.5)
+                .foregroundColor(Color.orange.opacity(0.15)),
+            alignment: .bottom
+        )
+    }
     
     private var searchBar: some View {
         HStack(spacing: 10) {
@@ -211,7 +298,7 @@ struct ClipoPanelView: View {
                 )
         )
         .padding(.horizontal, 12)
-        .padding(.top, 12)
+        .padding(.top, 8)
         .padding(.bottom, 6)
         .scaleEffect(searchFieldScale)
         .opacity(searchFieldOpacity)
@@ -243,7 +330,7 @@ struct ClipoPanelView: View {
         }
     }
     
-    private func sectionHeader(_ title: String, count: Int) -> some View {
+    private func sectionHeader(_ title: String, count: Int, total: Int? = nil) -> some View {
         HStack(spacing: 8) {
             RoundedRectangle(cornerRadius: 1.5)
                 .fill(Color.accentColor.opacity(0.6))
@@ -255,15 +342,27 @@ struct ClipoPanelView: View {
                 .textCase(.uppercase)
                 .tracking(0.8)
             
-            Text("\(count)")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.secondary.opacity(0.4))
-                .padding(.horizontal, 5)
-                .padding(.vertical, 1)
-                .background(
-                    Capsule()
-                        .fill(Color.secondary.opacity(0.08))
-                )
+            if let total = total {
+                Text("\(count)/\(total)")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.secondary.opacity(0.4))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(
+                        Capsule()
+                            .fill(Color.secondary.opacity(0.08))
+                    )
+            } else {
+                Text("\(count)")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.secondary.opacity(0.4))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(
+                        Capsule()
+                            .fill(Color.secondary.opacity(0.08))
+                    )
+            }
             
             Spacer()
         }
@@ -274,10 +373,18 @@ struct ClipoPanelView: View {
     
     private var slotSectionView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("Slots", count: slotSection.count)
+            sectionHeader("Slots", count: store.slots.count, total: 9)
             VStack(spacing: 2) {
-                ForEach(Array(slotSection.enumerated()), id: \.element.id) { index, row in
-                    rowView(for: row, globalIndex: index)
+                ForEach(1...9, id: \.self) { num in
+                    if let item = store.slots[num] {
+                        let globalIndex = slotNavigableIndices[num] ?? 0
+                        rowView(
+                            for: PanelListItem(isSlot: true, slotNumber: num, item: item),
+                            globalIndex: globalIndex
+                        )
+                    } else {
+                        SlotRowView(item: nil, slotNumber: num)
+                    }
                 }
             }
             .padding(.vertical, 4)
@@ -291,80 +398,64 @@ struct ClipoPanelView: View {
     
     private var historySectionView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("History", count: historySection.count)
-            VStack(spacing: 2) {
-                let offset = slotSection.count
-                ForEach(Array(historySection.enumerated()), id: \.element.id) { index, row in
-                    rowView(for: row, globalIndex: offset + index)
+            sectionHeader("Recent History", count: historySection.count)
+            if historySection.isEmpty {
+                historyOnboardingView
+            } else {
+                VStack(spacing: 2) {
+                    let offset = slotNavigableIndices.count
+                    ForEach(Array(historySection.enumerated()), id: \.element.id) { index, row in
+                        rowView(for: row, globalIndex: offset + index)
+                    }
                 }
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color(NSColor.controlBackgroundColor).opacity(0.2))
+                )
+                .padding(.horizontal, 10)
             }
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color(NSColor.controlBackgroundColor).opacity(0.2))
-            )
-            .padding(.horizontal, 10)
         }
     }
     
-    private var emptyStateView: some View {
-        VStack(spacing: 24) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color.accentColor.opacity(0.08))
-                    .frame(width: 80, height: 80)
-                Image(systemName: "doc.on.clipboard.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(.accentColor.opacity(0.7))
-            }
-            
-            VStack(spacing: 6) {
-                Text("Welcome to Clipo")
-                    .font(.system(size: 18, weight: .bold))
-                Text("Your clipboard, supercharged")
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary.opacity(0.7))
-            }
-            
-            VStack(spacing: 10) {
-                QuickTipRow(
-                    icon: "arrow.down.circle.fill",
-                    title: "Save",
-                    description: "Select text, then press ⌥1–9 to save to a slot"
-                )
-                QuickTipRow(
-                    icon: "arrow.up.circle.fill",
-                    title: "Paste",
-                    description: "Press ⌥Space to open Clipo, then ↵ to paste"
-                )
-                QuickTipRow(
-                    icon: "magnifyingglass.circle.fill",
-                    title: "Search",
-                    description: "Type to filter your history and slots instantly"
-                )
-            }
-            .padding(.top, 8)
-            
-            VStack(spacing: 6) {
-                Text("Keyboard Shortcuts")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.secondary.opacity(0.5))
-                    .textCase(.uppercase)
-                    .tracking(0.5)
-                
-                HStack(spacing: 12) {
-                    ShortcutBadge(keys: "⌥Space", label: "Open")
-                    ShortcutBadge(keys: "⌥1–9", label: "Save")
-                    ShortcutBadge(keys: "⌘↵", label: "Paste")
+    private var historyOnboardingView: some View {
+        VStack(spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "doc.text")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary.opacity(0.3))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("No history yet")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    Text("Save clips to slots and they will appear here")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary.opacity(0.35))
                 }
+                Spacer()
             }
-            .padding(.top, 8)
+            
+            Divider()
+                .padding(.vertical, 2)
+            
+            VStack(spacing: 8) {
+                OnboardingStep(number: 1, text: "Select text in any app")
+                OnboardingStep(number: 2, text: "Press ⌥1–9 to save to a slot")
+                OnboardingStep(number: 3, text: "Press ⌥Space to open Clipo")
+                OnboardingStep(number: 4, text: "Press ↵ to copy, ⌘↵ to paste")
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.top, 36)
-        .padding(.bottom, 24)
-        .opacity(appearAnimation ? 1 : 0)
-        .animation(.easeOut(duration: 0.4).delay(0.2), value: appearAnimation)
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color(NSColor.controlBackgroundColor).opacity(0.25))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(Color.secondary.opacity(0.06), lineWidth: 0.5)
+                )
+        )
+        .padding(.horizontal, 10)
     }
     
     private var footerBar: some View {
@@ -398,8 +489,8 @@ struct ClipoPanelView: View {
                     slotNumber: num,
                     onDelete: {
                         store.deleteSlot(number: num)
-                        if selectedIndex >= allItems.count {
-                            selectedIndex = max(0, allItems.count - 1)
+                        if selectedIndex >= allNavigableItems.count {
+                            selectedIndex = max(0, allNavigableItems.count - 1)
                         }
                     },
                     onCopy: {
@@ -414,8 +505,8 @@ struct ClipoPanelView: View {
                     onTogglePin: { store.togglePin(id: row.item.id) },
                     onDelete: {
                         store.deleteHistoryItem(id: row.item.id)
-                        if selectedIndex >= allItems.count {
-                            selectedIndex = max(0, allItems.count - 1)
+                        if selectedIndex >= allNavigableItems.count {
+                            selectedIndex = max(0, allNavigableItems.count - 1)
                         }
                     },
                     onCopy: {
@@ -464,78 +555,14 @@ struct ClipoPanelView: View {
                 .keyboardShortcut("p", modifiers: .command)
                 Button("Delete") {
                     store.deleteHistoryItem(id: row.item.id)
-                    if selectedIndex >= allItems.count {
-                        selectedIndex = max(0, allItems.count - 1)
+                    if selectedIndex >= allNavigableItems.count {
+                        selectedIndex = max(0, allNavigableItems.count - 1)
                     }
                 }
                 .keyboardShortcut(.delete, modifiers: [])
             }
         }
         .animation(.spring(response: 0.2, dampingFraction: 0.8), value: selectedIndex)
-    }
-    
-    private var permissionOverlay: some View {
-        ZStack {
-            Color.black.opacity(0.25)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                ZStack {
-                    Circle()
-                        .fill(Color.accentColor.opacity(0.12))
-                        .frame(width: 70, height: 70)
-                    Image(systemName: "hand.tap.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.accentColor)
-                }
-                
-                VStack(spacing: 8) {
-                    Text("Accessibility Permission")
-                        .font(.system(size: 17, weight: .bold))
-                    
-                    Text("Clipo needs Accessibility permission to simulate copy and paste using global shortcuts.")
-                        .font(.system(size: 13))
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                        .padding(.horizontal, 8)
-                }
-                
-                VStack(spacing: 10) {
-                    Button(action: {
-                        PermissionService.shared.requestAccessibilityPermission()
-                        PermissionService.shared.openAccessibilitySettings()
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "gear")
-                            Text("Open System Settings")
-                                .fontWeight(.semibold)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                    }
-                    .buttonStyle(GlassButtonStyle())
-                    
-                    Button(action: {
-                        withAnimation(.easeOut(duration: 0.3)) {
-                            showPermissionOverlay = false
-                        }
-                    }) {
-                        Text("Skip for now")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary.opacity(0.6))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-            .padding(24)
-            .frame(width: 340)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(NSColor.windowBackgroundColor))
-                    .shadow(color: Color.black.opacity(0.25), radius: 24, x: 0, y: 12)
-            )
-        }
     }
     
     // MARK: - Keyboard Handling
@@ -549,14 +576,14 @@ struct ClipoPanelView: View {
                 }
             }
         case 125: // Down arrow
-            if selectedIndex < allItems.count - 1 {
+            if selectedIndex < allNavigableItems.count - 1 {
                 withAnimation(.easeOut(duration: 0.1)) {
                     selectedIndex += 1
                 }
             }
         case 36: // Return
-            guard selectedIndex < allItems.count else { return }
-            let row = allItems[selectedIndex]
+            guard selectedIndex < allNavigableItems.count else { return }
+            let row = allNavigableItems[selectedIndex]
             if isOnlyCommandPressed(event) {
                 pasteItem(row.item)
             } else {
@@ -567,18 +594,18 @@ struct ClipoPanelView: View {
             PanelWindowService.shared.hidePanel()
         case 51: // Delete (Backspace)
             guard searchText.isEmpty else { return }
-            guard selectedIndex < allItems.count else { return }
-            let row = allItems[selectedIndex]
+            guard selectedIndex < allNavigableItems.count else { return }
+            let row = allNavigableItems[selectedIndex]
             if !row.isSlot {
                 store.deleteHistoryItem(id: row.item.id)
-                if selectedIndex >= allItems.count {
-                    selectedIndex = max(0, allItems.count - 1)
+                if selectedIndex >= allNavigableItems.count {
+                    selectedIndex = max(0, allNavigableItems.count - 1)
                 }
             }
         case 35: // 'P'
             if isOnlyCommandPressed(event) {
-                guard selectedIndex < allItems.count else { return }
-                let row = allItems[selectedIndex]
+                guard selectedIndex < allNavigableItems.count else { return }
+                let row = allNavigableItems[selectedIndex]
                 if !row.isSlot {
                     store.togglePin(id: row.item.id)
                 }
@@ -690,65 +717,26 @@ struct FooterShortcut: View {
     }
 }
 
-// MARK: - QuickTipRow
+// MARK: - OnboardingStep
 
-struct QuickTipRow: View {
-    let icon: String
-    let title: String
-    let description: String
+struct OnboardingStep: View {
+    let number: Int
+    let text: String
     
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(.accentColor.opacity(0.7))
-                .frame(width: 20)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.primary.opacity(0.8))
-                Text(description)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary.opacity(0.6))
-            }
-            
-            Spacer()
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color(NSColor.controlBackgroundColor).opacity(0.5))
-        )
-        .frame(width: 320)
-    }
-}
-
-// MARK: - ShortcutBadge
-
-struct ShortcutBadge: View {
-    let keys: String
-    let label: String
-    
-    var body: some View {
-        HStack(spacing: 4) {
-            Text(keys)
-                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                .foregroundColor(.secondary.opacity(0.6))
-                .padding(.horizontal, 5)
-                .padding(.vertical, 3)
+        HStack(spacing: 8) {
+            Text("\(number)")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(.accentColor)
+                .frame(width: 18, height: 18)
                 .background(
-                    RoundedRectangle(cornerRadius: 5, style: .continuous)
-                        .fill(Color.secondary.opacity(0.08))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                                .stroke(Color.secondary.opacity(0.12), lineWidth: 0.5)
-                        )
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.1))
                 )
-            Text(label)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.secondary.opacity(0.45))
+            Text(text)
+                .font(.system(size: 12))
+                .foregroundColor(.secondary.opacity(0.6))
+            Spacer()
         }
     }
 }
@@ -758,6 +746,6 @@ struct ShortcutBadge: View {
 struct ClipoPanelView_Previews: PreviewProvider {
     static var previews: some View {
         ClipoPanelView()
-            .frame(width: 580, height: 500)
+            .frame(width: 580, height: 640)
     }
 }
