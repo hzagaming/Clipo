@@ -3,6 +3,9 @@ import SwiftUI
 struct HistoryRowView: View {
     let item: ClipItem
     var onTogglePin: () -> Void = {}
+    var onDelete: () -> Void = {}
+    var onCopy: () -> Void = {}
+    var onPaste: () -> Void = {}
     @State private var isHovering = false
     
     var body: some View {
@@ -58,23 +61,33 @@ struct HistoryRowView: View {
                 }
             }
             
-            // Pin / Unpin button
-            Button(action: onTogglePin) {
-                Image(systemName: item.isPinned ? "pin.fill" : "pin")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(
-                        item.isPinned
-                            ? .accentColor
-                            : (isHovering ? .secondary.opacity(0.6) : .clear)
-                    )
-                    .frame(width: 20, height: 20)
-                    .contentShape(Rectangle())
+            // Hover action buttons
+            HStack(spacing: 2) {
+                Button(action: onTogglePin) {
+                    Image(systemName: item.isPinned ? "pin.fill" : "pin")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(item.isPinned ? .accentColor : .secondary.opacity(0.5))
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainButtonStyle())
+                .help(item.isPinned ? "Unpin" : "Pin")
+                
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainButtonStyle())
+                .help("Delete")
             }
-            .buttonStyle(PlainButtonStyle())
-            .help(item.isPinned ? "Unpin" : "Pin")
+            .opacity(isHovering ? 1 : 0)
+            .animation(.easeInOut(duration: 0.15), value: isHovering)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 5)
+        .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(isHovering ? Color.secondary.opacity(0.04) : Color.clear)

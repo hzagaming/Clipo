@@ -3,6 +3,9 @@ import SwiftUI
 struct SlotRowView: View {
     let item: ClipItem
     let slotNumber: Int
+    var onDelete: () -> Void = {}
+    var onCopy: () -> Void = {}
+    var onPaste: () -> Void = {}
     @State private var isHovering = false
     
     var body: some View {
@@ -53,9 +56,34 @@ struct SlotRowView: View {
                     .foregroundColor(.secondary.opacity(0.5))
                 }
             }
+            
+            // Hover action buttons
+            HStack(spacing: 2) {
+                Button(action: onPaste) {
+                    Image(systemName: "arrow.down.doc")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainButtonStyle())
+                .help("Paste")
+                
+                Button(action: onDelete) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainButtonStyle())
+                .help("Remove from slot")
+            }
+            .opacity(isHovering ? 1 : 0)
+            .animation(.easeInOut(duration: 0.15), value: isHovering)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 5)
+        .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(isHovering ? Color.secondary.opacity(0.04) : Color.clear)

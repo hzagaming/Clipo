@@ -115,6 +115,11 @@ class ClipStore: ObservableObject {
         save()
     }
     
+    func deleteSlot(number: Int) {
+        slots.removeValue(forKey: number)
+        save()
+    }
+    
     func resetSlots() {
         slots = [:]
         save()
