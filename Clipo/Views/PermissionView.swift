@@ -4,7 +4,6 @@ struct PermissionView: View {
     @State private var appear = false
     @State private var iconScale: CGFloat = 0.5
     @State private var iconRotation: Double = -30
-    var onPermissionGranted: (() -> Void)? = nil
     var onSkip: (() -> Void)? = nil
     
     var body: some View {
@@ -198,6 +197,6 @@ struct GlassButtonStyle: ButtonStyle {
 
 struct PermissionView_Previews: PreviewProvider {
     static var previews: some View {
-        PermissionView(onPermissionGranted: nil, onSkip: nil)
+        PermissionView(onSkip: nil)
     }
 }

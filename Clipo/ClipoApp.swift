@@ -33,6 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private var splashCloseTimer: Timer?
     private var permissionCheckTimer: Timer?
     private var isReplacingPermissionWindow = false
+    private var isClosingPermissionAfterGrant = false
     
     func applicationWillFinishLaunching(_ notification: Notification) {
         // Set activation policy as early as possible to prevent any Dock icon flicker
@@ -55,22 +56,44 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func continueLaunch(skippingPermission: Bool = false) {
         guard !hasFinishedSplash else { return }
         
-        if PermissionService.shared.hasAccessibilityPermission() || skippingPermission {
-            // Permission already granted — or user chose to skip — proceed with launch
-            hasFinishedSplash = true
-            setupStatusItem()
-            HotkeyService.shared.registerAllHotkeys()
-            
-            if skippingPermission && !PermissionService.shared.hasAccessibilityPermission() {
-                NotificationService.shared.showNotification(
-                    title: "Clipo is Running",
-                    body: "Look for the clipboard icon in your menu bar. You can enable Accessibility later via the menu."
-                )
-            }
+        if PermissionService.shared.hasAccessibilityPermission() {
+            // Permission already granted at launch — proceed directly
+            finishLaunch(showPanel: true, showReadyToast: false)
+        } else if skippingPermission {
+            // User chose to skip permission at launch
+            finishLaunch(showPanel: false, showReadyToast: false)
+            NotificationService.shared.showNotification(
+                title: "Clipo is Running",
+                body: "Look for the clipboard icon in your menu bar. You can enable Accessibility later via the menu."
+            )
         } else {
             // No permission — show permission window with live monitoring
             showPermissionWindow()
             startPermissionMonitoring()
+        }
+    }
+    
+    /// Unified launch-completion path. Prevents duplicate setup and optionally
+    /// shows the main panel or a ready toast.
+    private func finishLaunch(showPanel: Bool, showReadyToast: Bool) {
+        guard !hasFinishedSplash else { return }
+        hasFinishedSplash = true
+        setupStatusItem()
+        HotkeyService.shared.registerAllHotkeys()
+        
+        if showPanel {
+            // Small delay so the permission window has time to close
+            // and the UI doesn't feel jarring.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                PanelWindowService.shared.showPanel()
+            }
+        }
+        
+        if showReadyToast {
+            NotificationService.shared.showNotification(
+                title: "Clipo Ready",
+                body: "Accessibility permission granted. Hotkeys are now active."
+            )
         }
     }
     
@@ -82,21 +105,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                 self.permissionCheckTimer?.invalidate()
                 self.permissionCheckTimer = nil
                 
-                // Animate the granted state in the permission view
                 DispatchQueue.main.async {
+                    self.isClosingPermissionAfterGrant = true
                     self.permissionWindow?.close()
                     self.permissionWindow = nil
+                    self.isClosingPermissionAfterGrant = false
                     
-                    // Now continue with full launch
-                    if !self.hasFinishedSplash {
-                        self.hasFinishedSplash = true
-                        self.setupStatusItem()
-                        HotkeyService.shared.registerAllHotkeys()
-                        NotificationService.shared.showNotification(
-                            title: "Clipo Ready",
-                            body: "Accessibility permission granted. Hotkeys are now active."
-                        )
-                    }
+                    self.finishLaunch(showPanel: true, showReadyToast: true)
                 }
             }
         }
@@ -313,6 +328,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     @objc func showPermissionWindowFromMenu() {
         showPermissionWindow()
+        startPermissionMonitoring()
     }
     
     @objc func quitApp() {
@@ -403,7 +419,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             
             // If the user closes the permission window via the close button
             // without clicking Skip, treat it as a skip so the app doesn't hang.
-            if !hasFinishedSplash && !isReplacingPermissionWindow {
+            // Don't trigger this when we are closing the window programmatically
+            // after granting permission or when replacing the window.
+            if !hasFinishedSplash && !isReplacingPermissionWindow && !isClosingPermissionAfterGrant {
                 permissionCheckTimer?.invalidate()
                 permissionCheckTimer = nil
                 continueLaunch(skippingPermission: true)
