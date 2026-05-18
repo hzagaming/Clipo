@@ -111,16 +111,17 @@ struct SettingsView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     switch selectedTab {
-                    case 0: generalTab
-                    case 1: shortcutsTab
-                    case 2: clipboardTab
-                    case 3: privacyTab
-                    case 4: dataTab
-                    default: generalTab
+                    case 0: generalTab.transition(.opacity.combined(with: .move(edge: .trailing)))
+                    case 1: shortcutsTab.transition(.opacity.combined(with: .move(edge: .trailing)))
+                    case 2: clipboardTab.transition(.opacity.combined(with: .move(edge: .trailing)))
+                    case 3: privacyTab.transition(.opacity.combined(with: .move(edge: .trailing)))
+                    case 4: dataTab.transition(.opacity.combined(with: .move(edge: .trailing)))
+                    default: generalTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
+                .animation(.easeOut(duration: 0.2), value: selectedTab)
             }
         }
     }
@@ -144,11 +145,13 @@ struct SettingsView: View {
                 label: L10n.string(.statusHistoryTemplate, store.history.count),
                 color: .blue
             )
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: store.history.count)
             StatusBadge(
                 icon: "square.grid.2x2",
                 label: L10n.string(.statusSlotsTemplate, store.slots.values.compactMap { $0 }.count),
                 color: .accentColor
             )
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: store.slots.values.compactMap { $0 }.count)
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -260,6 +263,39 @@ struct SettingsView: View {
                     .labelsHidden()
                 }
                 .padding(.vertical, 8)
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(NSColor.controlBackgroundColor))
+            )
+            
+            sectionTitle(L10n.string(.sectionAppearance))
+            VStack(spacing: 0) {
+                ToggleRow(
+                    icon: "bell",
+                    title: L10n.string(.showNotificationsTitle),
+                    subtitle: L10n.string(.showNotificationsSubtitle),
+                    isOn: $store.settings.showNotifications
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "figure.walk.motion",
+                    title: L10n.string(.reduceAnimationsTitle),
+                    subtitle: L10n.string(.reduceAnimationsSubtitle),
+                    isOn: $store.settings.reduceAnimations
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "square.grid.2x2",
+                    title: L10n.string(.showEmptySlotsTitle),
+                    subtitle: L10n.string(.showEmptySlotsSubtitle),
+                    isOn: $store.settings.showEmptySlots
+                )
             }
             .padding(12)
             .background(
@@ -390,6 +426,30 @@ struct SettingsView: View {
                     title: L10n.string(.restoreAfterSaveTitle),
                     subtitle: L10n.string(.restoreAfterSaveSubtitle),
                     isOn: $store.settings.restoreClipboardAfterSave
+                )
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(NSColor.controlBackgroundColor))
+            )
+            
+            sectionTitle(L10n.string(.sectionHistoryBehavior))
+            VStack(spacing: 0) {
+                ToggleRow(
+                    icon: "doc.text.magnifyingglass",
+                    title: L10n.string(.ignoreDuplicateHistoryTitle),
+                    subtitle: L10n.string(.ignoreDuplicateHistorySubtitle),
+                    isOn: $store.settings.ignoreDuplicateHistory
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "arrow.down.doc",
+                    title: L10n.string(.pasteOnSelectionTitle),
+                    subtitle: L10n.string(.pasteOnSelectionSubtitle),
+                    isOn: $store.settings.pasteOnSelection
                 )
             }
             .padding(12)
@@ -782,7 +842,9 @@ struct SidebarItem: View {
             )
             .contentShape(Rectangle())
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(PressableButtonStyle(scale: 0.97))
+        .scaleEffect(isSelected ? 1.0 : 0.98)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSelected)
     }
 }
 

@@ -125,7 +125,7 @@ struct PermissionView: View {
                                     .fill(Color.secondary.opacity(0.06))
                             )
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(PressableButtonStyle())
                     .opacity(appear ? 1 : 0)
                     .offset(y: appear ? 0 : 6)
                     

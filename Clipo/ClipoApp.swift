@@ -149,13 +149,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             guard let self = self else { return }
             self.splashCloseTimer = nil
             
-            // Resign first responder so SwiftUI view hierarchy tears down safely
-            // before the window closes. Let NSWindow handle contentView lifecycle.
-            self.splashWindow?.makeFirstResponder(nil)
-            self.splashWindow?.close()
-            self.splashWindow = nil
-            
-            self.continueLaunch()
+            // Fade out gracefully before closing.
+            guard let window = self.splashWindow else {
+                self.continueLaunch()
+                return
+            }
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                window.animator().alphaValue = 0
+            } completionHandler: {
+                window.makeFirstResponder(nil)
+                window.close()
+                self.splashWindow = nil
+                self.continueLaunch()
+            }
         }
     }
     
@@ -404,9 +412,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         window.delegate = self
         window.isReleasedWhenClosed = false
         window.center()
+        window.alphaValue = 0
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         permissionWindow = window
+        
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.2
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            window.animator().alphaValue = 1
+        }
     }
     
     func applicationWillTerminate(_ notification: Notification) {

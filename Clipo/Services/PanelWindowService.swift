@@ -27,7 +27,7 @@ class PanelWindowService {
         // just bring it forward.
         if panel.isVisible && !isHiding {
             NSApp.activate(ignoringOtherApps: true)
-            panel.orderFrontRegardless()
+            panel.makeKeyAndOrderFront(nil)
             return
         }
         
@@ -36,10 +36,17 @@ class PanelWindowService {
         isHiding = false
         panel.alphaValue = 0
         
+        let reduceAnimations = ClipStore.shared.settings.reduceAnimations
+        
+        // Slightly offset downward for entrance animation.
+        let finalOrigin = panel.frame.origin
+        if !reduceAnimations {
+            panel.setFrameOrigin(NSPoint(x: finalOrigin.x, y: finalOrigin.y - 10))
+        }
+        
         // Activate the app first, then force the panel to the front.
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
-        panel.orderFrontRegardless()
         
         startKeyboardMonitoring()
         // Delay starting click-outside monitoring so that the very click
@@ -52,12 +59,18 @@ class PanelWindowService {
         
         SoundService.shared.playOpen()
         
-        // Fade in
-        CATransaction.begin()
-        CATransaction.setAnimationDuration(0.15)
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeOut))
-        panel.animator().alphaValue = 1
-        CATransaction.commit()
+        // Fade + slide in
+        if reduceAnimations {
+            panel.alphaValue = 1
+            panel.setFrameOrigin(finalOrigin)
+        } else {
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(0.2)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeOut))
+            panel.animator().alphaValue = 1
+            panel.animator().setFrameOrigin(finalOrigin)
+            CATransaction.commit()
+        }
     }
     
     func hidePanel() {
@@ -68,19 +81,30 @@ class PanelWindowService {
         stopKeyboardMonitoring()
         stopClickOutsideMonitoring()
         
-        // Fade out then orderOut. Capture the local panel reference so the
+        // Fade + slide out then orderOut. Capture the local panel reference so the
         // completion block never accesses a deallocated or replaced window.
-        CATransaction.begin()
-        CATransaction.setAnimationDuration(0.12)
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeIn))
-        CATransaction.setCompletionBlock { [weak self] in
-            // If showPanel() cancelled the hide in the meantime, don't orderOut.
-            guard let self = self, self.isHiding else { return }
+        let reduceAnimations = ClipStore.shared.settings.reduceAnimations
+        let currentOrigin = panel.frame.origin
+        if reduceAnimations {
+            panel.alphaValue = 0
             panel.orderOut(nil)
-            self.isHiding = false
+            isHiding = false
+        } else {
+            let exitOrigin = NSPoint(x: currentOrigin.x, y: currentOrigin.y - 6)
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(0.18)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeIn))
+            CATransaction.setCompletionBlock { [weak self] in
+                // If showPanel() cancelled the hide in the meantime, don't orderOut.
+                guard let self = self, self.isHiding else { return }
+                panel.setFrameOrigin(currentOrigin)
+                panel.orderOut(nil)
+                self.isHiding = false
+            }
+            panel.animator().alphaValue = 0
+            panel.animator().setFrameOrigin(exitOrigin)
+            CATransaction.commit()
         }
-        panel.animator().alphaValue = 0
-        CATransaction.commit()
     }
     
     func togglePanel() {

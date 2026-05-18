@@ -15,6 +15,11 @@ struct AppSettings: Codable, Equatable {
     var showDockIcon: Bool = true
     var soundEnabled: Bool = true
     var language: AppLanguage = .english
+    var showNotifications: Bool = true
+    var reduceAnimations: Bool = false
+    var showEmptySlots: Bool = true
+    var ignoreDuplicateHistory: Bool = false
+    var pasteOnSelection: Bool = false
     var hotkeyPreferences: HotkeyPreferences = HotkeyPreferences()
     
     // MARK: - Backward Compatibility
@@ -39,6 +44,11 @@ struct AppSettings: Codable, Equatable {
         self.showDockIcon = try container.decodeIfPresent(Bool.self, forKey: .showDockIcon) ?? true
         self.soundEnabled = try container.decodeIfPresent(Bool.self, forKey: .soundEnabled) ?? true
         self.language = try container.decodeIfPresent(AppLanguage.self, forKey: .language) ?? .english
+        self.showNotifications = try container.decodeIfPresent(Bool.self, forKey: .showNotifications) ?? true
+        self.reduceAnimations = try container.decodeIfPresent(Bool.self, forKey: .reduceAnimations) ?? false
+        self.showEmptySlots = try container.decodeIfPresent(Bool.self, forKey: .showEmptySlots) ?? true
+        self.ignoreDuplicateHistory = try container.decodeIfPresent(Bool.self, forKey: .ignoreDuplicateHistory) ?? false
+        self.pasteOnSelection = try container.decodeIfPresent(Bool.self, forKey: .pasteOnSelection) ?? false
         self.hotkeyPreferences = try container.decodeIfPresent(HotkeyPreferences.self, forKey: .hotkeyPreferences) ?? HotkeyPreferences()
     }
     

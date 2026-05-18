@@ -20,6 +20,7 @@ class NotificationService {
     private init() {}
     
     func showNotification(title: String, body: String, isError: Bool = false) {
+        guard ClipStore.shared.settings.showNotifications else { return }
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             // Cap the queue to prevent unbounded growth during rapid-fire events.
@@ -58,16 +59,21 @@ class NotificationService {
         window.contentView = NSHostingView(rootView: ToastView(title: title, message: body, isError: isError))
         positionWindow(window)
         
+        // Entrance: slightly above final position.
+        let finalOrigin = window.frame.origin
+        window.setFrameOrigin(NSPoint(x: finalOrigin.x, y: finalOrigin.y + 12))
         window.alphaValue = 0
         window.orderFront(nil)
         
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.2
+            context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             window.animator().alphaValue = 1
+            window.animator().setFrameOrigin(finalOrigin)
         }
         
-        dismissTimer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: false) { [weak self] _ in
+        let displayDuration = isError ? 3.5 : 2.5
+        dismissTimer = Timer.scheduledTimer(withTimeInterval: displayDuration, repeats: false) { [weak self] _ in
             self?.dismissToast()
         }
     }
@@ -79,11 +85,16 @@ class NotificationService {
             return
         }
         
+        let currentOrigin = window.frame.origin
+        let exitOrigin = NSPoint(x: currentOrigin.x, y: currentOrigin.y - 6)
+        
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.3
+            context.duration = 0.25
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
             window.animator().alphaValue = 0
+            window.animator().setFrameOrigin(exitOrigin)
         } completionHandler: { [weak self] in
+            window.setFrameOrigin(currentOrigin)
             window.orderOut(nil)
             self?.dismissTimer = nil
             self?.isDisplaying = false

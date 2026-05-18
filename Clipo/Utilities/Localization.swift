@@ -11,6 +11,10 @@ enum LocKey: String {
     case soundEffectsTitle, soundEffectsSubtitle
     case sectionLanguage
     case languageTitle, languageSubtitle
+    case sectionAppearance
+    case showNotificationsTitle, showNotificationsSubtitle
+    case reduceAnimationsTitle, reduceAnimationsSubtitle
+    case showEmptySlotsTitle, showEmptySlotsSubtitle
     case sectionGlobalShortcuts
     case openPanelShortcutTitle
     case saveSlotShortcutTitle
@@ -20,6 +24,9 @@ enum LocKey: String {
     case sectionPasteBehavior
     case restoreAfterPasteTitle, restoreAfterPasteSubtitle
     case restoreAfterSaveTitle, restoreAfterSaveSubtitle
+    case sectionHistoryBehavior
+    case ignoreDuplicateHistoryTitle, ignoreDuplicateHistorySubtitle
+    case pasteOnSelectionTitle, pasteOnSelectionSubtitle
     case sectionStorage
     case maxHistoryItemsTitle
     case autoDeleteUnpinnedTitle
@@ -372,6 +379,90 @@ struct L10n {
             "ru": "Выберите предпочитаемый язык отображения",
             "pt": "Selecione seu idioma de exibição preferido"
         ],
+        "sectionAppearance": [
+            "en": "Appearance",
+            "zh-Hans": "外观",
+            "zh-Hant": "外觀",
+            "ja": "外観",
+            "ko": "외관",
+            "fr": "Apparence",
+            "de": "Erscheinungsbild",
+            "es": "Apariencia",
+            "ru": "Внешний вид",
+            "pt": "Aparência"
+        ],
+        "showNotificationsTitle": [
+            "en": "Show Notifications",
+            "zh-Hans": "显示通知",
+            "zh-Hant": "顯示通知",
+            "ja": "通知を表示",
+            "ko": "알림 표시",
+            "fr": "Afficher les notifications",
+            "de": "Benachrichtigungen anzeigen",
+            "es": "Mostrar notificaciones",
+            "ru": "Показывать уведомления",
+            "pt": "Mostrar notificações"
+        ],
+        "showNotificationsSubtitle": [
+            "en": "Display toast alerts for actions",
+            "zh-Hans": "为操作显示弹窗提醒",
+            "zh-Hant": "為操作顯示彈窗提醒",
+            "ja": "アクションのトースト通知を表示",
+            "ko": "작업에 대한 알림 표시",
+            "fr": "Afficher les alertes toast pour les actions",
+            "de": "Toast-Benachrichtigungen für Aktionen anzeigen",
+            "es": "Mostrar alertas toast para acciones",
+            "ru": "Показывать тост-уведомления для действий",
+            "pt": "Exibir alertas toast para ações"
+        ],
+        "reduceAnimationsTitle": [
+            "en": "Reduce Animations",
+            "zh-Hans": "减少动画",
+            "zh-Hant": "減少動畫",
+            "ja": "アニメーションを減らす",
+            "ko": "애니메이션 줄이기",
+            "fr": "Réduire les animations",
+            "de": "Animationen reduzieren",
+            "es": "Reducir animaciones",
+            "ru": "Уменьшить анимации",
+            "pt": "Reduzir animações"
+        ],
+        "reduceAnimationsSubtitle": [
+            "en": "Disable motion effects for accessibility",
+            "zh-Hans": "为无障碍访问禁用动效",
+            "zh-Hant": "為無障礙存取停用動效",
+            "ja": "アクセシビリティのためモーション効果を無効化",
+            "ko": "접근성을 위해 모션 효과 비활성화",
+            "fr": "Désactiver les effets de mouvement pour l'accessibilité",
+            "de": "Bewegungseffekte für Barrierefreiheit deaktivieren",
+            "es": "Deshabilitar efectos de movimiento para accesibilidad",
+            "ru": "Отключить эффекты движения для доступности",
+            "pt": "Desativar efeitos de movimento para acessibilidade"
+        ],
+        "showEmptySlotsTitle": [
+            "en": "Show Empty Slots",
+            "zh-Hans": "显示空槽位",
+            "zh-Hant": "顯示空槽位",
+            "ja": "空のスロットを表示",
+            "ko": "빈 슬롯 표시",
+            "fr": "Afficher les emplacements vides",
+            "de": "Leere Slots anzeigen",
+            "es": "Mostrar ranuras vacías",
+            "ru": "Показывать пустые слоты",
+            "pt": "Mostrar slots vazios"
+        ],
+        "showEmptySlotsSubtitle": [
+            "en": "Display placeholder rows for unused slots",
+            "zh-Hans": "为未使用的槽位显示占位行",
+            "zh-Hant": "為未使用的槽位顯示佔位行",
+            "ja": "未使用スロットのプレースホルダーを表示",
+            "ko": "사용되지 않은 슬롯에 대한 자리 표시자 표시",
+            "fr": "Afficher les lignes d'espace réservé pour les emplacements inutilisés",
+            "de": "Platzhalterzeilen für unbenutzte Slots anzeigen",
+            "es": "Mostrar filas de marcador de posición para ranuras no utilizadas",
+            "ru": "Показывать строки-заполнители для неиспользуемых слотов",
+            "pt": "Exibir linhas de espaço reservado para slots não utilizados"
+        ],
         "sectionGlobalShortcuts": [
             "en": "Global Shortcuts",
             "zh-Hans": "全局快捷键",
@@ -503,6 +594,66 @@ struct L10n {
             "es": "Restaurar el contenido anterior del portapapeles después de guardar en una ranura",
             "ru": "Вернуть предыдущее содержимое буфера обмена после сохранения в слот",
             "pt": "Restaurar o conteúdo anterior da área de transferência após salvar em um slot"
+        ],
+        "sectionHistoryBehavior": [
+            "en": "History Behavior",
+            "zh-Hans": "历史行为",
+            "zh-Hant": "歷史行為",
+            "ja": "履歴の動作",
+            "ko": "기록 동작",
+            "fr": "Comportement de l'historique",
+            "de": "Verlaufsverhalten",
+            "es": "Comportamiento del historial",
+            "ru": "Поведение истории",
+            "pt": "Comportamento do histórico"
+        ],
+        "ignoreDuplicateHistoryTitle": [
+            "en": "Ignore Duplicate History",
+            "zh-Hans": "忽略重复历史",
+            "zh-Hant": "忽略重複歷史",
+            "ja": "重複履歴を無視",
+            "ko": "중복 기록 무시",
+            "fr": "Ignorer les doublons dans l'historique",
+            "de": "Doppelte Verlaufseinträge ignorieren",
+            "es": "Ignorar historial duplicado",
+            "ru": "Игнорировать дубликаты в истории",
+            "pt": "Ignorar histórico duplicado"
+        ],
+        "ignoreDuplicateHistorySubtitle": [
+            "en": "Skip recording the same content twice in a row",
+            "zh-Hans": "跳过连续记录相同内容",
+            "zh-Hant": "跳過連續記錄相同內容",
+            "ja": "同じ内容を連続して記録しない",
+            "ko": "동일한 내용을 연속으로 기록하지 않음",
+            "fr": "Ne pas enregistrer deux fois le même contenu consécutivement",
+            "de": "Gleiche Inhalte nicht zweimal hintereinander aufzeichnen",
+            "es": "Omitir registrar el mismo contenido dos veces seguidas",
+            "ru": "Не записывать одинаковое содержимое дважды подряд",
+            "pt": "Pular o registro do mesmo conteúdo duas vezes seguidas"
+        ],
+        "pasteOnSelectionTitle": [
+            "en": "Paste on Selection",
+            "zh-Hans": "选中即粘贴",
+            "zh-Hant": "選中即貼上",
+            "ja": "選択時に貼り付け",
+            "ko": "선택 시 붙여넣기",
+            "fr": "Coller lors de la sélection",
+            "de": "Bei Auswahl einfügen",
+            "es": "Pegar al seleccionar",
+            "ru": "Вставлять при выборе",
+            "pt": "Colar ao selecionar"
+        ],
+        "pasteOnSelectionSubtitle": [
+            "en": "Press Return to paste instead of copy",
+            "zh-Hans": "按回车键粘贴而非复制",
+            "zh-Hant": "按回車鍵貼上而非複製",
+            "ja": "Returnキーでコピーではなく貼り付け",
+            "ko": "Return 키로 복사 대신 붙여넣기",
+            "fr": "Appuyez sur Retour pour coller au lieu de copier",
+            "de": "Drücken Sie Return zum Einfügen statt Kopieren",
+            "es": "Presione Retorno para pegar en lugar de copiar",
+            "ru": "Нажмите Return для вставки вместо копирования",
+            "pt": "Pressione Return para colar em vez de copiar"
         ],
         "sectionStorage": [
             "en": "Storage",

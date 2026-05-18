@@ -85,7 +85,7 @@ struct SlotRowView: View {
                             .frame(width: 24, height: 24)
                             .contentShape(Rectangle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(PressableButtonStyle())
                     .help(L10n.string(.footerPaste))
                     
                     Button(action: onDelete) {
@@ -95,7 +95,7 @@ struct SlotRowView: View {
                             .frame(width: 24, height: 24)
                             .contentShape(Rectangle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(PressableButtonStyle())
                     .help(L10n.string(.footerDelete))
                 }
                 .opacity(isHovering ? 1 : 0)
@@ -119,10 +119,11 @@ struct SlotRowView: View {
         .background(
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(isHovering ? Color.secondary.opacity(0.04) : Color.clear)
+                .animation(.easeInOut(duration: 0.15), value: isHovering)
         )
         .contentShape(Rectangle())
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.12)) {
+            withAnimation(.easeInOut(duration: 0.15)) {
                 isHovering = hovering
             }
         }

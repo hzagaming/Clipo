@@ -27,7 +27,6 @@ struct ClipoPanelView: View {
     @State private var searchText = ""
     @State private var selectedIndex = 0
     @FocusState private var isSearchFocused: Bool
-    @State private var appearAnimation = false
     @State private var searchFieldScale: CGFloat = 0.95
     @State private var searchFieldOpacity: Double = 0
     @State private var showPermissionBanner = false
@@ -84,6 +83,10 @@ struct ClipoPanelView: View {
             
             if showPermissionBanner {
                 permissionBanner
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
             }
             
             searchBar
@@ -136,14 +139,12 @@ struct ClipoPanelView: View {
         selectedIndex = 0
         startPermissionCheck()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-            appearAnimation = true
             searchFieldScale = 1.0
             searchFieldOpacity = 1.0
         }
     }
     
     private func onDisappear() {
-        appearAnimation = false
         searchFieldScale = 0.95
         searchFieldOpacity = 0
         stopPermissionCheck()
@@ -228,7 +229,7 @@ struct ClipoPanelView: View {
                     .frame(width: 34, height: 34)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(PressableButtonStyle())
             .help(L10n.string(.settingsTooltip))
         }
         .padding(.horizontal, 14)
@@ -261,7 +262,7 @@ struct ClipoPanelView: View {
                 Text(isWaitingForPermissionGrant ? L10n.string(.checkAgainButton) : L10n.string(.openSystemSettingsButton))
                     .font(.system(size: 11, weight: .semibold))
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(PressableButtonStyle())
             .foregroundColor(.accentColor)
             
             Button(action: {
@@ -273,7 +274,7 @@ struct ClipoPanelView: View {
                     .font(.system(size: 10))
                     .foregroundColor(.secondary.opacity(0.5))
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(PressableButtonStyle())
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -307,7 +308,7 @@ struct ClipoPanelView: View {
                         .font(.system(size: 14))
                         .foregroundColor(.secondary.opacity(0.5))
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(PressableButtonStyle())
             }
         }
         .padding(.horizontal, 12)
@@ -405,7 +406,8 @@ struct ClipoPanelView: View {
     
     private var slotSectionView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader(L10n.string(.slotsSection), count: store.slots.values.compactMap { $0 }.count, total: 9)
+            let filledCount = store.slots.values.compactMap { $0 }.count
+            sectionHeader(L10n.string(.slotsSection), count: filledCount, total: store.settings.showEmptySlots ? 9 : nil)
             VStack(spacing: 2) {
                 ForEach(1...9, id: \.self) { num in
                     if let item = store.slots[num] {
@@ -414,7 +416,7 @@ struct ClipoPanelView: View {
                             for: PanelListItem(isSlot: true, slotNumber: num, item: item),
                             globalIndex: globalIndex
                         )
-                    } else {
+                    } else if store.settings.showEmptySlots {
                         SlotRowView(
                             item: nil,
                             slotNumber: num,
@@ -543,7 +545,9 @@ struct ClipoPanelView: View {
                     item: row.item,
                     slotNumber: num,
                     onDelete: {
-                        store.deleteSlot(number: num)
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            store.deleteSlot(number: num)
+                        }
                         if selectedIndex >= allNavigableItems.count {
                             selectedIndex = max(0, allNavigableItems.count - 1)
                         }
@@ -559,7 +563,9 @@ struct ClipoPanelView: View {
                     item: row.item,
                     onTogglePin: { store.togglePin(id: row.item.id) },
                     onDelete: {
-                        store.deleteHistoryItem(id: row.item.id)
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            store.deleteHistoryItem(id: row.item.id)
+                        }
                         if selectedIndex >= allNavigableItems.count {
                             selectedIndex = max(0, allNavigableItems.count - 1)
                         }
@@ -587,12 +593,17 @@ struct ClipoPanelView: View {
         .padding(.horizontal, 6)
         .padding(.vertical, 1)
         .id(globalIndex)
+        .transition(.opacity.combined(with: .scale(scale: 0.97)))
         .onTapGesture {
             withAnimation(.easeOut(duration: 0.15)) {
                 selectedIndex = globalIndex
             }
-            copyItem(row.item)
-            PanelWindowService.shared.hidePanel()
+            if store.settings.pasteOnSelection {
+                pasteItem(row.item)
+            } else {
+                copyItem(row.item)
+                PanelWindowService.shared.hidePanel()
+            }
         }
         .contextMenu {
             Button(L10n.string(.contextMenuCopy)) {
@@ -609,7 +620,9 @@ struct ClipoPanelView: View {
                 }
                 .keyboardShortcut("p", modifiers: .command)
                 Button(L10n.string(.contextMenuDelete)) {
-                    store.deleteHistoryItem(id: row.item.id)
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        store.deleteHistoryItem(id: row.item.id)
+                    }
                     if selectedIndex >= allNavigableItems.count {
                         selectedIndex = max(0, allNavigableItems.count - 1)
                     }
@@ -639,7 +652,8 @@ struct ClipoPanelView: View {
         case 36: // Return
             guard selectedIndex < allNavigableItems.count else { return }
             let row = allNavigableItems[selectedIndex]
-            if isOnlyCommandPressed(event) {
+            let shouldPaste = store.settings.pasteOnSelection != isOnlyCommandPressed(event)
+            if shouldPaste {
                 pasteItem(row.item)
             } else {
                 copyItem(row.item)
@@ -652,7 +666,9 @@ struct ClipoPanelView: View {
             guard selectedIndex < allNavigableItems.count else { return }
             let row = allNavigableItems[selectedIndex]
             if !row.isSlot {
-                store.deleteHistoryItem(id: row.item.id)
+                withAnimation(.easeOut(duration: 0.2)) {
+                    store.deleteHistoryItem(id: row.item.id)
+                }
                 if selectedIndex >= allNavigableItems.count {
                     selectedIndex = max(0, allNavigableItems.count - 1)
                 }
@@ -747,7 +763,7 @@ struct FilterPill: View {
                         .stroke(isSelected ? Color.clear : Color.secondary.opacity(0.1), lineWidth: 0.5)
                 )
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(PressableButtonStyle(scale: 0.95))
         .animation(.spring(response: 0.25, dampingFraction: 0.8), value: isSelected)
     }
 }

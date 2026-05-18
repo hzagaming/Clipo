@@ -42,6 +42,7 @@ struct HistoryRowView: View {
                             RoundedRectangle(cornerRadius: 4, style: .continuous)
                                 .fill(Color.accentColor.opacity(0.1))
                         )
+                        .transition(.scale(scale: 0.5, anchor: .leading).combined(with: .opacity))
                     }
                     
                     if let app = item.sourceApp {
@@ -69,8 +70,10 @@ struct HistoryRowView: View {
                         .foregroundColor(item.isPinned ? .accentColor : .secondary.opacity(0.5))
                         .frame(width: 24, height: 24)
                         .contentShape(Rectangle())
+                        .rotationEffect(.degrees(item.isPinned ? 0 : -45))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: item.isPinned)
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(PressableButtonStyle())
                 .help(item.isPinned ? L10n.string(.contextMenuUnpin) : L10n.string(.contextMenuPin))
                 
                 Button(action: onDelete) {
@@ -80,7 +83,7 @@ struct HistoryRowView: View {
                         .frame(width: 24, height: 24)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(PressableButtonStyle())
                 .help(L10n.string(.contextMenuDelete))
             }
             .opacity(isHovering ? 1 : 0)
@@ -91,6 +94,7 @@ struct HistoryRowView: View {
         .background(
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(isHovering ? Color.secondary.opacity(0.04) : Color.clear)
+                .animation(.easeInOut(duration: 0.15), value: isHovering)
         )
         .contentShape(Rectangle())
         .onHover { hovering in
