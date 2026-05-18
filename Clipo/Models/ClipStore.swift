@@ -97,8 +97,10 @@ class ClipStore: ObservableObject {
     
     func togglePin(id: UUID) {
         guard let index = history.firstIndex(where: { $0.id == id }) else { return }
-        history[index].isPinned.toggle()
-        history[index].lastUsedAt = Date()
+        var item = history[index]
+        item.isPinned.toggle()
+        item.lastUsedAt = Date()
+        history[index] = item
         trimHistory()
         save()
     }

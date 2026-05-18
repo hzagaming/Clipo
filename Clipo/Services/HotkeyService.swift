@@ -216,7 +216,9 @@ class HotkeyService {
             ClipStore.shared.slots[slotNumber] = updated
         }
         if let histIndex = ClipStore.shared.history.firstIndex(where: { $0.content == item.content }) {
-            ClipStore.shared.history[histIndex].lastUsedAt = Date()
+            var histItem = ClipStore.shared.history[histIndex]
+            histItem.lastUsedAt = Date()
+            ClipStore.shared.history[histIndex] = histItem
         }
         ClipStore.shared.save()
     }

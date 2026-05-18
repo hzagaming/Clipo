@@ -13,14 +13,17 @@ class PasteService {
         }
         
         let previousSnapshot = ClipboardService.shared.snapshotPasteboard()
+        let previousChangeCount = NSPasteboard.general.changeCount
         simulateCommandC()
         
         // Wait for the target app to respond and update the system pasteboard.
         // 200ms provides better compatibility with slower apps (e.g. Electron-based).
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.20) {
-            let text = ClipboardService.shared.readTextFromPasteboard()
+            let pasteboard = NSPasteboard.general
+            let didCopyNewContent = pasteboard.changeCount != previousChangeCount
+            let text = didCopyNewContent ? ClipboardService.shared.readTextFromPasteboard() : nil
             
-            if ClipStore.shared.settings.restoreClipboardAfterSave {
+            if didCopyNewContent && ClipStore.shared.settings.restoreClipboardAfterSave {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                     ClipboardService.shared.restorePasteboard(previousSnapshot)
                 }
