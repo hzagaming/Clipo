@@ -146,7 +146,7 @@ struct SettingsView: View {
             )
             StatusBadge(
                 icon: "square.grid.2x2",
-                label: L10n.string(.statusSlotsTemplate, store.slots.count),
+                label: L10n.string(.statusSlotsTemplate, store.slots.values.compactMap { $0 }.count),
                 color: .accentColor
             )
             Spacer()

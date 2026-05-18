@@ -3,6 +3,7 @@ import ApplicationServices
 
 extension Notification.Name {
     static let accessibilityPermissionChanged = Notification.Name("accessibilityPermissionChanged")
+    static let languageChanged = Notification.Name("languageChanged")
 }
 
 class PermissionService {

@@ -94,6 +94,7 @@ enum LocKey: String {
     case notificationCopiedBody
     case notificationSavedToSlotTemplate
     case notificationSlotEmptyTemplate
+    case notificationSlotEmptyBody
     case notificationPermissionRequiredTitle
     case notificationPermissionRequiredBody
     case notificationSensitiveAppIgnoredTitle
@@ -1654,6 +1655,18 @@ struct L10n {
             "es": "Ranura %d vacía",
             "ru": "Слот %d пуст",
             "pt": "Slot %d Vazio"
+        ],
+        "notificationSlotEmptyBody": [
+            "en": "Nothing has been saved to this slot yet.",
+            "zh-Hans": "此槽位尚未保存任何内容。",
+            "zh-Hant": "此槽位尚未儲存任何內容。",
+            "ja": "このスロットにはまだ何も保存されていません。",
+            "ko": "이 슬롯에 아직 저장된 내용이 없습니다.",
+            "fr": "Aucun élément n'a encore été enregistré dans cet emplacement.",
+            "de": "In diesem Slot wurde noch nichts gespeichert.",
+            "es": "Aún no se ha guardado nada en esta ranura.",
+            "ru": "В этом слоте ещё ничего не сохранено.",
+            "pt": "Nada foi salvo neste slot ainda."
         ],
         "notificationPermissionRequiredTitle": [
             "en": "Permission Required",

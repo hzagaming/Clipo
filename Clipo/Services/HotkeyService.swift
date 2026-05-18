@@ -191,7 +191,7 @@ class HotkeyService {
         guard let item = ClipStore.shared.slots[slotNumber] else {
             NotificationService.shared.showNotification(
                 title: L10n.string(.notificationSlotEmptyTemplate, slotNumber),
-                body: L10n.string(.notificationCopiedBody)
+                body: L10n.string(.notificationSlotEmptyBody)
             )
             return
         }

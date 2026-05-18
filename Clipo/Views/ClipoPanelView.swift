@@ -405,7 +405,7 @@ struct ClipoPanelView: View {
     
     private var slotSectionView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader(L10n.string(.slotsSection), count: store.slots.count, total: 9)
+            sectionHeader(L10n.string(.slotsSection), count: store.slots.values.compactMap { $0 }.count, total: 9)
             VStack(spacing: 2) {
                 ForEach(1...9, id: \.self) { num in
                     if let item = store.slots[num] {

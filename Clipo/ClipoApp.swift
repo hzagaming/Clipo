@@ -58,6 +58,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             object: nil
         )
         
+        // Rebuild menu bar when language changes.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(setupStatusItem),
+            name: .languageChanged,
+            object: nil
+        )
+        
         showSplashScreen()
     }
     
@@ -163,7 +171,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     
     // MARK: - Status Item Setup
     
-    func setupStatusItem() {
+    @objc func setupStatusItem() {
+        if let existing = statusItem {
+            NSStatusBar.system.removeStatusItem(existing)
+        }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         let button = statusItem?.button
         button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clipo")
@@ -269,7 +280,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         let slotNumber = sender.tag
         guard let item = ClipStore.shared.slots[slotNumber] else {
             SoundService.shared.playError()
-            NotificationService.shared.showNotification(title: L10n.string(.notificationSlotEmptyTemplate, slotNumber), body: L10n.string(.notificationCopiedBody))
+            NotificationService.shared.showNotification(title: L10n.string(.notificationSlotEmptyTemplate, slotNumber), body: L10n.string(.notificationSlotEmptyBody))
             return
         }
         guard PermissionService.shared.hasAccessibilityPermission() else {
@@ -442,7 +453,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         // 1. Rebuild history items dynamically.
         let recentHistory = Array(ClipStore.shared.history.prefix(5))
         
-        if let historyHeaderIndex = menu.items.firstIndex(where: { $0.title == "Recent History" }) {
+        if let historyHeaderIndex = menu.items.firstIndex(where: { $0.title == L10n.string(.recentHistoryMenuTitle) }) {
             var indicesToRemove: [Int] = []
             var i = historyHeaderIndex + 1
             while i < menu.items.count {

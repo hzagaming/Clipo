@@ -12,6 +12,9 @@ class ClipStore: ObservableObject {
                 if oldValue.maxHistoryItems != settings.maxHistoryItems {
                     trimHistory()
                 }
+                if oldValue.language != settings.language {
+                    NotificationCenter.default.post(name: .languageChanged, object: settings.language)
+                }
                 save()
             }
         }
