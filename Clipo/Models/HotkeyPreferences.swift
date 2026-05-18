@@ -52,4 +52,8 @@ struct HotkeyPreferences: Codable, Equatable {
         if mask & 0x0100 != 0 { parts.append("⌘") } // command
         return parts.joined()
     }
+    
+    mutating func resetToDefaults() {
+        self = HotkeyPreferences()
+    }
 }
