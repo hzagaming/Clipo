@@ -14,14 +14,27 @@ import AppKit
 class PasteboardSnapshot {
     private let items: [[(type: NSPasteboard.PasteboardType, data: Data)]]
     
+    /// Text-first strategy: only snapshot common textual / transferable types.
+    /// This avoids iterating every `NSPasteboardItem` type, which can trigger
+    /// `-[NSXPCDecoder validateAllowedClass:forKey:]` system warnings.
+    private static let allowedTypes: [NSPasteboard.PasteboardType] = [
+        .string,
+        .rtf,
+        NSPasteboard.PasteboardType("public.html"),
+        NSPasteboard.PasteboardType("public.url"),
+        NSPasteboard.PasteboardType("public.file-url"),
+        NSPasteboard.PasteboardType("public.utf16-external-plain-text"),
+        NSPasteboard.PasteboardType("public.utf16-plain-text"),
+    ]
+    
     init() {
         guard let pbItems = NSPasteboard.general.pasteboardItems else {
             self.items = []
             return
         }
         self.items = pbItems.map { item in
-            item.types.compactMap { type in
-                guard let data = item.data(forType: type) else { return nil }
+            Self.allowedTypes.compactMap { type in
+                guard item.types.contains(type), let data = item.data(forType: type) else { return nil }
                 return (type: type, data: data)
             }
         }

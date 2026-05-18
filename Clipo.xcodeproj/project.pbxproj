@@ -6,14 +6,17 @@
 	objectVersion = 77;
 	objects = {
 
-		6296971D56CF401EBFC900D2 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88D9B8CCDAF647F69E950116 /* Carbon.framework */; };
+/* Begin PBXBuildFile section */
 		34D8DACD4FB842319D00507A /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */; };
+		6296971D56CF401EBFC900D2 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88D9B8CCDAF647F69E950116 /* Carbon.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		88D9B8CCDAF647F69E950116 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		F2A5EE502FB887650012E61B /* Clipo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clipo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-		88D9B8CCDAF647F69E950116 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
-		8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F2A5EE522FB887650012E61B /* Clipo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -35,11 +38,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F28C94182FBB047C00CB49CB /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				88D9B8CCDAF647F69E950116 /* Carbon.framework */,
+				8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		F2A5EE472FB887650012E61B = {
 			isa = PBXGroup;
 			children = (
 				F2A5EE522FB887650012E61B /* Clipo */,
 				F2A5EE512FB887650012E61B /* Products */,
+				F28C94182FBB047C00CB49CB /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -84,7 +97,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2640;
-				LastUpgradeCheck = 2640;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					F2A5EE4F2FB887650012E61B = {
 						CreatedOnToolsVersion = 26.4.1;
@@ -165,6 +178,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -189,6 +203,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -228,6 +243,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -245,6 +261,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -257,6 +274,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -288,6 +306,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
