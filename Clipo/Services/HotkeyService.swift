@@ -220,7 +220,6 @@ class HotkeyService {
     }
     
     private func onOpenPanel() {
-        SoundService.shared.playOpen()
         PanelWindowService.shared.togglePanel()
     }
     

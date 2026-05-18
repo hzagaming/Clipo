@@ -292,7 +292,6 @@ struct ClipoPanelView: View {
                 PanelWindowService.shared.hidePanel()
             }
         case 53: // Esc
-            SoundService.shared.playClose()
             PanelWindowService.shared.hidePanel()
         case 51: // Delete (Backspace)
             guard searchText.isEmpty else { return }

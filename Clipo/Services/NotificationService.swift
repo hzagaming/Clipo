@@ -21,8 +21,13 @@ class NotificationService {
     
     func showNotification(title: String, body: String, isError: Bool = false) {
         DispatchQueue.main.async { [weak self] in
-            self?.queue.append((title, body, isError))
-            self?.processQueue()
+            guard let self = self else { return }
+            // Cap the queue to prevent unbounded growth during rapid-fire events.
+            if self.queue.count >= 10 {
+                self.queue.removeFirst()
+            }
+            self.queue.append((title, body, isError))
+            self.processQueue()
         }
     }
     

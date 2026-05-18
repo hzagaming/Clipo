@@ -19,19 +19,29 @@ class PanelWindowService {
         if panelWindow == nil {
             createPanel()
         }
+        guard let panel = panelWindow else { return }
+        
+        // If the panel is already fully visible, just bring it forward.
+        if panel.isVisible && panel.alphaValue == 1 {
+            panel.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+        
         // Cancel any in-progress hide animation so the panel doesn't get
         // ordered out immediately after we show it.
         isHiding = false
-        panelWindow?.alphaValue = 1
-        panelWindow?.makeKeyAndOrderFront(nil)
+        panel.alphaValue = 0
+        panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         startKeyboardMonitoring()
+        SoundService.shared.playOpen()
         
-        // Fade in with subtle scale
+        // Fade in
         CATransaction.begin()
         CATransaction.setAnimationDuration(0.15)
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeOut))
-        panelWindow?.animator().alphaValue = 1
+        panel.animator().alphaValue = 1
         CATransaction.commit()
     }
     
@@ -70,7 +80,6 @@ class PanelWindowService {
         stopKeyboardMonitoring()
         if let panel = panelWindow {
             panel.delegate = nil
-            panel.contentView = nil
             panel.close()
         }
         panelWindow = nil
