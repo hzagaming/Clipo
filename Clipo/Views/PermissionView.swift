@@ -90,6 +90,7 @@ struct PermissionView: View {
                                 iconScale = 1.0
                             }
                         }
+                        PermissionService.shared.requestAccessibilityPermission()
                         PermissionService.shared.openAccessibilitySettings()
                     }) {
                         HStack(spacing: 8) {

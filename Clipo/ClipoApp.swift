@@ -111,7 +111,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                     self.permissionWindow = nil
                     self.isClosingPermissionAfterGrant = false
                     
-                    self.finishLaunch(showPanel: true, showReadyToast: true)
+                    if !self.hasFinishedSplash {
+                        self.finishLaunch(showPanel: true, showReadyToast: true)
+                    } else {
+                        // App already running (menu-bar re-auth) — just give feedback.
+                        NotificationService.shared.showNotification(
+                            title: "Clipo Ready",
+                            body: "Accessibility permission granted. Hotkeys are now active."
+                        )
+                    }
                 }
             }
         }
