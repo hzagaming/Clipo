@@ -99,7 +99,7 @@ struct SlotRowView: View {
                     Text("Empty")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.secondary.opacity(0.35))
-                    Text("— press ⌥\(slotNumber) to save")
+                    Text("— press ⌘⌥\(slotNumber) to save")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary.opacity(0.25))
                 }

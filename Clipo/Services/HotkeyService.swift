@@ -72,12 +72,12 @@ class HotkeyService {
             }
         }
         
-        // Paste hotkeys: user-configured modifier + 1..9
+        // Copy slot hotkeys: user-configured modifier + 1..9
         for i in 1...9 {
             let keyCode = keyCodeForNumber(i)
             let id = UInt32(100 + i)
             registerHotkey(keyCode: keyCode, modifiers: prefs.pasteSlotModifiers, id: id) { [weak self] in
-                self?.onPasteSlot(slotNumber: i)
+                self?.onCopySlotToClipboard(slotNumber: i)
             }
         }
         
@@ -188,16 +188,7 @@ class HotkeyService {
         }
     }
     
-    private func onPasteSlot(slotNumber: Int) {
-        guard PermissionService.shared.hasAccessibilityPermission() else {
-            NotificationService.shared.showNotification(
-                title: "Permission Required",
-                body: "Clipo needs Accessibility permission to paste text.",
-                isError: true
-            )
-            return
-        }
-        
+    private func onCopySlotToClipboard(slotNumber: Int) {
         guard let item = ClipStore.shared.slots[slotNumber] else {
             NotificationService.shared.showNotification(
                 title: "Slot \(slotNumber) Empty",
@@ -206,9 +197,12 @@ class HotkeyService {
             return
         }
         
-        let shouldRestore = ClipStore.shared.settings.restoreClipboardAfterPaste
-        SoundService.shared.playPaste()
-        PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
+        ClipboardService.shared.writeTextToPasteboard(item.content)
+        SoundService.shared.playCopy()
+        NotificationService.shared.showNotification(
+            title: "Copied Slot \(slotNumber)",
+            body: "Press Command+V to paste it anywhere."
+        )
         
         // Update lastUsedAt timestamp in both slot and matching history.
         if var updated = ClipStore.shared.slots[slotNumber] {

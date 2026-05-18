@@ -51,7 +51,7 @@ struct PermissionView: View {
                         .opacity(appear ? 1 : 0)
                         .offset(y: appear ? 0 : 12)
                     
-                    Text("Required to simulate copy and paste using global shortcuts.")
+                    Text("Required to save selected text with global shortcuts.")
                         .multilineTextAlignment(.center)
                         .foregroundColor(.secondary)
                         .font(.system(size: 13))

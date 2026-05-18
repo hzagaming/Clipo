@@ -1,8 +1,8 @@
 # Clipo
 
-Clipo is a lightweight macOS multi-slot clipboard tool that lets users save selected text into shortcut slots and paste any saved item anywhere using global hotkeys.
+Clipo is a lightweight macOS multi-slot clipboard tool that lets users save selected text into shortcut slots and copy any saved slot back to the system clipboard using global hotkeys.
 
-**Clipo** 是一个轻量级 macOS 多槽位剪贴板工具。用户可以用全局快捷键把不同内容保存到不同槽位，并在任何地方快速粘贴指定内容。
+**Clipo** 是一个轻量级 macOS 多槽位剪贴板工具。用户可以用全局快捷键把不同内容保存到不同槽位，并在需要时快速复制指定 slot 到系统剪贴板。
 
 ---
 
@@ -10,7 +10,7 @@ Clipo is a lightweight macOS multi-slot clipboard tool that lets users save sele
 
 - **Menu Bar App**: Runs entirely in the macOS menu bar with no Dock icon by default.
 - **9 Fixed Slots**: Save text to Slot 1–9 with instant global shortcuts.
-- **Quick Paste**: Paste any saved slot back into the current app with a single keystroke.
+- **Quick Paste**: Copy any saved slot to the system clipboard with `Option + number`, then paste it with `Command + V`.
 - **Clipboard History**: Automatically saves every slot item into a local history (up to 200 items).
 - **Search Panel**: Spotlight-style panel to browse slots and history, searchable in real time.
 - **Privacy First**:
@@ -35,18 +35,18 @@ Clipo is a lightweight macOS multi-slot clipboard tool that lets users save sele
 | Save selected text to Slot 7 | `⌥⌘7` |
 | Save selected text to Slot 8 | `⌥⌘8` |
 | Save selected text to Slot 9 | `⌥⌘9` |
-| Paste Slot 1 | `⌃⌥1` (Control + Option + 1) |
-| Paste Slot 2 | `⌃⌥2` |
-| Paste Slot 3 | `⌃⌥3` |
-| Paste Slot 4 | `⌃⌥4` |
-| Paste Slot 5 | `⌃⌥5` |
-| Paste Slot 6 | `⌃⌥6` |
-| Paste Slot 7 | `⌃⌥7` |
-| Paste Slot 8 | `⌃⌥8` |
-| Paste Slot 9 | `⌃⌥9` |
+| Copy Slot 1 to clipboard | `⌥1` (Option + 1), then press `⌘V` to paste |
+| Copy Slot 2 to clipboard | `⌥2` |
+| Copy Slot 3 to clipboard | `⌥3` |
+| Copy Slot 4 to clipboard | `⌥4` |
+| Copy Slot 5 to clipboard | `⌥5` |
+| Copy Slot 6 to clipboard | `⌥6` |
+| Copy Slot 7 to clipboard | `⌥7` |
+| Copy Slot 8 to clipboard | `⌥8` |
+| Copy Slot 9 to clipboard | `⌥9` |
 | Open Clipo Panel | `⌥Space` (Option + Space) |
 
-> **Note:** Hotkeys require Accessibility permission to simulate copy/paste keystrokes.
+> **Note:** Saving selected text requires Accessibility permission so Clipo can simulate `Command + C`. Copying an existing slot with `Option + number` only writes to the system clipboard.
 
 ---
 

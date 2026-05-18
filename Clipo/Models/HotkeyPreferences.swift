@@ -4,16 +4,21 @@ import Foundation
 /// In v1 the digit keys (1-9) and their key-codes remain fixed;
 /// only the modifier masks and the open-panel key are customisable.
 struct HotkeyPreferences: Codable, Equatable {
+    static let defaultOpenPanelModifiers: UInt32 = 0x0800 // optionKey
+    static let defaultSaveSlotModifiers: UInt32 = 0x0900 // cmdKey | optionKey
+    static let defaultCopySlotModifiers: UInt32 = 0x0800 // optionKey
+    static let legacyPasteSlotModifiers: UInt32 = 0x1800 // controlKey | optionKey
+
     /// Key-code for the "Open Panel" shortcut (default: Space → 49).
     var openPanelKeyCode: UInt32 = 49
     /// Modifier mask for the "Open Panel" shortcut (default: Option).
-    var openPanelModifiers: UInt32 = 0x0800 // optionKey
+    var openPanelModifiers: UInt32 = defaultOpenPanelModifiers
 
     /// Modifier mask shared by all "Save to Slot" shortcuts (default: Cmd+Option).
-    var saveSlotModifiers: UInt32 = 0x0900 // cmdKey | optionKey
+    var saveSlotModifiers: UInt32 = defaultSaveSlotModifiers
 
-    /// Modifier mask shared by all "Paste from Slot" shortcuts (default: Ctrl+Option).
-    var pasteSlotModifiers: UInt32 = 0x1800 // controlKey | optionKey
+    /// Modifier mask shared by all "Copy Slot to Clipboard" shortcuts (default: Option).
+    var pasteSlotModifiers: UInt32 = defaultCopySlotModifiers
 
     // MARK: - Preset helpers
 

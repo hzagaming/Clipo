@@ -255,7 +255,7 @@ struct SettingsView: View {
                 Divider().padding(.leading, 12)
                 
                 shortcutRow(
-                    title: "Paste from Slot",
+                    title: "Copy Slot to Clipboard",
                     keyBinding: .constant(0),
                     modifierBinding: $store.settings.hotkeyPreferences.pasteSlotModifiers,
                     showKeyPicker: false
@@ -272,7 +272,7 @@ struct SettingsView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 11))
                         .foregroundColor(.orange)
-                    Text("Save and Paste modifiers are identical — slots will conflict.")
+                    Text("Save and Copy modifiers are identical — slot shortcuts will conflict.")
                         .font(.system(size: 12))
                         .foregroundColor(.orange.opacity(0.9))
                     Spacer()
@@ -427,7 +427,7 @@ struct SettingsView: View {
                     Spacer()
                 }
                 
-                Text("Clipo needs Accessibility permission to simulate keyboard shortcuts for copy and paste operations.")
+                Text("Clipo needs Accessibility permission to simulate Command+C when saving selected text.")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
                     .lineLimit(2)

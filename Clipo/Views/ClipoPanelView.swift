@@ -218,7 +218,7 @@ struct ClipoPanelView: View {
             Image(systemName: "exclamationmark.shield.fill")
                 .font(.system(size: 12))
                 .foregroundColor(.orange)
-            Text("Accessibility permission is required for paste hotkeys.")
+            Text("Accessibility permission is required to save selected text.")
                 .font(.system(size: 12))
                 .foregroundColor(.secondary.opacity(0.8))
             Spacer()
@@ -440,9 +440,9 @@ struct ClipoPanelView: View {
             
             VStack(spacing: 8) {
                 OnboardingStep(number: 1, text: "Select text in any app")
-                OnboardingStep(number: 2, text: "Press ⌥1–9 to save to a slot")
-                OnboardingStep(number: 3, text: "Press ⌥Space to open Clipo")
-                OnboardingStep(number: 4, text: "Press ↵ to copy, ⌘↵ to paste")
+                OnboardingStep(number: 2, text: "Press ⌘⌥1–9 to save to a slot")
+                OnboardingStep(number: 3, text: "Press ⌥1–9 to copy a slot")
+                OnboardingStep(number: 4, text: "Press ⌥Space to open Clipo")
             }
             
             Divider()

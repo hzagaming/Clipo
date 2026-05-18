@@ -15,14 +15,10 @@ class PasteService {
         let previousSnapshot = ClipboardService.shared.snapshotPasteboard()
         let previousChangeCount = NSPasteboard.general.changeCount
         simulateCommandC()
-        
-        // Wait for the target app to respond and update the system pasteboard.
-        // 200ms provides better compatibility with slower apps (e.g. Electron-based).
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.20) {
-            let pasteboard = NSPasteboard.general
-            let didCopyNewContent = pasteboard.changeCount != previousChangeCount
-            let text = didCopyNewContent ? ClipboardService.shared.readTextFromPasteboard() : nil
-            
+
+        // Some apps update the pasteboard slowly after a synthetic Cmd+C.
+        // Poll briefly instead of using a single fixed delay.
+        waitForPasteboardChange(previousChangeCount: previousChangeCount, deadline: Date().addingTimeInterval(0.8)) { didCopyNewContent, text in
             if didCopyNewContent && ClipStore.shared.settings.restoreClipboardAfterSave {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                     ClipboardService.shared.restorePasteboard(previousSnapshot)
@@ -66,6 +62,31 @@ class PasteService {
     func simulateCommandV() {
         // CGKeyCode 9 == 'v'
         simulateKeyPress(keyCode: 9, flags: .maskCommand)
+    }
+
+    private func waitForPasteboardChange(
+        previousChangeCount: Int,
+        deadline: Date,
+        completion: @escaping (Bool, String?) -> Void
+    ) {
+        let pasteboard = NSPasteboard.general
+        if pasteboard.changeCount != previousChangeCount {
+            completion(true, ClipboardService.shared.readTextFromPasteboard())
+            return
+        }
+
+        guard Date() < deadline else {
+            completion(false, nil)
+            return
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+            self?.waitForPasteboardChange(
+                previousChangeCount: previousChangeCount,
+                deadline: deadline,
+                completion: completion
+            )
+        }
     }
     
     private func simulateKeyPress(keyCode: CGKeyCode, flags: CGEventFlags) {
