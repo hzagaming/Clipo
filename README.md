@@ -248,6 +248,102 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
+## What's New in v1.6.8
+
+- **Click-outside to hide panel**: The Clipo panel now auto-hides when you click anywhere outside it (previously required pressing Escape).
+- **Smoother Settings tabs**: Removed conflicting transition animations that caused flicker when switching tabs.
+- **Consistent Copy behavior**: Copy from the context menu now closes the panel, matching the behavior when clicking a row.
+- **Permission-grant feedback**: Fixed missing Toast notification when re-authorizing from the menu bar.
+- **System permission dialog**: The permission window now triggers the native macOS accessibility dialog in addition to opening System Settings.
+- **Launch flow fixes**: Granting Accessibility permission now automatically shows the Clipo panel on first launch.
+
+## Version History
+
+### v1.6.8
+- Auto-hide panel on click-outside
+- Fix Settings tab transition flicker
+- Unify Copy behavior (context menu vs row click)
+- Fix menu-bar re-auth feedback Toast
+- Trigger native accessibility permission dialog
+- Auto-show panel after first-launch permission grant
+
+### v1.6.7
+- Fix `finishLaunch` guard blocking menu-bar re-auth feedback
+- Add `requestAccessibilityPermission()` to PermissionView
+
+### v1.6.6
+- Add unified `finishLaunch(showPanel:showReadyToast:)` method
+- Auto-show ClipoPanel after permission grant on first launch
+- Fix `windowWillClose` falsely treating programmatic close as user skip
+- Fix `showPermissionWindowFromMenu()` to also start monitoring
+- Remove dead `onPermissionGranted` parameter from PermissionView
+
+### v1.6.5
+- Fix Open Panel hotkey sound inconsistency (sound now tied to actual show/hide)
+- Fix `showPanel()` fade-in animation (alpha 0→1)
+- Fix Escape key double `playClose()`
+- Remove `tearDown()` `contentView = nil` crash risk
+- Cap Toast queue at 10
+- Remove unused `ClipboardViewModel` dead code
+- Fix `onSaveSlot` app-detection race condition
+
+### v1.6.4
+- Fix orphan permission window (don't nil delegate before `close()`)
+- StorageService: notify on load/save failures
+- Fix `\r\n` double-space in `StringPreviewUtility`
+- `clearHistory` now calls `trimHistory()`
+
+### v1.6.3
+- Fix `hidePanel` completion block race (`guard self.isHiding`)
+- `load()` calls `trimHistory()`
+- Dock icon visible → click opens panel
+- Import applies Dock policy immediately
+
+### v1.6.2
+- Paste permission check before sound
+- Paste failure keeps panel open
+- ToastWindow init failure clears queue
+- `\n`/`-`/`\r\n` unified handling
+
+### v1.6.1
+- Permission window replacement (no false Skip)
+- `windowWillClose` removes `contentView = nil`
+- Panel close cleans `panelWindow` reference
+
+### v1.6.0
+- Paste permission check before sound
+- Remove `contentView = nil` in `windowWillClose`
+- Import JSON → `registerAllHotkeys()`
+
+### v1.5.3
+- Close button (X) on permission window = Skip
+- Prevent duplicate permission windows
+- Max History change triggers `trimHistory`
+
+### v1.5.2
+- PermissionView menu-bar guidance badge
+- Skip Toast with menu-bar hint
+- Menu "Request Accessibility Permission…" entry
+
+### v1.5.1
+- "Skip for now" button on permission window
+- Delayed permission check
+
+### v1.5.0
+- Toast queue system (no overwriting)
+- Error/success visual distinction (🟠/🟢)
+- Multi-display Toast follows mouse
+- Panel non-resizable
+- Click row → Copy + close
+- Dynamic empty-state hints
+- Cmd+P pin (exact modifier detection)
+- Paste updates `lastUsedAt`
+
+### v1.4.2 and earlier
+- 9-slot clipboard, global hotkeys, history, search panel
+- Settings, pin/unpin, context menus
+- Configurable hotkeys, live Dock toggle
+
 ## Acknowledgements
 
 Built with Swift, SwiftUI, AppKit, and Carbon. No third-party dependencies.

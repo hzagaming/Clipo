@@ -33,33 +33,10 @@ struct SettingsView: View {
             
             // Content area with transition
             TabView(selection: $selectedTab) {
-                generalTab
-                    .tag(0)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
-                
-                clipboardTab
-                    .tag(1)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
-                
-                privacyTab
-                    .tag(2)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
-                
-                dataTab
-                    .tag(3)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+                generalTab.tag(0)
+                clipboardTab.tag(1)
+                privacyTab.tag(2)
+                dataTab.tag(3)
             }
             .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedTab)
             .padding(.horizontal, 16)

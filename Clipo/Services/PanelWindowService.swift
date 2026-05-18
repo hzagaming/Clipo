@@ -13,6 +13,7 @@ class PanelWindowService {
         isHiding = false
     }
     private var keyboardMonitor: Any?
+    private var clickOutsideMonitor: Any?
     private var isHiding = false
     
     func showPanel() {
@@ -36,6 +37,7 @@ class PanelWindowService {
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         startKeyboardMonitoring()
+        startClickOutsideMonitoring()
         SoundService.shared.playOpen()
         
         // Fade in
@@ -51,6 +53,7 @@ class PanelWindowService {
         isHiding = true
         SoundService.shared.playClose()
         stopKeyboardMonitoring()
+        stopClickOutsideMonitoring()
         
         // Fade out then orderOut. Capture the local panel reference so the
         // completion block never accesses a deallocated or replaced window.
@@ -79,6 +82,7 @@ class PanelWindowService {
     /// Full teardown used on app termination or when resetting UI state.
     func tearDown() {
         stopKeyboardMonitoring()
+        stopClickOutsideMonitoring()
         if let panel = panelWindow {
             panel.delegate = nil
             panel.close()
@@ -114,6 +118,31 @@ class PanelWindowService {
         }
     }
     
+    // MARK: - Click-Outside Monitoring
+    
+    /// Watches for mouse clicks outside the panel so it auto-hides when the
+    /// user clicks elsewhere. Because the panel uses `.nonactivatingPanel` it
+    /// never becomes key, so `windowDidResignKey` never fires.
+    private func startClickOutsideMonitoring() {
+        stopClickOutsideMonitoring()
+        clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            guard let self = self else { return }
+            guard let panel = self.panelWindow, panel.isVisible, !self.isHiding else { return }
+            // Small delay to avoid race with internal button clicks.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                guard let panel = self.panelWindow, panel.isVisible, !self.isHiding else { return }
+                self.hidePanel()
+            }
+        }
+    }
+    
+    private func stopClickOutsideMonitoring() {
+        if let monitor = clickOutsideMonitor {
+            NSEvent.removeMonitor(monitor)
+            clickOutsideMonitor = nil
+        }
+    }
+    
     private func createPanel() {
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 600, height: 500),
@@ -135,16 +164,8 @@ class PanelWindowService {
 
 // MARK: - Panel Window Delegate
 
-/// Automatically hides the panel when it loses key status (e.g. user clicks outside).
+/// Handles close-button clicks on the panel.
 class PanelWindowDelegate: NSObject, NSWindowDelegate {
-    func windowDidResignKey(_ notification: Notification) {
-        guard let window = notification.object as? NSPanel else { return }
-        // Only hide if this is our panel and it's currently visible.
-        if window.isVisible {
-            PanelWindowService.shared.hidePanel()
-        }
-    }
-    
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSPanel else { return }
         // If the user closes the panel via the close button, break the delegate

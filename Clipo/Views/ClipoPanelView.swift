@@ -214,7 +214,10 @@ struct ClipoPanelView: View {
             PanelWindowService.shared.hidePanel()
         }
         .contextMenu {
-            Button("Copy") { copyItem(row.item) }
+            Button("Copy") {
+                copyItem(row.item)
+                PanelWindowService.shared.hidePanel()
+            }
                 .keyboardShortcut(.return, modifiers: [])
             Button("Paste") { pasteItem(row.item) }
                 .keyboardShortcut(.return, modifiers: .command)

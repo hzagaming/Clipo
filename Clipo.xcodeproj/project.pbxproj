@@ -6,17 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		34D8DACD4FB842319D00507A /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */; };
 		6296971D56CF401EBFC900D2 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88D9B8CCDAF647F69E950116 /* Carbon.framework */; };
-/* End PBXBuildFile section */
-
+		34D8DACD4FB842319D00507A /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */; };
 /* Begin PBXFileReference section */
-		88D9B8CCDAF647F69E950116 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
-		8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		F2A5EE502FB887650012E61B /* Clipo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clipo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+		88D9B8CCDAF647F69E950116 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F2A5EE522FB887650012E61B /* Clipo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -38,21 +35,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F28B5ACC2FB8A6C300B3AA5E /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				88D9B8CCDAF647F69E950116 /* Carbon.framework */,
-				8CA26A5112B741A98F6D0A46 /* ServiceManagement.framework */,
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
 		F2A5EE472FB887650012E61B = {
 			isa = PBXGroup;
 			children = (
 				F2A5EE522FB887650012E61B /* Clipo */,
 				F2A5EE512FB887650012E61B /* Products */,
-				F28B5ACC2FB8A6C300B3AA5E /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -274,15 +261,13 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Clipo;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.6.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "Hanazar-Software.Clipo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -307,15 +292,13 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Clipo;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.6.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "Hanazar-Software.Clipo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
