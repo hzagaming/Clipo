@@ -64,16 +64,28 @@ class ClipStore: ObservableObject {
         addToHistory(item: item)
         save()
     }
+
+    func saveItemToSlot(number: Int, item: ClipItem) {
+        var slotItem = item
+        slotItem.slotNumber = number
+        slotItem.lastUsedAt = Date()
+
+        slots[number] = slotItem
+        addToHistory(item: slotItem)
+        save()
+    }
     
     func addToHistory(item: ClipItem) {
-        // Preserve pinned state if this content existed before.
-        let wasPinned = history.first { $0.content == item.content }?.isPinned ?? false
         var newItem = item
-        newItem.isPinned = wasPinned
+        newItem.slotNumber = nil
         
-        history.removeAll { $0.content == item.content }
         history.insert(newItem, at: 0)
         trimHistory()
+    }
+
+    func recordHistoryItem(_ item: ClipItem) {
+        addToHistory(item: item)
+        save()
     }
     
     func trimHistory() {
@@ -131,6 +143,7 @@ class ClipStore: ObservableObject {
         let wasLaunchAtLogin = settings.launchAtLogin
         slots = [:]
         history = []
+        FileBackupService.shared.removeAllBackups()
         // Temporarily suppress didSet to avoid a redundant save() call.
         isLoading = true
         settings = AppSettings()

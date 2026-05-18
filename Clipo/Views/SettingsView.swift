@@ -8,16 +8,17 @@ struct SettingsView: View {
     @State private var importExportAlert: ImportExportAlert?
     @State private var selectedTab = 0
     @State private var permissionStatus = PermissionService.shared.hasAccessibilityPermission()
+    @State private var isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
     @State private var permissionTimer: Timer?
     @State private var newBundleId = ""
     
     private var sidebarItems: [(title: String, icon: String)] {
         [
-            ("General", "gear"),
-            ("Shortcuts", "command"),
-            ("Clipboard", "doc.on.clipboard"),
-            ("Privacy", "shield"),
-            ("Data", "externaldrive")
+            (L10n.string(.tabGeneral), "gear"),
+            (L10n.string(.tabShortcuts), "command"),
+            (L10n.string(.tabClipboard), "doc.on.clipboard"),
+            (L10n.string(.tabPrivacy), "shield"),
+            (L10n.string(.tabData), "externaldrive")
         ]
     }
     
@@ -30,16 +31,19 @@ struct SettingsView: View {
         .frame(width: 760, height: 520)
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
-            permissionStatus = PermissionService.shared.hasAccessibilityPermission()
+            refreshPermissionStatus()
             startPermissionTimer()
         }
         .onDisappear {
             stopPermissionTimer()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .accessibilityPermissionChanged)) { _ in
+            refreshPermissionStatus()
+        }
         .alert(isPresented: $showLaunchAtLoginAlert) {
             Alert(
-                title: Text("Launch at Login Failed"),
-                message: Text("This feature requires the app to be code-signed. Please sign the app with your Apple Developer ID or disable this setting."),
+                title: Text(L10n.string(.alertLaunchAtLoginTitle)),
+                message: Text(L10n.string(.alertLaunchAtLoginMessage)),
                 dismissButton: .default(Text("OK"))
             )
         }
@@ -70,7 +74,7 @@ struct SettingsView: View {
                 Image(systemName: "doc.on.clipboard")
                     .font(.system(size: 20))
                     .foregroundColor(.accentColor)
-                Text("Clipo")
+                Text(L10n.string(.panelTitle))
                     .font(.system(size: 16, weight: .bold))
             }
             .padding(.top, 20)
@@ -126,23 +130,23 @@ struct SettingsView: View {
     private var statusBar: some View {
         HStack(spacing: 12) {
             StatusBadge(
-                icon: permissionStatus ? "checkmark.shield.fill" : "exclamationmark.shield.fill",
-                label: permissionStatus ? "Accessibility On" : "Accessibility Off",
+                icon: permissionStatus ? "checkmark.shield.fill" : (isWaitingForPermissionGrant ? "clock" : "exclamationmark.shield.fill"),
+                label: permissionStatus ? L10n.string(.statusAccessibilityOn) : (isWaitingForPermissionGrant ? L10n.string(.checkingPermission) : L10n.string(.statusAccessibilityOff)),
                 color: permissionStatus ? .green : .orange
             )
             StatusBadge(
                 icon: store.settings.launchAtLogin ? "checkmark.circle.fill" : "power.circle",
-                label: store.settings.launchAtLogin ? "Launch at Login On" : "Launch at Login Off",
+                label: store.settings.launchAtLogin ? L10n.string(.statusLaunchAtLoginOn) : L10n.string(.statusLaunchAtLoginOff),
                 color: store.settings.launchAtLogin ? .green : .secondary
             )
             StatusBadge(
                 icon: "doc.on.clipboard",
-                label: "\(store.history.count) History",
+                label: L10n.string(.statusHistoryTemplate, store.history.count),
                 color: .blue
             )
             StatusBadge(
                 icon: "square.grid.2x2",
-                label: "\(store.slots.count)/9 Slots",
+                label: L10n.string(.statusSlotsTemplate, store.slots.count),
                 color: .accentColor
             )
             Spacer()
@@ -156,12 +160,12 @@ struct SettingsView: View {
     
     private var generalTab: some View {
         VStack(alignment: .leading, spacing: 20) {
-            sectionTitle("Startup")
+            sectionTitle(L10n.string(.sectionStartup))
             VStack(spacing: 0) {
                 ToggleRow(
                     icon: "power",
-                    title: "Launch at Login",
-                    subtitle: "Start Clipo automatically when you log in",
+                    title: L10n.string(.launchAtLoginTitle),
+                    subtitle: L10n.string(.launchAtLoginSubtitle),
                     isOn: $store.settings.launchAtLogin
                 )
                 .onChange(of: store.settings.launchAtLogin) { newValue in
@@ -179,8 +183,8 @@ struct SettingsView: View {
                 
                 ToggleRow(
                     icon: "dock.rectangle",
-                    title: "Show Dock Icon",
-                    subtitle: "Display Clipo in the Dock for easy access",
+                    title: L10n.string(.showDockIconTitle),
+                    subtitle: L10n.string(.showDockIconSubtitle),
                     isOn: $store.settings.showDockIcon
                 )
                 .onChange(of: store.settings.showDockIcon) { newValue in
@@ -190,19 +194,19 @@ struct SettingsView: View {
                         if newValue {
                             NSApp.activate(ignoringOtherApps: true)
                             NotificationService.shared.showNotification(
-                                title: "Dock Icon Enabled",
-                                body: "The Clipo icon now appears in the Dock."
+                                title: L10n.string(.dockEnabledTitle),
+                                body: L10n.string(.dockEnabledBody)
                             )
                         } else {
                             NotificationService.shared.showNotification(
-                                title: "Dock Icon Hidden",
-                                body: "The Dock icon will disappear after you restart Clipo."
+                                title: L10n.string(.dockHiddenTitle),
+                                body: L10n.string(.dockHiddenBody)
                             )
                         }
                     } else {
                         NotificationService.shared.showNotification(
-                            title: "Setting Saved",
-                            body: "The change will take effect after you restart Clipo."
+                            title: L10n.string(.settingSavedTitle),
+                            body: L10n.string(.settingSavedBody)
                         )
                     }
                 }
@@ -213,14 +217,49 @@ struct SettingsView: View {
                     .fill(Color(NSColor.controlBackgroundColor))
             )
             
-            sectionTitle("Feedback")
+            sectionTitle(L10n.string(.sectionFeedback))
             VStack(spacing: 0) {
                 ToggleRow(
                     icon: "speaker.wave.2",
-                    title: "Sound Effects",
-                    subtitle: "Play sounds when copying, pasting, and saving",
+                    title: L10n.string(.soundEffectsTitle),
+                    subtitle: L10n.string(.soundEffectsSubtitle),
                     isOn: $store.settings.soundEnabled
                 )
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(NSColor.controlBackgroundColor))
+            )
+            
+            sectionTitle(L10n.string(.sectionLanguage))
+            VStack(spacing: 0) {
+                HStack {
+                    Image(systemName: "globe")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.string(.languageTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        Text(L10n.string(.languageSubtitle))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    
+                    Spacer()
+                    
+                    Picker("", selection: $store.settings.language) {
+                        ForEach(AppLanguage.allCases) { language in
+                            Text(language.displayName).tag(language)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                    .frame(width: 150)
+                    .labelsHidden()
+                }
+                .padding(.vertical, 8)
             }
             .padding(12)
             .background(
@@ -234,10 +273,10 @@ struct SettingsView: View {
     
     private var shortcutsTab: some View {
         VStack(alignment: .leading, spacing: 20) {
-            sectionTitle("Global Shortcuts")
+            sectionTitle(L10n.string(.sectionGlobalShortcuts))
             VStack(spacing: 0) {
                 shortcutRow(
-                    title: "Open Clipo Panel",
+                    title: L10n.string(.openPanelShortcutTitle),
                     keyBinding: $store.settings.hotkeyPreferences.openPanelKeyCode,
                     modifierBinding: $store.settings.hotkeyPreferences.openPanelModifiers,
                     showKeyPicker: true
@@ -246,7 +285,7 @@ struct SettingsView: View {
                 Divider().padding(.leading, 12)
                 
                 shortcutRow(
-                    title: "Save to Slot 1–9",
+                    title: L10n.string(.saveSlotShortcutTitle),
                     keyBinding: .constant(0),
                     modifierBinding: $store.settings.hotkeyPreferences.saveSlotModifiers,
                     showKeyPicker: false
@@ -255,7 +294,7 @@ struct SettingsView: View {
                 Divider().padding(.leading, 12)
                 
                 shortcutRow(
-                    title: "Copy Slot to Clipboard",
+                    title: L10n.string(.copySlotShortcutTitle),
                     keyBinding: .constant(0),
                     modifierBinding: $store.settings.hotkeyPreferences.pasteSlotModifiers,
                     showKeyPicker: false
@@ -272,7 +311,7 @@ struct SettingsView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 11))
                         .foregroundColor(.orange)
-                    Text("Save and Copy modifiers are identical — slot shortcuts will conflict.")
+                    Text(L10n.string(.shortcutConflictWarning))
                         .font(.system(size: 12))
                         .foregroundColor(.orange.opacity(0.9))
                     Spacer()
@@ -287,7 +326,7 @@ struct SettingsView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.counterclockwise")
                         .font(.system(size: 12))
-                    Text("Reset Shortcuts to Default")
+                    Text(L10n.string(.resetShortcutsButton))
                         .font(.system(size: 12, weight: .medium))
                 }
                 .foregroundColor(.accentColor)
@@ -335,12 +374,12 @@ struct SettingsView: View {
     
     private var clipboardTab: some View {
         VStack(alignment: .leading, spacing: 20) {
-            sectionTitle("Paste Behavior")
+            sectionTitle(L10n.string(.sectionPasteBehavior))
             VStack(spacing: 0) {
                 ToggleRow(
                     icon: "arrow.uturn.backward",
-                    title: "Restore Clipboard After Pasting",
-                    subtitle: "Return previous clipboard content after a paste operation",
+                    title: L10n.string(.restoreAfterPasteTitle),
+                    subtitle: L10n.string(.restoreAfterPasteSubtitle),
                     isOn: $store.settings.restoreClipboardAfterPaste
                 )
                 
@@ -348,8 +387,8 @@ struct SettingsView: View {
                 
                 ToggleRow(
                     icon: "arrow.uturn.backward",
-                    title: "Restore Clipboard After Saving",
-                    subtitle: "Return previous clipboard content after saving to a slot",
+                    title: L10n.string(.restoreAfterSaveTitle),
+                    subtitle: L10n.string(.restoreAfterSaveSubtitle),
                     isOn: $store.settings.restoreClipboardAfterSave
                 )
             }
@@ -359,10 +398,10 @@ struct SettingsView: View {
                     .fill(Color(NSColor.controlBackgroundColor))
             )
             
-            sectionTitle("Storage")
+            sectionTitle(L10n.string(.sectionStorage))
             VStack(spacing: 0) {
                 HStack {
-                    Text("Max History Items")
+                    Text(L10n.string(.maxHistoryItemsTitle))
                         .font(.system(size: 13))
                     Spacer()
                     Picker("", selection: $store.settings.maxHistoryItems) {
@@ -378,7 +417,7 @@ struct SettingsView: View {
                 Divider().padding(.leading, 12)
                 
                 HStack {
-                    Text("Auto Delete Unpinned")
+                    Text(L10n.string(.autoDeleteUnpinnedTitle))
                         .font(.system(size: 13))
                     Spacer()
                     Picker("", selection: $store.settings.autoDeletePolicy) {
@@ -394,10 +433,10 @@ struct SettingsView: View {
                 Divider().padding(.leading, 12)
                 
                 HStack {
-                    Text("Current History")
+                    Text(L10n.string(.currentHistoryTitle))
                         .font(.system(size: 13))
                     Spacer()
-                    Text("\(store.history.count) items")
+                    Text(L10n.string(.currentHistoryCountTemplate, store.history.count))
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
                 }
@@ -415,19 +454,23 @@ struct SettingsView: View {
     
     private var privacyTab: some View {
         VStack(alignment: .leading, spacing: 20) {
-            sectionTitle("Accessibility Permission")
+            sectionTitle(L10n.string(.sectionAccessibilityPermission))
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
                     Image(systemName: permissionStatus ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
                         .font(.system(size: 16))
                         .foregroundColor(permissionStatus ? .green : .orange)
-                    Text(permissionStatus ? "Granted" : "Required")
+                    Text(permissionStatus ? L10n.string(.accessibilityGranted) : (isWaitingForPermissionGrant ? L10n.string(.checkingPermission) : L10n.string(.accessibilityRequired)))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(permissionStatus ? .green : .orange)
                     Spacer()
                 }
                 
-                Text("Clipo needs Accessibility permission to simulate Command+C when saving selected text.")
+                Text(permissionStatus
+                    ? L10n.string(.accessibilityEnabledDescription)
+                    : (isWaitingForPermissionGrant
+                        ? L10n.string(.accessibilityWaitingMessage)
+                        : L10n.string(.accessibilityDescription)))
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
                     .lineLimit(2)
@@ -436,10 +479,11 @@ struct SettingsView: View {
                     Button(action: {
                         PermissionService.shared.requestAccessibilityPermission()
                         PermissionService.shared.openAccessibilitySettings()
+                        refreshPermissionStatus()
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "gear")
-                            Text("Open System Settings")
+                            Text(isWaitingForPermissionGrant ? L10n.string(.checkAgainButton) : L10n.string(.openSystemSettingsButton))
                                 .font(.system(size: 12, weight: .semibold))
                         }
                         .padding(.horizontal, 12)
@@ -457,12 +501,12 @@ struct SettingsView: View {
                     .fill(Color(NSColor.controlBackgroundColor))
             )
             
-            sectionTitle("Security")
+            sectionTitle(L10n.string(.sectionSecurity))
             VStack(spacing: 0) {
                 ToggleRow(
                     icon: "eye.slash",
-                    title: "Ignore Sensitive Apps",
-                    subtitle: "Do not save clipboard content from password managers",
+                    title: L10n.string(.ignoreSensitiveAppsTitle),
+                    subtitle: L10n.string(.ignoreSensitiveAppsSubtitle),
                     isOn: $store.settings.ignoreSensitiveApps
                 )
             }
@@ -472,10 +516,10 @@ struct SettingsView: View {
                     .fill(Color(NSColor.controlBackgroundColor))
             )
             
-            sectionTitle("Sensitive App Blacklist")
+            sectionTitle(L10n.string(.sectionSensitiveAppBlacklist))
             VStack(alignment: .leading, spacing: 8) {
                 if store.settings.sensitiveAppBundleIdentifiers.isEmpty {
-                    Text("No apps blacklisted")
+                    Text(L10n.string(.noAppsBlacklisted))
                         .font(.system(size: 12))
                         .foregroundColor(.secondary.opacity(0.5))
                         .padding(.vertical, 4)
@@ -512,7 +556,7 @@ struct SettingsView: View {
                         addBundleId(newBundleId)
                         newBundleId = ""
                     }) {
-                        Text("Add")
+                        Text(L10n.string(.addButton))
                             .font(.system(size: 12, weight: .semibold))
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
@@ -537,18 +581,18 @@ struct SettingsView: View {
     
     private var dataTab: some View {
         VStack(alignment: .leading, spacing: 20) {
-            sectionTitle("Import / Export")
+            sectionTitle(L10n.string(.sectionImportExport))
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
-                    SettingsActionButton(title: "Export JSON", icon: "square.and.arrow.up") {
+                    SettingsActionButton(title: L10n.string(.exportJSON), icon: "square.and.arrow.up") {
                         exportJSON()
                     }
-                    SettingsActionButton(title: "Import JSON", icon: "square.and.arrow.down") {
+                    SettingsActionButton(title: L10n.string(.importJSON), icon: "square.and.arrow.down") {
                         importJSON()
                     }
                 }
                 
-                SettingsActionButton(title: "Open Data Folder", icon: "folder") {
+                SettingsActionButton(title: L10n.string(.openDataFolder), icon: "folder") {
                     StorageService.shared.openStorageFolder()
                 }
             }
@@ -558,31 +602,31 @@ struct SettingsView: View {
                     .fill(Color(NSColor.controlBackgroundColor))
             )
             
-            sectionTitle("Danger Zone")
+            sectionTitle(L10n.string(.sectionDangerZone))
             VStack(spacing: 8) {
-                DangerButton(title: "Clear All History") {
+                DangerButton(title: L10n.string(.clearAllHistory)) {
                     confirmationAlert = ConfirmationAlert(
-                        title: "Clear History",
-                        message: "This will remove all unpinned history items. Pinned items and slots will remain.",
-                        confirmButtonTitle: "Clear",
+                        title: L10n.string(.alertClearHistoryTitle),
+                        message: L10n.string(.alertClearHistoryMessage),
+                        confirmButtonTitle: L10n.string(.alertClearHistoryConfirm),
                         action: { store.clearHistory() }
                     )
                 }
                 
-                DangerButton(title: "Reset All Slots") {
+                DangerButton(title: L10n.string(.resetAllSlots)) {
                     confirmationAlert = ConfirmationAlert(
-                        title: "Reset Slots",
-                        message: "This will clear all 9 slots. History will remain.",
-                        confirmButtonTitle: "Reset",
+                        title: L10n.string(.alertResetSlotsTitle),
+                        message: L10n.string(.alertResetSlotsMessage),
+                        confirmButtonTitle: L10n.string(.alertResetSlotsConfirm),
                         action: { store.resetSlots() }
                     )
                 }
                 
-                DangerButton(title: "Reset All Data") {
+                DangerButton(title: L10n.string(.resetAllData)) {
                     confirmationAlert = ConfirmationAlert(
-                        title: "Reset All Data",
-                        message: "This will erase all slots, history, and settings. This action cannot be undone.",
-                        confirmButtonTitle: "Erase Everything",
+                        title: L10n.string(.alertResetAllTitle),
+                        message: L10n.string(.alertResetAllMessage),
+                        confirmButtonTitle: L10n.string(.alertResetAllConfirm),
                         action: { store.resetAllData() }
                     )
                 }
@@ -613,16 +657,18 @@ struct SettingsView: View {
     private func startPermissionTimer() {
         permissionTimer?.invalidate()
         permissionTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-            let current = PermissionService.shared.hasAccessibilityPermission()
-            if current != permissionStatus {
-                permissionStatus = current
-            }
+            refreshPermissionStatus()
         }
     }
     
     private func stopPermissionTimer() {
         permissionTimer?.invalidate()
         permissionTimer = nil
+    }
+
+    private func refreshPermissionStatus() {
+        permissionStatus = PermissionService.shared.refreshAccessibilityPermission()
+        isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
     }
     
     private func addBundleId(_ id: String) {
@@ -644,7 +690,7 @@ struct SettingsView: View {
     
     private func exportJSON() {
         let panel = NSSavePanel()
-        panel.title = "Export Clipo Data"
+        panel.title = L10n.string(.exportJSON)
         panel.nameFieldStringValue = "clipo-data.json"
         panel.canCreateDirectories = true
         
@@ -658,12 +704,12 @@ struct SettingsView: View {
                 to: url
             )
             NotificationService.shared.showNotification(
-                title: "Export Successful",
-                body: "Data saved to \(url.lastPathComponent)"
+                title: L10n.string(.exportSuccessTitle),
+                body: L10n.string(.exportSuccessBody, url.lastPathComponent)
             )
         } catch {
             importExportAlert = ImportExportAlert(
-                title: "Export Failed",
+                title: L10n.string(.exportFailedTitle),
                 message: error.localizedDescription
             )
         }
@@ -671,7 +717,7 @@ struct SettingsView: View {
     
     private func importJSON() {
         let panel = NSOpenPanel()
-        panel.title = "Import Clipo Data"
+        panel.title = L10n.string(.importJSON)
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
@@ -690,19 +736,19 @@ struct SettingsView: View {
             let policyApplied = NSApp.setActivationPolicy(policy)
             if policyApplied {
                 NotificationService.shared.showNotification(
-                    title: "Import Successful",
-                    body: "Data restored from \(url.lastPathComponent)"
+                    title: L10n.string(.importSuccessTitle),
+                    body: L10n.string(.importSuccessBody, url.lastPathComponent)
                 )
             } else {
                 NotificationService.shared.showNotification(
-                    title: "Import Successful",
-                    body: "Data restored. Dock icon change will take effect after restart."
+                    title: L10n.string(.importSuccessTitle),
+                    body: L10n.string(.importSuccessRestartBody)
                 )
             }
         } catch {
             importExportAlert = ImportExportAlert(
-                title: "Import Failed",
-                message: "The selected file is invalid or corrupted. Your existing data was not changed."
+                title: L10n.string(.importFailedTitle),
+                message: L10n.string(.importFailedMessage)
             )
         }
     }

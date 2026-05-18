@@ -70,8 +70,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         
         if skippingPermission {
             NotificationService.shared.showNotification(
-                title: "Clipo is Running",
-                body: "Look for the clipboard icon in your menu bar. You can enable Accessibility later via the menu."
+                title: L10n.string(.runningTitle),
+                body: L10n.string(.runningBody)
             )
         } else if !PermissionService.shared.hasAccessibilityPermission() {
             startPermissionMonitoring()
@@ -85,6 +85,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         hasFinishedSplash = true
         setupStatusItem()
         HotkeyService.shared.registerAllHotkeys()
+        ClipboardHistoryService.shared.start()
         
         if showPanel {
             // Small delay so the permission window has time to close
@@ -96,8 +97,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         
         if showReadyToast {
             NotificationService.shared.showNotification(
-                title: "Clipo Ready",
-                body: "Accessibility permission granted. Hotkeys are now active."
+                title: L10n.string(.notificationClipoReadyTitle),
+                body: L10n.string(.notificationClipoReadyBody)
             )
         }
     }
@@ -110,8 +111,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                 self.permissionCheckTimer?.invalidate()
                 self.permissionCheckTimer = nil
                 NotificationService.shared.showNotification(
-                    title: "Clipo Ready",
-                    body: "Accessibility permission granted. Hotkeys are now active."
+                    title: L10n.string(.notificationClipoReadyTitle),
+                    body: L10n.string(.notificationClipoReadyBody)
                 )
             }
         }
@@ -167,30 +168,30 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         let button = statusItem?.button
         button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clipo")
             ?? NSImage(named: NSImage.Name("NSActionTemplate"))
-        button?.toolTip = "Clipo – Multi-slot Clipboard"
+        button?.toolTip = "Clipo – " + L10n.string(.appNameMenuTitle)
         
         let menu = NSMenu()
         menu.delegate = self
         
         // Title
-        let titleItem = NSMenuItem(title: "Clipo", action: nil, keyEquivalent: "")
+        let titleItem = NSMenuItem(title: L10n.string(.appNameMenuTitle), action: nil, keyEquivalent: "")
         titleItem.isEnabled = false
         menu.addItem(titleItem)
         menu.addItem(NSMenuItem.separator())
         
         // Slots with Copy / Paste submenu
         for i in 1...9 {
-            let item = NSMenuItem(title: "Slot \(i): Empty", action: nil, keyEquivalent: "")
+            let item = NSMenuItem(title: L10n.string(.slotEmptyTemplate, i), action: nil, keyEquivalent: "")
             item.tag = i
             
             let submenu = NSMenu()
             
-            let copyAction = NSMenuItem(title: "Copy to Clipboard", action: #selector(slotCopyClicked(_:)), keyEquivalent: "")
+            let copyAction = NSMenuItem(title: L10n.string(.slotCopyMenuTitle), action: #selector(slotCopyClicked(_:)), keyEquivalent: "")
             copyAction.tag = i
             copyAction.target = self
             submenu.addItem(copyAction)
             
-            let pasteAction = NSMenuItem(title: "Paste", action: #selector(slotPasteClicked(_:)), keyEquivalent: "")
+            let pasteAction = NSMenuItem(title: L10n.string(.slotPasteMenuTitle), action: #selector(slotPasteClicked(_:)), keyEquivalent: "")
             pasteAction.tag = i
             pasteAction.target = self
             submenu.addItem(pasteAction)
@@ -202,7 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         menu.addItem(NSMenuItem.separator())
         
         // History header
-        let historyHeader = NSMenuItem(title: "Recent History", action: nil, keyEquivalent: "")
+        let historyHeader = NSMenuItem(title: L10n.string(.recentHistoryMenuTitle), action: nil, keyEquivalent: "")
         historyHeader.isEnabled = false
         menu.addItem(historyHeader)
         
@@ -210,33 +211,33 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         menu.addItem(NSMenuItem.separator())
         
         // Actions
-        let openPanelItem = NSMenuItem(title: openPanelMenuTitle(), action: #selector(openPanel), keyEquivalent: "")
+        let openPanelItem = NSMenuItem(title: L10n.string(.openPanelMenuTitle), action: #selector(openPanel), keyEquivalent: "")
         openPanelItem.target = self
         menu.addItem(openPanelItem)
         
-        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: L10n.string(.settingsMenuItem), action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
         
         menu.addItem(NSMenuItem.separator())
         
-        let clearHistoryItem = NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "")
+        let clearHistoryItem = NSMenuItem(title: L10n.string(.clearHistoryMenuItem), action: #selector(clearHistory), keyEquivalent: "")
         clearHistoryItem.target = self
         menu.addItem(clearHistoryItem)
         
-        let resetSlotsItem = NSMenuItem(title: "Reset Slots", action: #selector(resetSlots), keyEquivalent: "")
+        let resetSlotsItem = NSMenuItem(title: L10n.string(.resetSlotsMenuItem), action: #selector(resetSlots), keyEquivalent: "")
         resetSlotsItem.target = self
         menu.addItem(resetSlotsItem)
         
         menu.addItem(NSMenuItem.separator())
         
-        let permissionItem = NSMenuItem(title: "Request Accessibility Permission…", action: #selector(showPermissionWindowFromMenu), keyEquivalent: "")
+        let permissionItem = NSMenuItem(title: L10n.string(.requestAccessibilityMenuItem), action: #selector(showPermissionWindowFromMenu), keyEquivalent: "")
         permissionItem.target = self
         menu.addItem(permissionItem)
         
         menu.addItem(NSMenuItem.separator())
         
-        let quitItem = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: L10n.string(.quitMenuItem), action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
         
@@ -252,8 +253,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             return
         }
         SoundService.shared.playCopy()
-        ClipboardService.shared.writeTextToPasteboard(item.content)
-        NotificationService.shared.showNotification(title: "Copied", body: item.preview)
+        let changeCount = ClipboardService.shared.writeClipItemToPasteboard(item)
+        ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
+        ClipStore.shared.recordHistoryItem(item)
+        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.preview)
         
         if var updated = ClipStore.shared.slots[slotNumber] {
             updated.lastUsedAt = Date()
@@ -266,20 +269,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         let slotNumber = sender.tag
         guard let item = ClipStore.shared.slots[slotNumber] else {
             SoundService.shared.playError()
-            NotificationService.shared.showNotification(title: "Slot \(slotNumber) Empty", body: "Nothing has been saved to this slot yet.")
+            NotificationService.shared.showNotification(title: L10n.string(.notificationSlotEmptyTemplate, slotNumber), body: L10n.string(.notificationCopiedBody))
             return
         }
         guard PermissionService.shared.hasAccessibilityPermission() else {
             NotificationService.shared.showNotification(
-                title: "Permission Required",
-                body: "Clipo needs Accessibility permission to paste text.",
+                title: L10n.string(.notificationPastePermissionTitle),
+                body: PermissionService.shared.accessibilityRequiredMessage(action: L10n.string(.footerPaste).lowercased()),
                 isError: true
             )
             return
         }
         SoundService.shared.playPaste()
         let shouldRestore = ClipStore.shared.settings.restoreClipboardAfterPaste
-        PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
+        PasteService.shared.pasteItem(item, restorePrevious: shouldRestore)
         
         if var updated = ClipStore.shared.slots[slotNumber] {
             updated.lastUsedAt = Date()
@@ -305,7 +308,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                 backing: .buffered,
                 defer: false
             )
-            window.title = "Clipo Settings"
+            window.title = L10n.string(.settingsTitle)
             window.contentView = NSHostingView(rootView: SettingsView())
             window.delegate = self
             window.isReleasedWhenClosed = false
@@ -319,13 +322,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     @objc func clearHistory() {
         SoundService.shared.playReset()
         ClipStore.shared.clearHistory()
-        NotificationService.shared.showNotification(title: "History Cleared", body: "All unpinned history items removed.")
+        NotificationService.shared.showNotification(title: L10n.string(.notificationHistoryClearedTitle), body: L10n.string(.notificationHistoryClearedBody))
     }
     
     @objc func resetSlots() {
         SoundService.shared.playReset()
         ClipStore.shared.resetSlots()
-        NotificationService.shared.showNotification(title: "Slots Reset", body: "All slots cleared.")
+        NotificationService.shared.showNotification(title: L10n.string(.notificationSlotsResetTitle), body: L10n.string(.notificationSlotsResetBody))
     }
     
     @objc func showPermissionWindowFromMenu() {
@@ -343,8 +346,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             return
         }
         SoundService.shared.playCopy()
-        ClipboardService.shared.writeTextToPasteboard(item.content)
-        NotificationService.shared.showNotification(title: "Copied", body: item.preview)
+        let changeCount = ClipboardService.shared.writeClipItemToPasteboard(item)
+        ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
+        ClipStore.shared.recordHistoryItem(item)
+        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.preview)
     }
     
     // MARK: - Dynamic Menu Labels
@@ -354,7 +359,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         let keyLabel = HotkeyPreferences.label(forKeyCode: prefs.openPanelKeyCode)
         let modLabel = HotkeyPreferences.shortMenuLabel(forModifiers: prefs.openPanelModifiers)
         let shortcut = modLabel.isEmpty ? keyLabel : "\(modLabel)\(keyLabel)"
-        return "Open Clipo Panel    \(shortcut)"
+        return L10n.string(.openPanelMenuTitle) + "    \(shortcut)"
     }
     
     // MARK: - Permission Window
@@ -376,7 +381,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             backing: .buffered,
             defer: false
         )
-        window.title = "Clipo Permissions"
+        window.title = L10n.string(.permissionTitle)
         window.contentView = NSHostingView(rootView: PermissionView(onSkip: { [weak self] in
             guard let self = self else { return }
             self.permissionCheckTimer?.invalidate()
@@ -399,6 +404,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = nil
         PanelWindowService.shared.tearDown()
+        ClipboardHistoryService.shared.stop()
         HotkeyService.shared.unregisterAllHotkeys()
     }
     
@@ -459,7 +465,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
                 insertIndex += 1
             }
             if recentHistory.isEmpty {
-                let emptyItem = NSMenuItem(title: "No history", action: nil, keyEquivalent: "")
+                let emptyItem = NSMenuItem(title: L10n.string(.noHistoryMenuItem), action: nil, keyEquivalent: "")
                 emptyItem.isEnabled = false
                 menu.insertItem(emptyItem, at: insertIndex)
             }
@@ -470,11 +476,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             if item.tag >= 1 && item.tag <= 9 {
                 let slot = item.tag
                 if let clip = ClipStore.shared.slots[slot] {
-                    item.title = "Slot \(slot): \(clip.preview)"
+                    item.title = L10n.string(.slotTitleTemplate, slot, clip.preview)
                     item.isEnabled = true
                     item.submenu?.items.forEach { $0.isEnabled = true }
                 } else {
-                    item.title = "Slot \(slot): Empty"
+                    item.title = L10n.string(.slotEmptyTemplate, slot)
                     item.isEnabled = true
                     item.submenu?.items.forEach { $0.isEnabled = false }
                 }
@@ -491,10 +497,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         for item in menu.items {
             if item.action == #selector(showPermissionWindowFromMenu) {
                 if hasPermission {
-                    item.title = "Accessibility Permission Granted"
+                    item.title = L10n.string(.accessibilityGrantedMenuItem)
                     item.isEnabled = false
+                } else if PermissionService.shared.isWaitingForAccessibilityGrant {
+                    item.title = L10n.string(.checkingAccessibilityPermissionMenu)
+                    item.isEnabled = true
                 } else {
-                    item.title = "Request Accessibility Permission…"
+                    item.title = L10n.string(.requestAccessibilityMenuItem)
                     item.isEnabled = true
                 }
             }

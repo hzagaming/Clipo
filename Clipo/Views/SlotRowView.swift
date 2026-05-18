@@ -6,6 +6,7 @@ struct SlotRowView: View {
     var onDelete: () -> Void = {}
     var onCopy: () -> Void = {}
     var onPaste: () -> Void = {}
+    var onCreate: () -> Void = {}
     @State private var isHovering = false
     
     var body: some View {
@@ -41,9 +42,15 @@ struct SlotRowView: View {
                         )
                 }
                 
-                Text("\(slotNumber)")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(item != nil ? .white : .secondary.opacity(0.5))
+                if item != nil {
+                    Text("\(slotNumber)")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                } else {
+                    Image(systemName: "plus")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.accentColor.opacity(0.75))
+                }
             }
             
             if let item = item {
@@ -79,7 +86,7 @@ struct SlotRowView: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .help("Paste")
+                    .help(L10n.string(.footerPaste))
                     
                     Button(action: onDelete) {
                         Image(systemName: "xmark")
@@ -89,19 +96,19 @@ struct SlotRowView: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .help("Remove from slot")
+                    .help(L10n.string(.footerDelete))
                 }
                 .opacity(isHovering ? 1 : 0)
                 .animation(.easeInOut(duration: 0.15), value: isHovering)
             } else {
                 // Empty slot placeholder
-                HStack(spacing: 4) {
-                    Text("Empty")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.secondary.opacity(0.35))
-                    Text("— press ⌘⌥\(slotNumber) to save")
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.string(.newSlot))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary.opacity(0.65))
+                    Text(L10n.string(.saveSlotHintTemplate, slotNumber))
                         .font(.system(size: 11))
-                        .foregroundColor(.secondary.opacity(0.25))
+                        .foregroundColor(.secondary.opacity(0.35))
                 }
                 
                 Spacer()
@@ -117,6 +124,11 @@ struct SlotRowView: View {
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.12)) {
                 isHovering = hovering
+            }
+        }
+        .onTapGesture {
+            if item == nil {
+                onCreate()
             }
         }
     }

@@ -126,8 +126,8 @@ class HotkeyService {
         } else {
             print("[Clipo] Failed to register hotkey id \(id), status: \(status)")
             NotificationService.shared.showNotification(
-                title: "Hotkey Registration Failed",
-                body: "Shortcut id \(id) could not be registered. It may conflict with another app.",
+                title: L10n.string(.hotkeyRegistrationFailedTitle),
+                body: L10n.string(.hotkeyRegistrationFailedTemplate, id),
                 isError: true
             )
         }
@@ -142,10 +142,14 @@ class HotkeyService {
     // MARK: - Actions
     
     private func onSaveSlot(slotNumber: Int) {
+        saveSelectionToSlot(number: slotNumber)
+    }
+
+    func saveSelectionToSlot(number slotNumber: Int) {
         guard PermissionService.shared.hasAccessibilityPermission() else {
             NotificationService.shared.showNotification(
-                title: "Permission Required",
-                body: "Clipo needs Accessibility permission to save text.",
+                title: L10n.string(.notificationPermissionRequiredTitle),
+                body: PermissionService.shared.accessibilityRequiredMessage(action: L10n.string(.footerSave).lowercased()),
                 isError: true
             )
             return
@@ -153,8 +157,8 @@ class HotkeyService {
         
         if AppDetectionService.shared.isCurrentAppSensitive() && ClipStore.shared.settings.ignoreSensitiveApps {
             NotificationService.shared.showNotification(
-                title: "Sensitive App Ignored",
-                body: "Clipo does not auto-save from password managers."
+                title: L10n.string(.notificationSensitiveAppIgnoredTitle),
+                body: L10n.string(.notificationSensitiveAppIgnoredBody)
             )
             return
         }
@@ -164,26 +168,21 @@ class HotkeyService {
         let appName = AppDetectionService.shared.currentFrontmostAppName()
         let bundleId = AppDetectionService.shared.currentFrontmostBundleIdentifier()
         
-        PasteService.shared.copySelectionAndReadText { text in
-            guard let text = text, !text.isEmpty else {
+        PasteService.shared.copySelectionAndReadItem(sourceApp: appName, sourceBundleIdentifier: bundleId) { item in
+            guard let item = item else {
                 NotificationService.shared.showNotification(
-                    title: "Save Failed",
-                    body: "No text selected or clipboard is empty.",
+                    title: L10n.string(.notificationSaveFailedTitle),
+                    body: L10n.string(.notificationSaveFailedBody),
                     isError: true
                 )
                 return
             }
-            
-            ClipStore.shared.saveToSlot(
-                number: slotNumber,
-                content: text,
-                sourceApp: appName,
-                sourceBundleIdentifier: bundleId
-            )
+
+            ClipStore.shared.saveItemToSlot(number: slotNumber, item: item)
             SoundService.shared.playSave()
             NotificationService.shared.showNotification(
-                title: "Saved to Slot \(slotNumber)",
-                body: StringPreviewUtility.makePreview(from: text)
+                title: L10n.string(.notificationSavedToSlotTemplate, slotNumber),
+                body: item.preview
             )
         }
     }
@@ -191,17 +190,19 @@ class HotkeyService {
     private func onCopySlotToClipboard(slotNumber: Int) {
         guard let item = ClipStore.shared.slots[slotNumber] else {
             NotificationService.shared.showNotification(
-                title: "Slot \(slotNumber) Empty",
-                body: "Nothing has been saved to this slot yet."
+                title: L10n.string(.notificationSlotEmptyTemplate, slotNumber),
+                body: L10n.string(.notificationCopiedBody)
             )
             return
         }
         
-        ClipboardService.shared.writeTextToPasteboard(item.content)
+        let changeCount = ClipboardService.shared.writeClipItemToPasteboard(item)
+        ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
+        ClipStore.shared.recordHistoryItem(item)
         SoundService.shared.playCopy()
         NotificationService.shared.showNotification(
-            title: "Copied Slot \(slotNumber)",
-            body: "Press Command+V to paste it anywhere."
+            title: L10n.string(.notificationCopiedTitle),
+            body: L10n.string(.notificationCopiedBody)
         )
         
         // Update lastUsedAt timestamp in both slot and matching history.

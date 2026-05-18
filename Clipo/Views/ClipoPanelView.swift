@@ -14,6 +14,10 @@ extension ClipType {
         case .plainText: return .gray
         case .url: return .blue
         case .codeLikeText: return .orange
+        case .image: return .purple
+        case .file: return .green
+        case .richText: return .pink
+        case .data: return .secondary
         }
     }
 }
@@ -27,6 +31,8 @@ struct ClipoPanelView: View {
     @State private var searchFieldScale: CGFloat = 0.95
     @State private var searchFieldOpacity: Double = 0
     @State private var showPermissionBanner = false
+    @State private var permissionStatus = PermissionService.shared.hasAccessibilityPermission()
+    @State private var isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
     @State private var permissionCheckTimer: Timer?
     @State private var selectedTypeFilter: ClipType? = nil
     
@@ -34,7 +40,8 @@ struct ClipoPanelView: View {
     
     private var filteredHistory: [ClipItem] {
         var items = searchText.isEmpty ? store.history : store.history.filter {
-            $0.content.localizedCaseInsensitiveContains(searchText)
+            $0.content.localizedCaseInsensitiveContains(searchText) ||
+            $0.preview.localizedCaseInsensitiveContains(searchText)
         }
         if let filter = selectedTypeFilter {
             items = items.filter { $0.type == filter }
@@ -117,6 +124,9 @@ struct ClipoPanelView: View {
             guard let event = notification.object as? NSEvent else { return }
             handleKeyEvent(event)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .accessibilityPermissionChanged)) { _ in
+            refreshPermissionStatus(animated: true)
+        }
     }
     
     // MARK: - Lifecycle
@@ -140,23 +150,44 @@ struct ClipoPanelView: View {
     }
     
     private func startPermissionCheck() {
-        showPermissionBanner = !PermissionService.shared.hasAccessibilityPermission()
+        permissionStatus = PermissionService.shared.refreshAccessibilityPermission()
+        isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
+        showPermissionBanner = !permissionStatus
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            let hasPermission = PermissionService.shared.hasAccessibilityPermission()
-            if hasPermission && showPermissionBanner {
-                DispatchQueue.main.async {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        showPermissionBanner = false
-                    }
-                }
-            }
+            refreshPermissionStatus(animated: true)
         }
     }
     
     private func stopPermissionCheck() {
         permissionCheckTimer?.invalidate()
         permissionCheckTimer = nil
+    }
+
+    private func refreshPermissionStatus(animated: Bool) {
+        let hasPermission = PermissionService.shared.refreshAccessibilityPermission()
+        let isWaiting = PermissionService.shared.isWaitingForAccessibilityGrant
+
+        let update = {
+            permissionStatus = hasPermission
+            isWaitingForPermissionGrant = isWaiting
+            if hasPermission {
+                showPermissionBanner = false
+            }
+        }
+
+        if animated {
+            withAnimation(.easeOut(duration: 0.25), update)
+        } else {
+            update()
+        }
+    }
+
+    private func requestAccessibilityFromPanel() {
+        PermissionService.shared.requestAccessibilityPermission()
+        PermissionService.shared.openAccessibilitySettings()
+        refreshPermissionStatus(animated: true)
+        showPermissionBanner = true
     }
     
     // MARK: - Subviews
@@ -167,18 +198,18 @@ struct ClipoPanelView: View {
                 Image(systemName: "doc.on.clipboard")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.accentColor)
-                Text("Clipo")
+                Text(L10n.string(.panelTitle))
                     .font(.system(size: 15, weight: .bold))
             }
             
             Spacer()
             
-            if !PermissionService.shared.hasAccessibilityPermission() {
+            if !permissionStatus {
                 HStack(spacing: 4) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 9))
                         .foregroundColor(.orange)
-                    Text("Needs Permission")
+                    Text(isWaitingForPermissionGrant ? L10n.string(.checkingPermission) : L10n.string(.needsPermission))
                         .font(.system(size: 10, weight: .medium))
                 }
                 .foregroundColor(.orange.opacity(0.8))
@@ -192,13 +223,13 @@ struct ClipoPanelView: View {
                 NotificationCenter.default.post(name: .openClipoSettings, object: nil)
             }) {
                 Image(systemName: "gear")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.secondary.opacity(0.6))
-                    .frame(width: 28, height: 28)
+                    .frame(width: 34, height: 34)
                     .contentShape(Rectangle())
             }
             .buttonStyle(PlainButtonStyle())
-            .help("Settings")
+            .help(L10n.string(.settingsTooltip))
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -215,18 +246,19 @@ struct ClipoPanelView: View {
     
     private var permissionBanner: some View {
         HStack(spacing: 10) {
-            Image(systemName: "exclamationmark.shield.fill")
+            Image(systemName: isWaitingForPermissionGrant ? "clock" : "exclamationmark.shield.fill")
                 .font(.system(size: 12))
                 .foregroundColor(.orange)
-            Text("Accessibility permission is required to save selected text.")
+            Text(isWaitingForPermissionGrant
+                ? L10n.string(.accessibilityWaitingMessage)
+                : L10n.string(.permissionBannerText))
                 .font(.system(size: 12))
                 .foregroundColor(.secondary.opacity(0.8))
             Spacer()
             Button(action: {
-                PermissionService.shared.requestAccessibilityPermission()
-                PermissionService.shared.openAccessibilitySettings()
+                requestAccessibilityFromPanel()
             }) {
-                Text("Open System Settings")
+                Text(isWaitingForPermissionGrant ? L10n.string(.checkAgainButton) : L10n.string(.openSystemSettingsButton))
                     .font(.system(size: 11, weight: .semibold))
             }
             .buttonStyle(PlainButtonStyle())
@@ -260,7 +292,7 @@ struct ClipoPanelView: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.secondary.opacity(0.7))
             
-            TextField("Search clips...", text: $searchText)
+            TextField(L10n.string(.searchPlaceholder), text: $searchText)
                 .textFieldStyle(PlainTextFieldStyle())
                 .font(.system(size: 14))
                 .focused($isSearchFocused)
@@ -309,7 +341,7 @@ struct ClipoPanelView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 FilterPill(
-                    title: "All",
+                    title: L10n.string(.allFilter),
                     color: .accentColor,
                     isSelected: selectedTypeFilter == nil
                 ) {
@@ -373,7 +405,7 @@ struct ClipoPanelView: View {
     
     private var slotSectionView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("Slots", count: store.slots.count, total: 9)
+            sectionHeader(L10n.string(.slotsSection), count: store.slots.count, total: 9)
             VStack(spacing: 2) {
                 ForEach(1...9, id: \.self) { num in
                     if let item = store.slots[num] {
@@ -383,7 +415,11 @@ struct ClipoPanelView: View {
                             globalIndex: globalIndex
                         )
                     } else {
-                        SlotRowView(item: nil, slotNumber: num)
+                        SlotRowView(
+                            item: nil,
+                            slotNumber: num,
+                            onCreate: { saveSelectionToSlot(num) }
+                        )
                     }
                 }
             }
@@ -398,7 +434,7 @@ struct ClipoPanelView: View {
     
     private var historySectionView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("Recent History", count: historySection.count)
+            sectionHeader(L10n.string(.recentHistorySection), count: historySection.count)
             if historySection.isEmpty {
                 historyOnboardingView
             } else {
@@ -425,10 +461,10 @@ struct ClipoPanelView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.secondary.opacity(0.3))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("No history yet")
+                    Text(L10n.string(.noHistoryTitle))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.secondary.opacity(0.5))
-                    Text("Save clips to slots and they will appear here")
+                    Text(L10n.string(.noHistorySubtitle))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary.opacity(0.35))
                 }
@@ -439,10 +475,10 @@ struct ClipoPanelView: View {
                 .padding(.vertical, 2)
             
             VStack(spacing: 8) {
-                OnboardingStep(number: 1, text: "Select text in any app")
-                OnboardingStep(number: 2, text: "Press ⌘⌥1–9 to save to a slot")
-                OnboardingStep(number: 3, text: "Press ⌥1–9 to copy a slot")
-                OnboardingStep(number: 4, text: "Press ⌥Space to open Clipo")
+                OnboardingStep(number: 1, text: L10n.string(.onboardingStep1))
+                OnboardingStep(number: 2, text: L10n.string(.onboardingStep2))
+                OnboardingStep(number: 3, text: L10n.string(.onboardingStep3))
+                OnboardingStep(number: 4, text: L10n.string(.onboardingStep4))
             }
             
             Divider()
@@ -452,7 +488,7 @@ struct ClipoPanelView: View {
                 Image(systemName: "power")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary.opacity(0.4))
-                Text("Launch at Login")
+                Text(L10n.string(.launchAtLoginTitle))
                     .font(.system(size: 12))
                     .foregroundColor(.secondary.opacity(0.6))
                 Spacer()
@@ -479,13 +515,13 @@ struct ClipoPanelView: View {
     
     private var footerBar: some View {
         HStack(spacing: 14) {
-            FooterShortcut(keys: "↑↓", label: "Select")
-            FooterShortcut(keys: "↵", label: "Copy")
-            FooterShortcut(keys: "⌘↵", label: "Paste")
-            FooterShortcut(keys: "⌘P", label: "Pin")
-            FooterShortcut(keys: "⌫", label: "Delete")
+            FooterShortcut(keys: "↑↓", label: L10n.string(.footerSelect))
+            FooterShortcut(keys: "↵", label: L10n.string(.footerCopy))
+            FooterShortcut(keys: "⌘↵", label: L10n.string(.footerPaste))
+            FooterShortcut(keys: "⌘P", label: L10n.string(.footerPin))
+            FooterShortcut(keys: "⌫", label: L10n.string(.footerDelete))
             Spacer()
-            FooterShortcut(keys: "esc", label: "Close")
+            FooterShortcut(keys: "esc", label: L10n.string(.footerClose))
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -559,20 +595,20 @@ struct ClipoPanelView: View {
             PanelWindowService.shared.hidePanel()
         }
         .contextMenu {
-            Button("Copy") {
+            Button(L10n.string(.contextMenuCopy)) {
                 copyItem(row.item)
                 PanelWindowService.shared.hidePanel()
             }
             .keyboardShortcut(.return, modifiers: [])
-            Button("Paste") { pasteItem(row.item) }
+            Button(L10n.string(.contextMenuPaste)) { pasteItem(row.item) }
                 .keyboardShortcut(.return, modifiers: .command)
             if !row.isSlot {
                 Divider()
-                Button(row.item.isPinned ? "Unpin" : "Pin") {
+                Button(row.item.isPinned ? L10n.string(.contextMenuUnpin) : L10n.string(.contextMenuPin)) {
                     store.togglePin(id: row.item.id)
                 }
                 .keyboardShortcut("p", modifiers: .command)
-                Button("Delete") {
+                Button(L10n.string(.contextMenuDelete)) {
                     store.deleteHistoryItem(id: row.item.id)
                     if selectedIndex >= allNavigableItems.count {
                         selectedIndex = max(0, allNavigableItems.count - 1)
@@ -644,23 +680,31 @@ struct ClipoPanelView: View {
     
     private func copyItem(_ item: ClipItem) {
         SoundService.shared.playCopy()
-        ClipboardService.shared.writeTextToPasteboard(item.content)
-        NotificationService.shared.showNotification(title: "Copied", body: item.preview)
+        let changeCount = ClipboardService.shared.writeClipItemToPasteboard(item)
+        ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
+        store.recordHistoryItem(item)
+        NotificationService.shared.showNotification(title: L10n.string(.notificationCopiedTitle), body: item.preview)
     }
     
     private func pasteItem(_ item: ClipItem) {
         guard PermissionService.shared.hasAccessibilityPermission() else {
             NotificationService.shared.showNotification(
-                title: "Permission Required",
-                body: "Clipo needs Accessibility permission to paste text.",
+                title: L10n.string(.notificationPastePermissionTitle),
+                body: PermissionService.shared.accessibilityRequiredMessage(action: L10n.string(.footerPaste).lowercased()),
                 isError: true
             )
+            refreshPermissionStatus(animated: true)
+            showPermissionBanner = true
             return
         }
         SoundService.shared.playPaste()
         let shouldRestore = store.settings.restoreClipboardAfterPaste
-        PasteService.shared.pasteText(item.content, restorePrevious: shouldRestore)
+        PasteService.shared.pasteItem(item, restorePrevious: shouldRestore)
         PanelWindowService.shared.hidePanel()
+    }
+
+    private func saveSelectionToSlot(_ slotNumber: Int) {
+        HotkeyService.shared.saveSelectionToSlot(number: slotNumber)
     }
 }
 

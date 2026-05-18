@@ -32,7 +32,7 @@ struct HistoryRowView: View {
                         HStack(spacing: 2) {
                             Image(systemName: "pin.fill")
                                 .font(.system(size: 8, weight: .bold))
-                            Text("Pinned")
+                            Text(L10n.string(.pinnedLabel))
                                 .font(.system(size: 9, weight: .medium))
                         }
                         .foregroundColor(.accentColor)
@@ -71,7 +71,7 @@ struct HistoryRowView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help(item.isPinned ? "Unpin" : "Pin")
+                .help(item.isPinned ? L10n.string(.contextMenuUnpin) : L10n.string(.contextMenuPin))
                 
                 Button(action: onDelete) {
                     Image(systemName: "trash")
@@ -81,7 +81,7 @@ struct HistoryRowView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help("Delete")
+                .help(L10n.string(.contextMenuDelete))
             }
             .opacity(isHovering ? 1 : 0)
             .animation(.easeInOut(duration: 0.15), value: isHovering)
@@ -108,6 +108,14 @@ struct HistoryRowView: View {
             return .orange
         case .plainText:
             return .gray
+        case .image:
+            return .purple
+        case .file:
+            return .green
+        case .richText:
+            return .pink
+        case .data:
+            return .secondary
         }
     }
     
@@ -119,6 +127,14 @@ struct HistoryRowView: View {
             return "chevron.left.forwardslash.chevron.right"
         case .plainText:
             return "doc.text"
+        case .image:
+            return "photo"
+        case .file:
+            return "doc"
+        case .richText:
+            return "textformat"
+        case .data:
+            return "shippingbox"
         }
     }
 }
@@ -143,6 +159,10 @@ struct TypeBadge: View {
         case .url: return "URL"
         case .codeLikeText: return "Code"
         case .plainText: return "Text"
+        case .image: return "Image"
+        case .file: return "File"
+        case .richText: return "Rich"
+        case .data: return "Data"
         }
     }
     
@@ -151,6 +171,10 @@ struct TypeBadge: View {
         case .url: return .blue
         case .codeLikeText: return .orange
         case .plainText: return .gray
+        case .image: return .purple
+        case .file: return .green
+        case .richText: return .pink
+        case .data: return .secondary
         }
     }
 }

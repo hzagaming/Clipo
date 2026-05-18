@@ -40,12 +40,12 @@ struct HotkeyPreferences: Codable, Equatable {
 
     /// Human-readable string for a modifier mask (e.g. "⌘⌥").
     static func label(forModifiers mask: UInt32) -> String {
-        modifierPresets.first { $0.mask == mask }?.label ?? "Custom"
+        modifierPresets.first { $0.mask == mask }?.label ?? L10n.string(.customLabel)
     }
 
     /// Human-readable string for a key-code (e.g. "Space").
     static func label(forKeyCode code: UInt32) -> String {
-        openPanelKeyPresets.first { $0.code == code }?.label ?? "Key \(code)"
+        openPanelKeyPresets.first { $0.code == code }?.label ?? L10n.string(.keyCodeTemplate, code)
     }
 
     /// Short symbol string for menu labels (e.g. "⌘⌥", "⌃⌥").

@@ -4,6 +4,9 @@ struct PermissionView: View {
     @State private var appear = false
     @State private var iconScale: CGFloat = 0.5
     @State private var iconRotation: Double = -30
+    @State private var permissionStatus = PermissionService.shared.hasAccessibilityPermission()
+    @State private var isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
+    @State private var permissionTimer: Timer?
     var onSkip: (() -> Void)? = nil
     
     var body: some View {
@@ -46,12 +49,16 @@ struct PermissionView: View {
                 
                 // Title with fade-in
                 VStack(spacing: 10) {
-                    Text("Accessibility Permission")
+                    Text(L10n.string(.permissionTitle))
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .opacity(appear ? 1 : 0)
                         .offset(y: appear ? 0 : 12)
                     
-                    Text("Required to save selected text with global shortcuts.")
+                    Text(permissionStatus
+                        ? L10n.string(.accessibilityGranted)
+                        : (isWaitingForPermissionGrant
+                            ? L10n.string(.checkingPermission)
+                            : L10n.string(.permissionSubtitle)))
                         .multilineTextAlignment(.center)
                         .foregroundColor(.secondary)
                         .font(.system(size: 13))
@@ -63,7 +70,7 @@ struct PermissionView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "menubar.rectangle")
                             .font(.system(size: 11))
-                        Text("Clipo lives in your menu bar — look for the clipboard icon.")
+                        Text(L10n.string(.permissionMenuBarHint))
                             .font(.system(size: 11, weight: .medium))
                     }
                     .foregroundColor(.accentColor.opacity(0.8))
@@ -95,7 +102,7 @@ struct PermissionView: View {
                     }) {
                         HStack(spacing: 8) {
                             Image(systemName: "gear")
-                            Text("Open System Settings")
+                            Text(isWaitingForPermissionGrant ? L10n.string(.checkAgainButton) : L10n.string(.openSystemSettingsButton))
                                 .fontWeight(.semibold)
                         }
                         .padding(.horizontal, 20)
@@ -108,7 +115,7 @@ struct PermissionView: View {
                     Button(action: {
                         onSkip?()
                     }) {
-                        Text("Skip for now")
+                        Text(L10n.string(.skipForNow))
                             .font(.system(size: 12))
                             .foregroundColor(.secondary.opacity(0.6))
                             .padding(.horizontal, 12)
@@ -123,20 +130,20 @@ struct PermissionView: View {
                     .offset(y: appear ? 0 : 6)
                     
                     VStack(spacing: 6) {
-                        Text("1. Open System Settings → Privacy & Security → Accessibility")
+                        Text(L10n.string(.permissionStep1))
                             .font(.caption)
                             .foregroundColor(.secondary.opacity(0.7))
-                        Text("2. Add Clipo to the list and enable the checkbox")
+                        Text(L10n.string(.permissionStep2))
                             .font(.caption)
                             .foregroundColor(.secondary.opacity(0.7))
-                        Text("3. The app will detect it and continue automatically")
+                        Text(L10n.string(.permissionStep3))
                             .font(.caption)
                             .foregroundColor(.secondary.opacity(0.7))
                         
                         // Debug-build hint: ad-hoc signed apps change identity on every rebuild,
                         // so the old permission entry becomes stale.
                         #if DEBUG
-                        Text("Debug build: if permission is already on but not working, remove the old Clipo entry in Accessibility and re-add the current build.")
+                        Text(L10n.string(.debugBuildHint))
                             .font(.caption2)
                             .foregroundColor(.orange.opacity(0.85))
                             .multilineTextAlignment(.center)
@@ -150,7 +157,17 @@ struct PermissionView: View {
             .padding(32)
         }
         .frame(width: 480, height: 400)
-        .onAppear(perform: startAnimation)
+        .onAppear {
+            startAnimation()
+            startPermissionTimer()
+        }
+        .onDisappear {
+            permissionTimer?.invalidate()
+            permissionTimer = nil
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .accessibilityPermissionChanged)) { _ in
+            refreshPermissionStatus()
+        }
     }
     
     private func startAnimation() {
@@ -161,6 +178,19 @@ struct PermissionView: View {
         withAnimation(.easeOut(duration: 0.5).delay(0.15)) {
             appear = true
         }
+    }
+
+    private func startPermissionTimer() {
+        refreshPermissionStatus()
+        permissionTimer?.invalidate()
+        permissionTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            refreshPermissionStatus()
+        }
+    }
+
+    private func refreshPermissionStatus() {
+        permissionStatus = PermissionService.shared.refreshAccessibilityPermission()
+        isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
     }
 }
 

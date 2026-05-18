@@ -10,10 +10,10 @@ enum AutoDeletePolicy: String, Codable, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .never: return "Never"
-        case .oneDay: return "1 Day"
-        case .sevenDays: return "7 Days"
-        case .thirtyDays: return "30 Days"
+        case .never: return L10n.string(.autoDeleteNever)
+        case .oneDay: return L10n.string(.autoDeleteOneDay)
+        case .sevenDays: return L10n.string(.autoDeleteSevenDays)
+        case .thirtyDays: return L10n.string(.autoDeleteThirtyDays)
         }
     }
 

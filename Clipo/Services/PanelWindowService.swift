@@ -168,7 +168,7 @@ class PanelWindowService {
             backing: .buffered,
             defer: false
         )
-        panel.title = "Clipo"
+        panel.title = L10n.string(.panelTitle)
         panel.isFloatingPanel = true
         panel.level = .floating
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]

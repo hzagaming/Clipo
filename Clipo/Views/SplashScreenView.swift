@@ -64,7 +64,7 @@ struct SplashScreenView: View {
                 .animation(.spring(response: 0.6, dampingFraction: 0.7), value: phase)
                 
                 // Main title
-                Text("Clipo")
+                Text(L10n.string(.panelTitle))
                     .font(.system(size: 42, weight: .bold, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
@@ -108,7 +108,7 @@ struct SplashScreenView: View {
                             }
                         )
                     
-                    Text("Loading...")
+                    Text(L10n.string(.loadingText))
                         .font(.caption2)
                         .foregroundColor(.white.opacity(0.25))
                         .opacity(phase >= 1 ? 1.0 : 0.0)
