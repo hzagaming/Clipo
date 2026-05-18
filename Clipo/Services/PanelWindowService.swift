@@ -15,6 +15,7 @@ class PanelWindowService {
     private var keyboardMonitor: Any?
     private var clickOutsideMonitor: Any?
     private var isHiding = false
+    private var ignoreOutsideClicksUntil = Date.distantPast
     
     func showPanel() {
         if panelWindow == nil {
@@ -33,6 +34,7 @@ class PanelWindowService {
         // Cancel any in-progress hide animation so the panel doesn't get
         // ordered out immediately after we show it.
         isHiding = false
+        ignoreOutsideClicksUntil = Date().addingTimeInterval(0.35)
         panel.alphaValue = 0
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -126,12 +128,8 @@ class PanelWindowService {
     private func startClickOutsideMonitoring() {
         stopClickOutsideMonitoring()
         clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            guard let self = self else { return }
-            guard let panel = self.panelWindow, panel.isVisible, !self.isHiding else { return }
-            // Small delay to avoid race with internal button clicks.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                guard let panel = self.panelWindow, panel.isVisible, !self.isHiding else { return }
-                self.hidePanel()
+            DispatchQueue.main.async {
+                self?.handleOutsideClick()
             }
         }
     }
@@ -141,6 +139,13 @@ class PanelWindowService {
             NSEvent.removeMonitor(monitor)
             clickOutsideMonitor = nil
         }
+    }
+    
+    private func handleOutsideClick() {
+        guard Date() >= ignoreOutsideClicksUntil else { return }
+        guard let panel = panelWindow, panel.isVisible, !isHiding else { return }
+        guard !panel.frame.contains(NSEvent.mouseLocation) else { return }
+        hidePanel()
     }
     
     private func createPanel() {

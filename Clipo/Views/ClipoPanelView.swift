@@ -12,6 +12,8 @@ struct ClipoPanelView: View {
     @State private var appearAnimation = false
     @State private var searchFieldScale: CGFloat = 0.95
     @State private var searchFieldOpacity: Double = 0
+    @State private var showPermissionOverlay = false
+    @State private var permissionCheckTimer: Timer?
     
     // MARK: - Data
     
@@ -44,42 +46,48 @@ struct ClipoPanelView: View {
     // MARK: - Body
     
     var body: some View {
-        VStack(spacing: 0) {
-            searchBar
-            
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        if !slotSection.isEmpty {
-                            sectionHeader("Slots")
-                            ForEach(Array(slotSection.enumerated()), id: \.element.id) { index, row in
-                                rowView(for: row, globalIndex: index)
+        ZStack {
+            VStack(spacing: 0) {
+                searchBar
+                
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            if !slotSection.isEmpty {
+                                sectionHeader("Slots")
+                                ForEach(Array(slotSection.enumerated()), id: \.element.id) { index, row in
+                                    rowView(for: row, globalIndex: index)
+                                }
+                            }
+                            
+                            if !historySection.isEmpty {
+                                sectionHeader("History")
+                                let offset = slotSection.count
+                                ForEach(Array(historySection.enumerated()), id: \.element.id) { index, row in
+                                    rowView(for: row, globalIndex: offset + index)
+                                }
+                            }
+                            
+                            if allItems.isEmpty {
+                                emptyStateView
                             }
                         }
-                        
-                        if !historySection.isEmpty {
-                            sectionHeader("History")
-                            let offset = slotSection.count
-                            ForEach(Array(historySection.enumerated()), id: \.element.id) { index, row in
-                                rowView(for: row, globalIndex: offset + index)
-                            }
-                        }
-                        
-                        if allItems.isEmpty {
-                            emptyStateView
-                        }
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
-                }
-                .onChange(of: selectedIndex) { newValue in
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        proxy.scrollTo(newValue, anchor: .center)
+                    .onChange(of: selectedIndex) { newValue in
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            proxy.scrollTo(newValue, anchor: .center)
+                        }
                     }
                 }
             }
+            .frame(minWidth: 580, minHeight: 440)
+            .background(Color(NSColor.windowBackgroundColor))
+            
+            if showPermissionOverlay {
+                permissionOverlay
+            }
         }
-        .frame(minWidth: 580, minHeight: 440)
-        .background(Color(NSColor.windowBackgroundColor))
         .onAppear(perform: onAppear)
         .onDisappear(perform: onDisappear)
         .onChange(of: searchText) { _ in
@@ -98,6 +106,7 @@ struct ClipoPanelView: View {
     private func onAppear() {
         isSearchFocused = true
         selectedIndex = 0
+        startPermissionCheck()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             appearAnimation = true
             searchFieldScale = 1.0
@@ -109,6 +118,27 @@ struct ClipoPanelView: View {
         appearAnimation = false
         searchFieldScale = 0.95
         searchFieldOpacity = 0
+        stopPermissionCheck()
+    }
+    
+    private func startPermissionCheck() {
+        showPermissionOverlay = !PermissionService.shared.hasAccessibilityPermission()
+        permissionCheckTimer?.invalidate()
+        permissionCheckTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            let hasPermission = PermissionService.shared.hasAccessibilityPermission()
+            if hasPermission && showPermissionOverlay {
+                DispatchQueue.main.async {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showPermissionOverlay = false
+                    }
+                }
+            }
+        }
+    }
+    
+    private func stopPermissionCheck() {
+        permissionCheckTimer?.invalidate()
+        permissionCheckTimer = nil
     }
     
     // MARK: - Subviews
@@ -237,6 +267,70 @@ struct ClipoPanelView: View {
             }
         }
         .animation(.spring(response: 0.2, dampingFraction: 0.8), value: selectedIndex)
+    }
+    
+    private var permissionOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.25)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.12))
+                        .frame(width: 70, height: 70)
+                    Image(systemName: "hand.tap.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.accentColor)
+                }
+                
+                VStack(spacing: 8) {
+                    Text("Accessibility Permission")
+                        .font(.system(size: 17, weight: .bold))
+                    
+                    Text("Clipo needs Accessibility permission to simulate copy and paste using global shortcuts.")
+                        .font(.system(size: 13))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                        .padding(.horizontal, 8)
+                }
+                
+                VStack(spacing: 10) {
+                    Button(action: {
+                        PermissionService.shared.requestAccessibilityPermission()
+                        PermissionService.shared.openAccessibilitySettings()
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "gear")
+                            Text("Open System Settings")
+                                .fontWeight(.semibold)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                    }
+                    .buttonStyle(GlassButtonStyle())
+                    
+                    Button(action: {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            showPermissionOverlay = false
+                        }
+                    }) {
+                        Text("Skip for now")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary.opacity(0.6))
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+            .padding(24)
+            .frame(width: 340)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(NSColor.windowBackgroundColor))
+                    .shadow(color: Color.black.opacity(0.25), radius: 24, x: 0, y: 12)
+            )
+        }
     }
     
     private var emptyStateView: some View {

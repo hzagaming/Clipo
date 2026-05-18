@@ -56,19 +56,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     private func continueLaunch(skippingPermission: Bool = false) {
         guard !hasFinishedSplash else { return }
         
-        if PermissionService.shared.hasAccessibilityPermission() {
-            // Permission already granted at launch — proceed directly
-            finishLaunch(showPanel: true, showReadyToast: false)
-        } else if skippingPermission {
-            // User chose to skip permission at launch
-            finishLaunch(showPanel: false, showReadyToast: false)
+        // Always show the main panel first. If permission is missing,
+        // an in-panel overlay will prompt the user.
+        finishLaunch(showPanel: true, showReadyToast: false)
+        
+        if skippingPermission {
             NotificationService.shared.showNotification(
                 title: "Clipo is Running",
                 body: "Look for the clipboard icon in your menu bar. You can enable Accessibility later via the menu."
             )
-        } else {
-            // No permission — show permission window with live monitoring
-            showPermissionWindow()
+        } else if !PermissionService.shared.hasAccessibilityPermission() {
             startPermissionMonitoring()
         }
     }
@@ -104,23 +101,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             if PermissionService.shared.hasAccessibilityPermission() {
                 self.permissionCheckTimer?.invalidate()
                 self.permissionCheckTimer = nil
-                
-                DispatchQueue.main.async {
-                    self.isClosingPermissionAfterGrant = true
-                    self.permissionWindow?.close()
-                    self.permissionWindow = nil
-                    self.isClosingPermissionAfterGrant = false
-                    
-                    if !self.hasFinishedSplash {
-                        self.finishLaunch(showPanel: true, showReadyToast: true)
-                    } else {
-                        // App already running (menu-bar re-auth) — just give feedback.
-                        NotificationService.shared.showNotification(
-                            title: "Clipo Ready",
-                            body: "Accessibility permission granted. Hotkeys are now active."
-                        )
-                    }
-                }
+                NotificationService.shared.showNotification(
+                    title: "Clipo Ready",
+                    body: "Accessibility permission granted. Hotkeys are now active."
+                )
             }
         }
     }
@@ -335,8 +319,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     @objc func showPermissionWindowFromMenu() {
-        showPermissionWindow()
-        startPermissionMonitoring()
+        PanelWindowService.shared.showPanel()
     }
     
     @objc func quitApp() {
