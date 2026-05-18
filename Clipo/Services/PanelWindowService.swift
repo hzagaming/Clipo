@@ -184,6 +184,14 @@ class PanelWindowService {
 
 /// Handles close-button clicks on the panel.
 class PanelWindowDelegate: NSObject, NSWindowDelegate {
+    /// Intercept the close button (×) so the panel hides instead of being
+    /// destroyed. This keeps the app running in the background (menu-bar
+    /// style) and preserves the panel state for the next showPanel().
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        PanelWindowService.shared.hidePanel()
+        return false
+    }
+    
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSPanel else { return }
         // If the user closes the panel via the close button, break the delegate

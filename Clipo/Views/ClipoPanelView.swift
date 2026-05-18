@@ -444,6 +444,25 @@ struct ClipoPanelView: View {
                 OnboardingStep(number: 3, text: "Press ⌥Space to open Clipo")
                 OnboardingStep(number: 4, text: "Press ↵ to copy, ⌘↵ to paste")
             }
+            
+            Divider()
+                .padding(.vertical, 2)
+            
+            HStack(spacing: 8) {
+                Image(systemName: "power")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary.opacity(0.4))
+                Text("Launch at Login")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary.opacity(0.6))
+                Spacer()
+                Toggle("", isOn: $store.settings.launchAtLogin)
+                    .toggleStyle(SwitchToggleStyle(tint: .accentColor))
+                    .scaleEffect(0.8)
+                    .onChange(of: store.settings.launchAtLogin) { newValue in
+                        LaunchAtLoginService.shared.setLaunchAtLogin(newValue)
+                    }
+            }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
