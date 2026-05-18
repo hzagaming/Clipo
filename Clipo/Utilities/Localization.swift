@@ -7,8 +7,6 @@ enum LocKey: String {
     case sectionStartup
     case launchAtLoginTitle, launchAtLoginSubtitle
     case showDockIconTitle, showDockIconSubtitle
-    case sectionFeedback
-    case soundEffectsTitle, soundEffectsSubtitle
     case sectionLanguage
     case languageTitle, languageSubtitle
     case sectionAppearance
@@ -60,6 +58,7 @@ enum LocKey: String {
     case settingsTooltip
     case permissionBannerText
     case searchPlaceholder
+    case searchNoResults
     case slotsSection
     case recentHistorySection
     case noHistoryTitle
@@ -355,42 +354,6 @@ struct L10n {
             "es": "Mostrar Clipo en el Dock para acceso fácil",
             "ru": "Отображать Clipo в Dock для удобного доступа",
             "pt": "Exibir o Clipo no Dock para acesso fácil"
-        ],
-        "sectionFeedback": [
-            "en": "Feedback",
-            "zh-Hans": "反馈",
-            "zh-Hant": "回饋",
-            "ja": "フィードバック",
-            "ko": "피드백",
-            "fr": "Retour",
-            "de": "Feedback",
-            "es": "Retroalimentación",
-            "ru": "Обратная связь",
-            "pt": "Feedback"
-        ],
-        "soundEffectsTitle": [
-            "en": "Sound Effects",
-            "zh-Hans": "音效",
-            "zh-Hant": "音效",
-            "ja": "効果音",
-            "ko": "효과음",
-            "fr": "Effets sonores",
-            "de": "Soundeffekte",
-            "es": "Efectos de sonido",
-            "ru": "Звуковые эффекты",
-            "pt": "Efeitos Sonoros"
-        ],
-        "soundEffectsSubtitle": [
-            "en": "Play sounds when copying, pasting, and saving",
-            "zh-Hans": "复制、粘贴和保存时播放声音",
-            "zh-Hant": "複製、貼上和儲存時播放聲音",
-            "ja": "コピー、貼り付け、保存時に音を再生",
-            "ko": "복사, 붙여넣기 및 저장 시 소리 재생",
-            "fr": "Jouer des sons lors de la copie, du collage et de l'enregistrement",
-            "de": "Töne beim Kopieren, Einfügen und Speichern abspielen",
-            "es": "Reproducir sonidos al copiar, pegar y guardar",
-            "ru": "Воспроизводить звуки при копировании, вставке и сохранении",
-            "pt": "Reproduzir sons ao copiar, colar e salvar"
         ],
         "sectionLanguage": [
             "en": "Language",
@@ -1255,6 +1218,18 @@ struct L10n {
             "es": "Buscar clips...",
             "ru": "Поиск клипов...",
             "pt": "Pesquisar clips..."
+        ],
+        "searchNoResults": [
+            "en": "No matching results",
+            "zh-Hans": "无匹配结果",
+            "zh-Hant": "無匹配結果",
+            "ja": "一致する結果がありません",
+            "ko": "일치하는 결과 없음",
+            "fr": "Aucun résultat correspondant",
+            "de": "Keine passenden Ergebnisse",
+            "es": "Sin resultados coincidentes",
+            "ru": "Нет совпадающих результатов",
+            "pt": "Nenhum resultado correspondente"
         ],
         "slotsSection": [
             "en": "Slots",

@@ -269,6 +269,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
         let slotNumber = sender.tag
         guard let item = ClipStore.shared.slots[slotNumber] else {
             SoundService.shared.playError()
+            NotificationService.shared.showNotification(
+                title: L10n.string(.notificationSlotEmptyTemplate, slotNumber),
+                body: L10n.string(.notificationSlotEmptyBody)
+            )
             return
         }
         SoundService.shared.playCopy()

@@ -79,11 +79,8 @@ class ClipStore: ObservableObject {
     }
     
     func addToHistory(item: ClipItem) {
-        var newItem = item
-        newItem.slotNumber = nil
-        
         if settings.ignoreDuplicateHistory,
-           let index = history.firstIndex(where: { $0.content == newItem.content }) {
+           let index = history.firstIndex(where: { $0.content == item.content }) {
             // Move the existing duplicate to the top and update its timestamp
             // so the user sees it as the most recent item.
             var existing = history.remove(at: index)
@@ -92,7 +89,21 @@ class ClipStore: ObservableObject {
             return
         }
         
-        history.insert(newItem, at: 0)
+        // Create a fresh copy with a new UUID to avoid duplicate IDs in history.
+        let historyItem = ClipItem(
+            content: item.content,
+            preview: item.preview,
+            type: item.type,
+            pasteboardPayload: item.pasteboardPayload,
+            sourceApp: item.sourceApp,
+            sourceBundleIdentifier: item.sourceBundleIdentifier,
+            createdAt: item.createdAt,
+            lastUsedAt: Date(),
+            isPinned: item.isPinned,
+            slotNumber: nil
+        )
+        
+        history.insert(historyItem, at: 0)
         trimHistory()
     }
 

@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
     @State private var permissionTimer: Timer?
     @State private var newBundleId = ""
+    @State private var volumeSliderValue: Double = ClipStore.shared.settings.soundVolume
     
     private var sidebarItems: [(title: String, icon: String)] {
         [
@@ -653,22 +654,24 @@ struct SettingsView: View {
                         
                         Spacer()
                         
-                        Text("\(Int(store.settings.soundVolume * 100))%")
+                        Text("\(Int(volumeSliderValue * 100))%")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(.secondary)
                             .frame(width: 32, alignment: .trailing)
                         
                         Slider(
-                            value: $store.settings.soundVolume,
+                            value: $volumeSliderValue,
                             in: 0...1,
                             onEditingChanged: { isEditing in
                                 if !isEditing {
+                                    store.settings.soundVolume = volumeSliderValue
                                     SoundService.shared.playPreview()
                                 }
                             }
                         )
                         .frame(width: 100)
                         .controlSize(.small)
+                        .accessibilityLabel(L10n.string(.sfxVolumeTitle))
                     }
                     .padding(.vertical, 8)
                     
@@ -726,6 +729,7 @@ struct SettingsView: View {
             Toggle("", isOn: isOn)
                 .toggleStyle(SwitchToggleStyle(tint: .accentColor))
                 .labelsHidden()
+                .accessibilityLabel(title)
         }
         .padding(.vertical, 8)
     }

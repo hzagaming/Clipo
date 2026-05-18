@@ -140,15 +140,7 @@ struct TypeBadge: View {
     }
     
     private var typeLabel: String {
-        switch type {
-        case .url: return "URL"
-        case .codeLikeText: return "Code"
-        case .plainText: return "Text"
-        case .image: return "Image"
-        case .file: return "File"
-        case .richText: return "Rich"
-        case .data: return "Data"
-        }
+        type.displayName
     }
     
     private var typeColor: Color {

@@ -21,6 +21,10 @@ struct ClipoPanelView: View {
     
     // MARK: - Data
     
+    private var isSearchActive: Bool {
+        !searchText.isEmpty || selectedTypeFilter != nil
+    }
+    
     private var filteredHistory: [ClipItem] {
         var items = searchText.isEmpty ? store.history : store.history.filter {
             $0.content.localizedCaseInsensitiveContains(searchText) ||
@@ -32,6 +36,14 @@ struct ClipoPanelView: View {
         return items
     }
     
+    private var groupedFilteredHistory: [(type: ClipType, items: [ClipItem])] {
+        let groups = Dictionary(grouping: filteredHistory) { $0.type }
+        return ClipType.allCases.compactMap { type in
+            guard let items = groups[type], !items.isEmpty else { return nil }
+            return (type, items)
+        }
+    }
+    
     private var allNavigableItems: [PanelListItem] {
         var items: [PanelListItem] = []
         for i in 1...9 {
@@ -39,10 +51,26 @@ struct ClipoPanelView: View {
                 items.append(PanelListItem(isSlot: true, slotNumber: i, item: item))
             }
         }
-        for item in filteredHistory {
-            items.append(PanelListItem(isSlot: false, slotNumber: nil, item: item))
+        if isSearchActive {
+            for (_, typeItems) in groupedFilteredHistory {
+                for item in typeItems {
+                    items.append(PanelListItem(isSlot: false, slotNumber: nil, item: item))
+                }
+            }
+        } else {
+            for item in filteredHistory {
+                items.append(PanelListItem(isSlot: false, slotNumber: nil, item: item))
+            }
         }
         return items
+    }
+    
+    private var historySectionIndexMap: [String: Int] {
+        var map: [String: Int] = [:]
+        for (index, item) in allNavigableItems.enumerated() {
+            map[item.id] = index
+        }
+        return map
     }
     
     private var slotNavigableIndices: [Int: Int] {
@@ -85,8 +113,9 @@ struct ClipoPanelView: View {
                     .padding(.vertical, 6)
                 }
                 .onChange(of: selectedIndex) { newValue in
+                    let targetId = newValue < allNavigableItems.count ? allNavigableItems[newValue].id : "\(newValue)"
                     withAnimation(.easeInOut(duration: 0.15)) {
-                        proxy.scrollTo(newValue, anchor: .center)
+                        proxy.scrollTo(targetId, anchor: .center)
                     }
                 }
             }
@@ -103,8 +132,10 @@ struct ClipoPanelView: View {
             }
         }
         .onChange(of: store.settings.showEmptySlots) { _ in
-            if selectedIndex >= allNavigableItems.count {
-                selectedIndex = max(0, allNavigableItems.count - 1)
+            if allNavigableItems.isEmpty {
+                selectedIndex = 0
+            } else if selectedIndex >= allNavigableItems.count {
+                selectedIndex = allNavigableItems.count - 1
             }
         }
         .onChange(of: selectedTypeFilter) { _ in
@@ -425,10 +456,33 @@ struct ClipoPanelView: View {
     
     private var historySectionView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader(L10n.string(.recentHistorySection), count: historySection.count)
             if historySection.isEmpty {
-                historyOnboardingView
+                if isSearchActive {
+                    searchEmptyView
+                } else {
+                    historyOnboardingView
+                }
+            } else if isSearchActive {
+                ForEach(groupedFilteredHistory, id: \.type) { group in
+                    VStack(alignment: .leading, spacing: 0) {
+                        sectionHeader(group.type.displayName, count: group.items.count)
+                        VStack(spacing: 2) {
+                            ForEach(Array(group.items.enumerated()), id: \.element.id) { _, item in
+                                let row = PanelListItem(isSlot: false, slotNumber: nil, item: item)
+                                let globalIndex = historySectionIndexMap[row.id] ?? 0
+                                rowView(for: row, globalIndex: globalIndex)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(Color(NSColor.controlBackgroundColor).opacity(0.2))
+                        )
+                        .padding(.horizontal, 10)
+                    }
+                }
             } else {
+                sectionHeader(L10n.string(.recentHistorySection), count: historySection.count)
                 VStack(spacing: 2) {
                     let offset = slotNavigableIndices.count
                     ForEach(Array(historySection.enumerated()), id: \.element.id) { index, row in
@@ -443,6 +497,23 @@ struct ClipoPanelView: View {
                 .padding(.horizontal, 10)
             }
         }
+    }
+    
+    private var searchEmptyView: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 24))
+                .foregroundColor(.secondary.opacity(0.3))
+            Text(L10n.string(.searchNoResults))
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary.opacity(0.5))
+        }
+        .frame(maxWidth: .infinity, minHeight: 120)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color(NSColor.controlBackgroundColor).opacity(0.25))
+        )
+        .padding(.horizontal, 10)
     }
     
     private var historyOnboardingView: some View {
@@ -581,7 +652,7 @@ struct ClipoPanelView: View {
         )
         .padding(.horizontal, 6)
         .padding(.vertical, 1)
-        .id(globalIndex)
+        .id(row.id)
         .transition(.opacity.combined(with: .scale(scale: 0.97)))
         .onTapGesture {
             withAnimation(.easeOut(duration: 0.15)) {
@@ -625,6 +696,7 @@ struct ClipoPanelView: View {
     // MARK: - Keyboard Handling
     
     func handleKeyEvent(_ event: NSEvent) {
+        guard !allNavigableItems.isEmpty else { return }
         switch event.keyCode {
         case 126: // Up arrow
             if selectedIndex > 0 {

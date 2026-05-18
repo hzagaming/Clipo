@@ -248,16 +248,27 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-## What's New in v1.7.1
+## What's New in v1.7.2
 
-- **Granular Sound Effects Settings**: New dedicated Sound Effects tab in Settings with per-action toggles (Copy, Paste, Save, Open, Close, Error, Reset) plus a master switch and volume slider with live preview.
-- **Sound Consistency Audit**: Added missing error sounds on permission-denied paths (save hotkey, panel paste, menu-bar paste, hotkey registration).
-- **Destructive-action sounds**: Clear History, Reset Slots, and Reset All Data now play the Reset sound when confirmed.
-- **Volume guard**: Sounds are now skipped when volume is set to 0 instead of playing silently.
-- **Removed duplicate toggle**: The legacy Sound Effects toggle has been removed from General settings and consolidated into the new dedicated tab.
-- **Critical UI fix**: Fixed the master sound toggle becoming permanently disabled when turned off in the SFX tab.
+- **Search by category**: The panel search now groups results by their content type (Text, URL, Code, Image, File, etc.) instead of flattening everything into one list.
+- **Stable search IDs**: Fixed view-identity instability that caused flashing and duplicate-ID warnings while typing in the search box.
+- **No-results state**: Searching with no matches now shows a clean "No matching results" message instead of the full onboarding tutorial.
+- **Type badge localization**: History row type badges (URL, Code, Text, etc.) now respect the selected app language.
+- **Volume slider performance**: Dragging the SFX volume slider no longer triggers a full store save on every pixel.
+- **SFX accessibility**: Volume slider and per-sound toggles now have VoiceOver labels.
+- **Menu-bar empty slot copy**: Copying an empty slot from the menu bar now shows the same toast notification as paste.
 
 ## Version History
+
+### v1.7.2
+- Grouped search results by ClipType with section headers
+- Fix duplicate UUID accumulation in history
+- Fix SwiftUI view identity instability during search
+- Add dedicated empty-search state
+- Localize history row type badges
+- Debounce SFX volume slider persistence
+- Add VoiceOver labels to SFX controls
+- Add missing empty-slot copy notification in menu bar
 
 ### v1.7.1
 - Granular Sound Effects settings tab with per-action toggles and volume control
