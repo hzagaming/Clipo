@@ -125,6 +125,7 @@ class HotkeyService {
             handlers[id] = action
         } else {
             print("[Clipo] Failed to register hotkey id \(id), status: \(status)")
+            SoundService.shared.playError()
             NotificationService.shared.showNotification(
                 title: L10n.string(.hotkeyRegistrationFailedTitle),
                 body: L10n.string(.hotkeyRegistrationFailedTemplate, id),
@@ -147,6 +148,7 @@ class HotkeyService {
 
     func saveSelectionToSlot(number slotNumber: Int) {
         guard PermissionService.shared.hasAccessibilityPermission() else {
+            SoundService.shared.playError()
             NotificationService.shared.showNotification(
                 title: L10n.string(.notificationPermissionRequiredTitle),
                 body: PermissionService.shared.accessibilityRequiredMessage(action: L10n.string(.footerSave).lowercased()),

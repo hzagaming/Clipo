@@ -19,7 +19,8 @@ struct SettingsView: View {
             (L10n.string(.tabClipboard), "doc.on.clipboard"),
             (L10n.string(.tabPrivacy), "shield"),
             (L10n.string(.tabData), "externaldrive"),
-            (L10n.string(.tabInsights), "chart.bar")
+            (L10n.string(.tabInsights), "chart.bar"),
+            (L10n.string(.tabSFX), "speaker.wave.2")
         ]
     }
     
@@ -118,6 +119,7 @@ struct SettingsView: View {
                     case 3: privacyTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     case 4: dataTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     case 5: InsightsView().transition(.opacity.combined(with: .move(edge: .trailing)))
+                    case 6: sfxTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     default: generalTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
                 }
@@ -215,21 +217,6 @@ struct SettingsView: View {
                         )
                     }
                 }
-            }
-            .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color(NSColor.controlBackgroundColor))
-            )
-            
-            sectionTitle(L10n.string(.sectionFeedback))
-            VStack(spacing: 0) {
-                ToggleRow(
-                    icon: "speaker.wave.2",
-                    title: L10n.string(.soundEffectsTitle),
-                    subtitle: L10n.string(.soundEffectsSubtitle),
-                    isOn: $store.settings.soundEnabled
-                )
             }
             .padding(12)
             .background(
@@ -639,6 +626,110 @@ struct SettingsView: View {
         }
     }
     
+    // MARK: - Sound Effects Tab
+    
+    private var sfxTab: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            sectionTitle(L10n.string(.sectionSoundEffects))
+            VStack(spacing: 0) {
+                ToggleRow(
+                    icon: "speaker.wave.2",
+                    title: L10n.string(.sfxMasterToggle),
+                    subtitle: L10n.string(.sfxMasterToggleSubtitle),
+                    isOn: $store.settings.soundEnabled
+                )
+                
+                VStack(spacing: 0) {
+                    Divider().padding(.leading, 44)
+                    
+                    HStack(spacing: 12) {
+                        Image(systemName: "speaker.wave.3")
+                            .font(.system(size: 16))
+                            .foregroundColor(.accentColor)
+                            .frame(width: 24)
+                        
+                        Text(L10n.string(.sfxVolumeTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        
+                        Spacer()
+                        
+                        Text("\(Int(store.settings.soundVolume * 100))%")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.secondary)
+                            .frame(width: 32, alignment: .trailing)
+                        
+                        Slider(
+                            value: $store.settings.soundVolume,
+                            in: 0...1,
+                            onEditingChanged: { isEditing in
+                                if !isEditing {
+                                    SoundService.shared.playPreview()
+                                }
+                            }
+                        )
+                        .frame(width: 100)
+                        .controlSize(.small)
+                    }
+                    .padding(.vertical, 8)
+                    
+                    Divider().padding(.leading, 44)
+                    
+                    sfxToggleRow(icon: "doc.on.doc", title: L10n.string(.sfxCopyToggle), isOn: $store.settings.soundCopyEnabled)
+                    
+                    Divider().padding(.leading, 44)
+                    
+                    sfxToggleRow(icon: "doc.on.clipboard", title: L10n.string(.sfxPasteToggle), isOn: $store.settings.soundPasteEnabled)
+                    
+                    Divider().padding(.leading, 44)
+                    
+                    sfxToggleRow(icon: "square.grid.2x2", title: L10n.string(.sfxSaveToggle), isOn: $store.settings.soundSaveEnabled)
+                    
+                    Divider().padding(.leading, 44)
+                    
+                    sfxToggleRow(icon: "arrow.up.forward.app", title: L10n.string(.sfxOpenToggle), isOn: $store.settings.soundOpenEnabled)
+                    
+                    Divider().padding(.leading, 44)
+                    
+                    sfxToggleRow(icon: "xmark.app", title: L10n.string(.sfxCloseToggle), isOn: $store.settings.soundCloseEnabled)
+                    
+                    Divider().padding(.leading, 44)
+                    
+                    sfxToggleRow(icon: "exclamationmark.triangle", title: L10n.string(.sfxErrorToggle), isOn: $store.settings.soundErrorEnabled)
+                    
+                    Divider().padding(.leading, 44)
+                    
+                    sfxToggleRow(icon: "arrow.counterclockwise", title: L10n.string(.sfxResetToggle), isOn: $store.settings.soundResetEnabled)
+                }
+                .disabled(!store.settings.soundEnabled)
+                .opacity(store.settings.soundEnabled ? 1.0 : 0.5)
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(NSColor.controlBackgroundColor))
+            )
+        }
+    }
+    
+    private func sfxToggleRow(icon: String, title: String, isOn: Binding<Bool>) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(.accentColor)
+                .frame(width: 24)
+            
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+            
+            Spacer()
+            
+            Toggle("", isOn: isOn)
+                .toggleStyle(SwitchToggleStyle(tint: .accentColor))
+                .labelsHidden()
+        }
+        .padding(.vertical, 8)
+    }
+    
     // MARK: - Data Tab
     
     private var dataTab: some View {
@@ -671,7 +762,10 @@ struct SettingsView: View {
                         title: L10n.string(.alertClearHistoryTitle),
                         message: L10n.string(.alertClearHistoryMessage),
                         confirmButtonTitle: L10n.string(.alertClearHistoryConfirm),
-                        action: { store.clearHistory() }
+                        action: {
+                            store.clearHistory()
+                            SoundService.shared.playReset()
+                        }
                     )
                 }
                 
@@ -680,7 +774,10 @@ struct SettingsView: View {
                         title: L10n.string(.alertResetSlotsTitle),
                         message: L10n.string(.alertResetSlotsMessage),
                         confirmButtonTitle: L10n.string(.alertResetSlotsConfirm),
-                        action: { store.resetSlots() }
+                        action: {
+                            store.resetSlots()
+                            SoundService.shared.playReset()
+                        }
                     )
                 }
                 
@@ -689,7 +786,10 @@ struct SettingsView: View {
                         title: L10n.string(.alertResetAllTitle),
                         message: L10n.string(.alertResetAllMessage),
                         confirmButtonTitle: L10n.string(.alertResetAllConfirm),
-                        action: { store.resetAllData() }
+                        action: {
+                            store.resetAllData()
+                            SoundService.shared.playReset()
+                        }
                     )
                 }
             }

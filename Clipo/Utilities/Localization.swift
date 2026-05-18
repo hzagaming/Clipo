@@ -3,7 +3,7 @@ import Foundation
 enum LocKey: String {
     // MARK: - Settings
     case settingsTitle
-    case tabGeneral, tabShortcuts, tabClipboard, tabPrivacy, tabData
+    case tabGeneral, tabShortcuts, tabClipboard, tabPrivacy, tabData, tabSFX
     case sectionStartup
     case launchAtLoginTitle, launchAtLoginSubtitle
     case showDockIconTitle, showDockIconSubtitle
@@ -167,6 +167,18 @@ enum LocKey: String {
     case customLabel
     case keyCodeTemplate
     
+    // MARK: - Sound Effects
+    case sectionSoundEffects
+    case sfxMasterToggle, sfxMasterToggleSubtitle
+    case sfxVolumeTitle
+    case sfxCopyToggle
+    case sfxPasteToggle
+    case sfxSaveToggle
+    case sfxOpenToggle
+    case sfxCloseToggle
+    case sfxErrorToggle
+    case sfxResetToggle
+    
     // MARK: - Insights Dashboard
     case tabInsights
     case statTodayLabel
@@ -271,6 +283,18 @@ struct L10n {
             "es": "Datos",
             "ru": "Данные",
             "pt": "Dados"
+        ],
+        "tabSFX": [
+            "en": "Sound Effects",
+            "zh-Hans": "音效",
+            "zh-Hant": "音效",
+            "ja": "効果音",
+            "ko": "효과음",
+            "fr": "Effets sonores",
+            "de": "Soundeffekte",
+            "es": "Efectos de sonido",
+            "ru": "Звуковые эффекты",
+            "pt": "Efeitos Sonoros"
         ],
         "sectionStartup": [
             "en": "Startup",
@@ -2635,6 +2659,138 @@ struct L10n {
             "es": "Tecla %d",
             "ru": "Клавиша %d",
             "pt": "Tecla %d"
+        ],
+        "sectionSoundEffects": [
+            "en": "Sound Effects",
+            "zh-Hans": "音效",
+            "zh-Hant": "音效",
+            "ja": "効果音",
+            "ko": "효과음",
+            "fr": "Effets sonores",
+            "de": "Soundeffekte",
+            "es": "Efectos de sonido",
+            "ru": "Звуковые эффекты",
+            "pt": "Efeitos Sonoros"
+        ],
+        "sfxMasterToggle": [
+            "en": "Enable Sound Effects",
+            "zh-Hans": "启用音效",
+            "zh-Hant": "啟用音效",
+            "ja": "効果音を有効にする",
+            "ko": "효과음 활성화",
+            "fr": "Activer les effets sonores",
+            "de": "Soundeffekte aktivieren",
+            "es": "Activar efectos de sonido",
+            "ru": "Включить звуковые эффекты",
+            "pt": "Ativar Efeitos Sonoros"
+        ],
+        "sfxMasterToggleSubtitle": [
+            "en": "Play audio feedback for actions",
+            "zh-Hans": "为操作播放音频反馈",
+            "zh-Hant": "為操作播放音訊回饋",
+            "ja": "アクション時に音を再生",
+            "ko": "작업에 대한 오디오 피드백 재생",
+            "fr": "Jouer un retour audio pour les actions",
+            "de": "Audio-Feedback für Aktionen abspielen",
+            "es": "Reproducir retroalimentación de audio para acciones",
+            "ru": "Воспроизводить звуковую обратную связь для действий",
+            "pt": "Reproduzir feedback de áudio para ações"
+        ],
+        "sfxVolumeTitle": [
+            "en": "Volume",
+            "zh-Hans": "音量",
+            "zh-Hant": "音量",
+            "ja": "音量",
+            "ko": "볼륨",
+            "fr": "Volume",
+            "de": "Lautstärke",
+            "es": "Volumen",
+            "ru": "Громкость",
+            "pt": "Volume"
+        ],
+        "sfxCopyToggle": [
+            "en": "Copy",
+            "zh-Hans": "复制",
+            "zh-Hant": "複製",
+            "ja": "コピー",
+            "ko": "복사",
+            "fr": "Copier",
+            "de": "Kopieren",
+            "es": "Copiar",
+            "ru": "Копировать",
+            "pt": "Copiar"
+        ],
+        "sfxPasteToggle": [
+            "en": "Paste",
+            "zh-Hans": "粘贴",
+            "zh-Hant": "貼上",
+            "ja": "貼り付け",
+            "ko": "붙여넣기",
+            "fr": "Coller",
+            "de": "Einfügen",
+            "es": "Pegar",
+            "ru": "Вставить",
+            "pt": "Colar"
+        ],
+        "sfxSaveToggle": [
+            "en": "Save to Slot",
+            "zh-Hans": "保存到槽位",
+            "zh-Hant": "儲存到槽位",
+            "ja": "スロットに保存",
+            "ko": "슬롯에 저장",
+            "fr": "Enregistrer dans l'emplacement",
+            "de": "In Slot speichern",
+            "es": "Guardar en ranura",
+            "ru": "Сохранить в слот",
+            "pt": "Salvar no Slot"
+        ],
+        "sfxOpenToggle": [
+            "en": "Open Panel",
+            "zh-Hans": "打开面板",
+            "zh-Hant": "打開面板",
+            "ja": "パネルを開く",
+            "ko": "패널 열기",
+            "fr": "Ouvrir le panneau",
+            "de": "Panel öffnen",
+            "es": "Abrir panel",
+            "ru": "Открыть панель",
+            "pt": "Abrir Painel"
+        ],
+        "sfxCloseToggle": [
+            "en": "Close Panel",
+            "zh-Hans": "关闭面板",
+            "zh-Hant": "關閉面板",
+            "ja": "パネルを閉じる",
+            "ko": "패널 닫기",
+            "fr": "Fermer le panneau",
+            "de": "Panel schließen",
+            "es": "Cerrar panel",
+            "ru": "Закрыть панель",
+            "pt": "Fechar Painel"
+        ],
+        "sfxErrorToggle": [
+            "en": "Error",
+            "zh-Hans": "错误",
+            "zh-Hant": "錯誤",
+            "ja": "エラー",
+            "ko": "오류",
+            "fr": "Erreur",
+            "de": "Fehler",
+            "es": "Error",
+            "ru": "Ошибка",
+            "pt": "Erro"
+        ],
+        "sfxResetToggle": [
+            "en": "Reset",
+            "zh-Hans": "重置",
+            "zh-Hant": "重置",
+            "ja": "リセット",
+            "ko": "재설정",
+            "fr": "Réinitialiser",
+            "de": "Zurücksetzen",
+            "es": "Restablecer",
+            "ru": "Сброс",
+            "pt": "Redefinir"
         ],
         "tabInsights": [
             "en": "Insights",

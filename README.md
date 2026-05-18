@@ -248,16 +248,29 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-## What's New in v1.6.8
+## What's New in v1.7.1
 
-- **Click-outside to hide panel**: The Clipo panel now auto-hides when you click anywhere outside it (previously required pressing Escape).
-- **Smoother Settings tabs**: Removed conflicting transition animations that caused flicker when switching tabs.
-- **Consistent Copy behavior**: Copy from the context menu now closes the panel, matching the behavior when clicking a row.
-- **Permission-grant feedback**: Fixed missing Toast notification when re-authorizing from the menu bar.
-- **System permission dialog**: The permission window now triggers the native macOS accessibility dialog in addition to opening System Settings.
-- **Launch flow fixes**: Granting Accessibility permission now automatically shows the Clipo panel on first launch.
+- **Granular Sound Effects Settings**: New dedicated Sound Effects tab in Settings with per-action toggles (Copy, Paste, Save, Open, Close, Error, Reset) plus a master switch and volume slider with live preview.
+- **Sound Consistency Audit**: Added missing error sounds on permission-denied paths (save hotkey, panel paste, menu-bar paste, hotkey registration).
+- **Destructive-action sounds**: Clear History, Reset Slots, and Reset All Data now play the Reset sound when confirmed.
+- **Volume guard**: Sounds are now skipped when volume is set to 0 instead of playing silently.
+- **Removed duplicate toggle**: The legacy Sound Effects toggle has been removed from General settings and consolidated into the new dedicated tab.
+- **Critical UI fix**: Fixed the master sound toggle becoming permanently disabled when turned off in the SFX tab.
 
 ## Version History
+
+### v1.7.1
+- Granular Sound Effects settings tab with per-action toggles and volume control
+- Add missing error sounds across permission-denied paths
+- Play reset sound on destructive settings actions
+- Skip sound playback when volume is zero
+- Remove duplicate sound toggle from General tab
+- Fix master toggle disabled trap in SFX tab
+
+### v1.7.0
+- 10-language i18n system (en, zh-Hans, zh-Hant, ja, ko, fr, de, es, ru, pt)
+- Language picker in Settings with instant switching
+- Localize all UI surfaces (panel, settings, menu bar, notifications, onboarding)
 
 ### v1.6.8
 - Auto-hide panel on click-outside

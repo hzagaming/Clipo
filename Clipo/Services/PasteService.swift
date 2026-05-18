@@ -56,6 +56,7 @@ class PasteService {
 
     func pasteItem(_ item: ClipItem, restorePrevious: Bool = true) {
         guard PermissionService.shared.hasAccessibilityPermission() else {
+            SoundService.shared.playError()
             NotificationService.shared.showNotification(
                 title: L10n.string(.notificationPastePermissionTitle),
                 body: PermissionService.shared.accessibilityRequiredMessage(action: L10n.string(.footerPaste).lowercased()),
