@@ -18,7 +18,8 @@ struct SettingsView: View {
             (L10n.string(.tabShortcuts), "command"),
             (L10n.string(.tabClipboard), "doc.on.clipboard"),
             (L10n.string(.tabPrivacy), "shield"),
-            (L10n.string(.tabData), "externaldrive")
+            (L10n.string(.tabData), "externaldrive"),
+            (L10n.string(.tabInsights), "chart.bar")
         ]
     }
     
@@ -116,6 +117,7 @@ struct SettingsView: View {
                     case 2: clipboardTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     case 3: privacyTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     case 4: dataTab.transition(.opacity.combined(with: .move(edge: .trailing)))
+                    case 5: InsightsView().transition(.opacity.combined(with: .move(edge: .trailing)))
                     default: generalTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
                 }

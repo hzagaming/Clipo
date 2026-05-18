@@ -13,12 +13,12 @@ struct HistoryRowView: View {
             // Icon with subtle background
             ZStack {
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(iconBackgroundColor.opacity(0.12))
+                    .fill(item.type.iconBackgroundColor.opacity(0.12))
                     .frame(width: 30, height: 30)
                 
                 Image(systemName: iconName(for: item.type))
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(iconBackgroundColor.opacity(0.8))
+                    .foregroundColor(item.type.iconBackgroundColor.opacity(0.8))
             }
             
             VStack(alignment: .leading, spacing: 3) {
@@ -101,25 +101,6 @@ struct HistoryRowView: View {
             withAnimation(.easeInOut(duration: 0.12)) {
                 isHovering = hovering
             }
-        }
-    }
-    
-    private var iconBackgroundColor: Color {
-        switch item.type {
-        case .url:
-            return .blue
-        case .codeLikeText:
-            return .orange
-        case .plainText:
-            return .gray
-        case .image:
-            return .purple
-        case .file:
-            return .green
-        case .richText:
-            return .pink
-        case .data:
-            return .secondary
         }
     }
     

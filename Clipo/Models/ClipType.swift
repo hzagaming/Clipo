@@ -1,3 +1,5 @@
+import SwiftUI
+
 enum ClipType: String, Codable, CaseIterable {
     case plainText
     case url
@@ -18,6 +20,30 @@ extension ClipType {
         case .file: return L10n.string(.typeFile)
         case .richText: return L10n.string(.typeRich)
         case .data: return L10n.string(.typeData)
+        }
+    }
+    
+    var filterColor: Color {
+        switch self {
+        case .plainText: return .gray
+        case .url: return .blue
+        case .codeLikeText: return .orange
+        case .image: return .purple
+        case .file: return .green
+        case .richText: return .pink
+        case .data: return .secondary
+        }
+    }
+    
+    var iconBackgroundColor: Color {
+        switch self {
+        case .url: return .blue
+        case .codeLikeText: return .orange
+        case .plainText: return .gray
+        case .image: return .purple
+        case .file: return .green
+        case .richText: return .pink
+        case .data: return .secondary
         }
     }
 }

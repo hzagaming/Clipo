@@ -6,22 +6,6 @@ extension Notification.Name {
     static let openClipoSettings = Notification.Name("openClipoSettings")
 }
 
-// MARK: - ClipType UI Helpers
-
-extension ClipType {
-    var filterColor: Color {
-        switch self {
-        case .plainText: return .gray
-        case .url: return .blue
-        case .codeLikeText: return .orange
-        case .image: return .purple
-        case .file: return .green
-        case .richText: return .pink
-        case .data: return .secondary
-        }
-    }
-}
-
 struct ClipoPanelView: View {
     @StateObject private var store = ClipStore.shared
     @State private var searchText = ""

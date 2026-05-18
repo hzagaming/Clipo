@@ -162,6 +162,23 @@ enum LocKey: String {
     case checkingAccessibilityPermissionMenu
     case customLabel
     case keyCodeTemplate
+    
+    // MARK: - Insights Dashboard
+    case tabInsights
+    case statTodayLabel
+    case statWeekLabel
+    case statTotalLabel
+    case statSourcesLabel
+    case trendTitle
+    case hourlyTitle
+    case peakHourTemplate
+    case typeDistTitle
+    case topSourcesTitle
+    case slotUtilTitle
+    case slotUtilTemplate
+    case noDataLabel
+    case unknownSource
+    case todayLabel
 }
 
 struct L10n {
@@ -2562,6 +2579,186 @@ struct L10n {
             "es": "Tecla %d",
             "ru": "Клавиша %d",
             "pt": "Tecla %d"
+        ],
+        "tabInsights": [
+            "en": "Insights",
+            "zh-Hans": "统计",
+            "zh-Hant": "統計",
+            "ja": "統計",
+            "ko": "통계",
+            "fr": "Statistiques",
+            "de": "Einblicke",
+            "es": "Estadísticas",
+            "ru": "Статистика",
+            "pt": "Estatísticas"
+        ],
+        "statTodayLabel": [
+            "en": "Today",
+            "zh-Hans": "今日",
+            "zh-Hant": "今日",
+            "ja": "今日",
+            "ko": "오늘",
+            "fr": "Aujourd'hui",
+            "de": "Heute",
+            "es": "Hoy",
+            "ru": "Сегодня",
+            "pt": "Hoje"
+        ],
+        "statWeekLabel": [
+            "en": "This Week",
+            "zh-Hans": "本周",
+            "zh-Hant": "本週",
+            "ja": "今週",
+            "ko": "이번 주",
+            "fr": "Cette semaine",
+            "de": "Diese Woche",
+            "es": "Esta semana",
+            "ru": "На этой неделе",
+            "pt": "Esta semana"
+        ],
+        "statTotalLabel": [
+            "en": "Total",
+            "zh-Hans": "总计",
+            "zh-Hant": "總計",
+            "ja": "合計",
+            "ko": "총계",
+            "fr": "Total",
+            "de": "Gesamt",
+            "es": "Total",
+            "ru": "Всего",
+            "pt": "Total"
+        ],
+        "statSourcesLabel": [
+            "en": "Sources",
+            "zh-Hans": "来源",
+            "zh-Hant": "來源",
+            "ja": "ソース",
+            "ko": "출처",
+            "fr": "Sources",
+            "de": "Quellen",
+            "es": "Fuentes",
+            "ru": "Источники",
+            "pt": "Fontes"
+        ],
+        "trendTitle": [
+            "en": "7-Day Trend",
+            "zh-Hans": "7天趋势",
+            "zh-Hant": "7天趨勢",
+            "ja": "7日間の推移",
+            "ko": "7일 추이",
+            "fr": "Tendance sur 7 jours",
+            "de": "7-Tage-Trend",
+            "es": "Tendencia de 7 días",
+            "ru": "Тренд за 7 дней",
+            "pt": "Tendência de 7 Dias"
+        ],
+        "hourlyTitle": [
+            "en": "Hourly Activity",
+            "zh-Hans": "每小时活动",
+            "zh-Hant": "每小時活動",
+            "ja": "時間別アクティビティ",
+            "ko": "시간대별 활동",
+            "fr": "Activité horaire",
+            "de": "Stündliche Aktivität",
+            "es": "Actividad por hora",
+            "ru": "Активность по часам",
+            "pt": "Atividade por Hora"
+        ],
+        "peakHourTemplate": [
+            "en": "Peak: %d:00",
+            "zh-Hans": "高峰: %d:00",
+            "zh-Hant": "高峰: %d:00",
+            "ja": "ピーク: %d:00",
+            "ko": "피크: %d:00",
+            "fr": "Pic: %d h",
+            "de": "Spitze: %d:00",
+            "es": "Pico: %d:00",
+            "ru": "Пик: %d:00",
+            "pt": "Pico: %d:00"
+        ],
+        "typeDistTitle": [
+            "en": "Content Types",
+            "zh-Hans": "内容类型",
+            "zh-Hant": "內容類型",
+            "ja": "コンテンツタイプ",
+            "ko": "콘텐츠 유형",
+            "fr": "Types de contenu",
+            "de": "Inhaltstypen",
+            "es": "Tipos de contenido",
+            "ru": "Типы контента",
+            "pt": "Tipos de Conteúdo"
+        ],
+        "topSourcesTitle": [
+            "en": "Top Sources",
+            "zh-Hans": "主要来源",
+            "zh-Hant": "主要來源",
+            "ja": "主要ソース",
+            "ko": "주요 출처",
+            "fr": "Principales sources",
+            "de": "Hauptquellen",
+            "es": "Principales fuentes",
+            "ru": "Топ источников",
+            "pt": "Principais Fontes"
+        ],
+        "slotUtilTitle": [
+            "en": "Slot Usage",
+            "zh-Hans": "槽位使用",
+            "zh-Hant": "槽位使用",
+            "ja": "スロット使用状況",
+            "ko": "슬롯 사용량",
+            "fr": "Utilisation des emplacements",
+            "de": "Slot-Nutzung",
+            "es": "Uso de ranuras",
+            "ru": "Использование слотов",
+            "pt": "Uso de Slots"
+        ],
+        "slotUtilTemplate": [
+            "en": "%d of %d slots filled",
+            "zh-Hans": "已使用 %d/%d 个槽位",
+            "zh-Hant": "已使用 %d/%d 個槽位",
+            "ja": "%d/%d スロット使用中",
+            "ko": "%d/%d 슬롯 사용 중",
+            "fr": "%d sur %d emplacements remplis",
+            "de": "%d von %d Slots belegt",
+            "es": "%d de %d ranuras ocupadas",
+            "ru": "%d из %d слотов заполнено",
+            "pt": "%d de %d slots preenchidos"
+        ],
+        "noDataLabel": [
+            "en": "No data yet",
+            "zh-Hans": "暂无数据",
+            "zh-Hant": "暫無數據",
+            "ja": "まだデータがありません",
+            "ko": "아직 데이터가 없습니다",
+            "fr": "Pas encore de données",
+            "de": "Noch keine Daten",
+            "es": "Aún no hay datos",
+            "ru": "Пока нет данных",
+            "pt": "Ainda sem dados"
+        ],
+        "unknownSource": [
+            "en": "Unknown",
+            "zh-Hans": "未知",
+            "zh-Hant": "未知",
+            "ja": "不明",
+            "ko": "알 수 없음",
+            "fr": "Inconnu",
+            "de": "Unbekannt",
+            "es": "Desconocido",
+            "ru": "Неизвестно",
+            "pt": "Desconhecido"
+        ],
+        "todayLabel": [
+            "en": "Today",
+            "zh-Hans": "今天",
+            "zh-Hant": "今天",
+            "ja": "今日",
+            "ko": "오늘",
+            "fr": "Aujourd'hui",
+            "de": "Heute",
+            "es": "Hoy",
+            "ru": "Сегодня",
+            "pt": "Hoje"
         ]
     ]
 }
