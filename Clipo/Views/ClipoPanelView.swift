@@ -414,7 +414,9 @@ struct ClipoPanelView: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSearchFocused)
     }
     
+    @ViewBuilder
     private var typeFilterBar: some View {
+        if store.settings.showTypeFilterBar {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 FilterPill(
@@ -436,6 +438,7 @@ struct ClipoPanelView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
+            }
         }
     }
     

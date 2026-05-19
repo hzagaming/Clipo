@@ -56,6 +56,7 @@ struct AppSettings: Codable, Equatable {
     var autoHideDelay: Double = 0.0
     var panelWidth: Int = 620
     var showHistorySectionHeader: Bool = true
+    var showTypeFilterBar: Bool = true
     
     // MARK: - Backward Compatibility
     
@@ -114,6 +115,7 @@ struct AppSettings: Codable, Equatable {
         self.autoHideDelay = max(0, try container.decodeIfPresent(Double.self, forKey: .autoHideDelay) ?? 0.0)
         self.panelWidth = max(400, min(800, try container.decodeIfPresent(Int.self, forKey: .panelWidth) ?? 620))
         self.showHistorySectionHeader = try container.decodeIfPresent(Bool.self, forKey: .showHistorySectionHeader) ?? true
+        self.showTypeFilterBar = try container.decodeIfPresent(Bool.self, forKey: .showTypeFilterBar) ?? true
     }
     
     init() {}

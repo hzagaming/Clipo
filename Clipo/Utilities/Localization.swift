@@ -220,6 +220,7 @@ enum LocKey: String {
     case autoHideNever
     case panelWidthTitle, panelWidthSubtitle
     case showHistorySectionHeaderTitle, showHistorySectionHeaderSubtitle
+    case showTypeFilterBarTitle, showTypeFilterBarSubtitle
     case okButton
 }
 
@@ -3557,6 +3558,30 @@ struct L10n {
             "es": "Mostrar el título de la sección 'Historial reciente' en el panel",
             "ru": "Показывать заголовок раздела 'Недавняя история' на панели",
             "pt": "Exibir o título da seção 'Histórico Recente' no painel"
+        ],
+        "showTypeFilterBarTitle": [
+            "en": "Show Type Filters",
+            "zh-Hans": "显示类型过滤器",
+            "zh-Hant": "顯示類型過濾器",
+            "ja": "タイプフィルターを表示",
+            "ko": "유형 필터 표시",
+            "fr": "Afficher les filtres de type",
+            "de": "Typ-Filter anzeigen",
+            "es": "Mostrar filtros de tipo",
+            "ru": "Показывать фильтры по типу",
+            "pt": "Mostrar Filtros de Tipo"
+        ],
+        "showTypeFilterBarSubtitle": [
+            "en": "Display the type filter pills above the history list",
+            "zh-Hans": "在历史列表上方显示类型过滤标签",
+            "zh-Hant": "在歷史列表上方顯示類型過濾標籤",
+            "ja": "履歴リストの上にタイプフィルターピルを表示",
+            "ko": "기록 목록 위에 유형 필터 배지 표시",
+            "fr": "Afficher les pastilles de filtre de type au-dessus de la liste d'historique",
+            "de": "Typ-Filter-Pills über der Verlaufsliste anzeigen",
+            "es": "Mostrar píldoras de filtro de tipo sobre la lista del historial",
+            "ru": "Показывать фильтры по типу над списком истории",
+            "pt": "Exibir filtros de tipo acima da lista do histórico"
         ],
         "okButton": [
             "en": "OK",

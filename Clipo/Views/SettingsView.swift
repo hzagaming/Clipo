@@ -312,18 +312,27 @@ struct SettingsView: View {
                     subtitle: L10n.string(.showSlotSectionSubtitle),
                     isOn: $store.settings.showSlotSection
                 )
-                
+
                 Divider().padding(.leading, 44)
-                
+
                 ToggleRow(
                     icon: "doc.text.magnifyingglass",
-                    title: L10n.string(.showHistorySectionHeaderTitle),
-                    subtitle: L10n.string(.showHistorySectionHeaderSubtitle),
+                    title: "Show History Header",
+                    subtitle: "Display the Recent History section title in the panel",
                     isOn: $store.settings.showHistorySectionHeader
                 )
-                
+
                 Divider().padding(.leading, 44)
-                
+
+                ToggleRow(
+                    icon: "funnel",
+                    title: L10n.string(.showTypeFilterBarTitle),
+                    subtitle: L10n.string(.showTypeFilterBarSubtitle),
+                    isOn: $store.settings.showTypeFilterBar
+                )
+
+                Divider().padding(.leading, 44)
+
                 ToggleRow(
                     icon: "app.badge",
                     title: L10n.string(.showSourceAppTitle),
