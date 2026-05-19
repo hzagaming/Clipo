@@ -99,7 +99,7 @@ struct SlotRowView: View {
                     .help(L10n.string(.footerDelete))
                 }
                 .opacity(isHovering ? 1 : 0)
-                .animation(.easeInOut(duration: 0.15), value: isHovering)
+                .animation(ClipStore.shared.settings.reduceAnimations ? nil : .easeInOut(duration: 0.15), value: isHovering)
             } else {
                 // Empty slot placeholder
                 VStack(alignment: .leading, spacing: 2) {
@@ -119,12 +119,16 @@ struct SlotRowView: View {
         .background(
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(isHovering ? Color.secondary.opacity(0.04) : Color.clear)
-                .animation(.easeInOut(duration: 0.15), value: isHovering)
+                .animation(ClipStore.shared.settings.reduceAnimations ? nil : .easeInOut(duration: 0.15), value: isHovering)
         )
         .contentShape(Rectangle())
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
+            if ClipStore.shared.settings.reduceAnimations {
                 isHovering = hovering
+            } else {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    isHovering = hovering
+                }
             }
         }
         .onTapGesture {

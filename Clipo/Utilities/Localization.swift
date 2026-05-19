@@ -3,7 +3,7 @@ import Foundation
 enum LocKey: String {
     // MARK: - Settings
     case settingsTitle
-    case tabGeneral, tabShortcuts, tabClipboard, tabPrivacy, tabData, tabSFX
+    case tabGeneral, tabShortcuts, tabClipboard, tabPrivacy, tabData, tabSFX, tabAbout
     case sectionStartup
     case launchAtLoginTitle, launchAtLoginSubtitle
     case showDockIconTitle, showDockIconSubtitle
@@ -222,6 +222,14 @@ enum LocKey: String {
     case showHistorySectionHeaderTitle, showHistorySectionHeaderSubtitle
     case showTypeFilterBarTitle, showTypeFilterBarSubtitle
     case okButton
+    
+    // MARK: - About
+    case aboutTitle
+    case aboutVersionTemplate
+    case aboutGithubTitle, aboutGithubSubtitle
+    case aboutWebsiteTitle, aboutWebsiteSubtitle
+    case aboutIssuesTitle, aboutIssuesSubtitle
+    case aboutUpdatesTitle, aboutUpdatesSubtitle
 }
 
 struct L10n {
@@ -318,6 +326,138 @@ struct L10n {
             "es": "Efectos de sonido",
             "ru": "Звуковые эффекты",
             "pt": "Efeitos Sonoros"
+        ],
+        "tabAbout": [
+            "en": "About",
+            "zh-Hans": "关于",
+            "zh-Hant": "關於",
+            "ja": "について",
+            "ko": "정보",
+            "fr": "À propos",
+            "de": "Über",
+            "es": "Acerca de",
+            "ru": "О программе",
+            "pt": "Sobre"
+        ],
+        "aboutTitle": [
+            "en": "Clipo",
+            "zh-Hans": "Clipo",
+            "zh-Hant": "Clipo",
+            "ja": "Clipo",
+            "ko": "Clipo",
+            "fr": "Clipo",
+            "de": "Clipo",
+            "es": "Clipo",
+            "ru": "Clipo",
+            "pt": "Clipo"
+        ],
+        "aboutVersionTemplate": [
+            "en": "Version %@",
+            "zh-Hans": "版本 %@",
+            "zh-Hant": "版本 %@",
+            "ja": "バージョン %@",
+            "ko": "버전 %@",
+            "fr": "Version %@",
+            "de": "Version %@",
+            "es": "Versión %@",
+            "ru": "Версия %@",
+            "pt": "Versão %@"
+        ],
+        "aboutGithubTitle": [
+            "en": "GitHub",
+            "zh-Hans": "GitHub",
+            "zh-Hant": "GitHub",
+            "ja": "GitHub",
+            "ko": "GitHub",
+            "fr": "GitHub",
+            "de": "GitHub",
+            "es": "GitHub",
+            "ru": "GitHub",
+            "pt": "GitHub"
+        ],
+        "aboutGithubSubtitle": [
+            "en": "github.com/hanazargames",
+            "zh-Hans": "github.com/hanazargames",
+            "zh-Hant": "github.com/hanazargames",
+            "ja": "github.com/hanazargames",
+            "ko": "github.com/hanazargames",
+            "fr": "github.com/hanazargames",
+            "de": "github.com/hanazargames",
+            "es": "github.com/hanazargames",
+            "ru": "github.com/hanazargames",
+            "pt": "github.com/hanazargames"
+        ],
+        "aboutWebsiteTitle": [
+            "en": "Other Products",
+            "zh-Hans": "其他产品",
+            "zh-Hant": "其他產品",
+            "ja": "その他の製品",
+            "ko": "다른 제품",
+            "fr": "Autres produits",
+            "de": "Weitere Produkte",
+            "es": "Otros productos",
+            "ru": "Другие продукты",
+            "pt": "Outros Produtos"
+        ],
+        "aboutWebsiteSubtitle": [
+            "en": "hanazargames.com",
+            "zh-Hans": "hanazargames.com",
+            "zh-Hant": "hanazargames.com",
+            "ja": "hanazargames.com",
+            "ko": "hanazargames.com",
+            "fr": "hanazargames.com",
+            "de": "hanazargames.com",
+            "es": "hanazargames.com",
+            "ru": "hanazargames.com",
+            "pt": "hanazargames.com"
+        ],
+        "aboutIssuesTitle": [
+            "en": "Report an Issue",
+            "zh-Hans": "反馈问题",
+            "zh-Hant": "回饋問題",
+            "ja": "問題を報告",
+            "ko": "문제 보고",
+            "fr": "Signaler un problème",
+            "de": "Problem melden",
+            "es": "Reportar un problema",
+            "ru": "Сообщить об ошибке",
+            "pt": "Reportar Problema"
+        ],
+        "aboutIssuesSubtitle": [
+            "en": "Open GitHub Issues",
+            "zh-Hans": "打开 GitHub Issues",
+            "zh-Hant": "打開 GitHub Issues",
+            "ja": "GitHub Issues を開く",
+            "ko": "GitHub Issues 열기",
+            "fr": "Ouvrir les Issues GitHub",
+            "de": "GitHub Issues öffnen",
+            "es": "Abrir GitHub Issues",
+            "ru": "Открыть GitHub Issues",
+            "pt": "Abrir GitHub Issues"
+        ],
+        "aboutUpdatesTitle": [
+            "en": "Check for Updates",
+            "zh-Hans": "检查更新",
+            "zh-Hant": "檢查更新",
+            "ja": "更新を確認",
+            "ko": "업데이트 확인",
+            "fr": "Vérifier les mises à jour",
+            "de": "Nach Updates suchen",
+            "es": "Buscar actualizaciones",
+            "ru": "Проверить обновления",
+            "pt": "Verificar Atualizações"
+        ],
+        "aboutUpdatesSubtitle": [
+            "en": "View latest release",
+            "zh-Hans": "查看最新版本",
+            "zh-Hant": "查看最新版本",
+            "ja": "最新リリースを見る",
+            "ko": "최신 릴리스 보기",
+            "fr": "Voir la dernière version",
+            "de": "Neueste Version anzeigen",
+            "es": "Ver última versión",
+            "ru": "Посмотреть последний релиз",
+            "pt": "Ver último lançamento"
         ],
         "sectionStartup": [
             "en": "Startup",

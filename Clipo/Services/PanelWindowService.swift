@@ -29,6 +29,7 @@ class PanelWindowService {
         if panel.isVisible && !isHiding {
             NSApp.activate(ignoringOtherApps: true)
             panel.makeKeyAndOrderFront(nil)
+            resetAutoHideTimer()
             return
         }
         
@@ -147,6 +148,7 @@ class PanelWindowService {
         stopKeyboardMonitoring()
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard self?.panelWindow?.isVisible == true else { return event }
+            self?.resetAutoHideTimer()
             NotificationCenter.default.post(name: .panelKeyboardEvent, object: event)
             // Consume navigation and action keys so they don't leak through
             // to the search field.
@@ -206,6 +208,11 @@ class PanelWindowService {
         autoHideTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
             self?.hidePanel()
         }
+    }
+    
+    func resetAutoHideTimer() {
+        guard ClipStore.shared.settings.autoHideDelay > 0 else { return }
+        startAutoHideTimer()
     }
     
     private func stopAutoHideTimer() {

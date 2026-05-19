@@ -21,7 +21,8 @@ struct SettingsView: View {
             (L10n.string(.tabPrivacy), "shield"),
             (L10n.string(.tabData), "externaldrive"),
             (L10n.string(.tabInsights), "chart.bar"),
-            (L10n.string(.tabSFX), "speaker.wave.2")
+            (L10n.string(.tabSFX), "speaker.wave.2"),
+            (L10n.string(.tabAbout), "info.circle")
         ]
     }
     
@@ -124,6 +125,7 @@ struct SettingsView: View {
                     case 4: dataTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     case 5: InsightsView().transition(.opacity.combined(with: .move(edge: .trailing)))
                     case 6: sfxTab.transition(.opacity.combined(with: .move(edge: .trailing)))
+                    case 7: aboutTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     default: generalTab.transition(.opacity.combined(with: .move(edge: .trailing)))
                     }
                 }
@@ -317,8 +319,8 @@ struct SettingsView: View {
 
                 ToggleRow(
                     icon: "doc.text.magnifyingglass",
-                    title: "Show History Header",
-                    subtitle: "Display the Recent History section title in the panel",
+                    title: L10n.string(.showHistorySectionHeaderTitle),
+                    subtitle: L10n.string(.showHistorySectionHeaderSubtitle),
                     isOn: $store.settings.showHistorySectionHeader
                 )
 
@@ -502,6 +504,9 @@ struct SettingsView: View {
                     Slider(value: $store.settings.autoHideDelay, in: 0.0...10.0, step: 0.5)
                         .frame(width: 100)
                         .controlSize(.small)
+                        .onChange(of: store.settings.autoHideDelay) { _ in
+                            PanelWindowService.shared.resetAutoHideTimer()
+                        }
                 }
                 .padding(.vertical, 8)
                 
@@ -540,7 +545,7 @@ struct SettingsView: View {
                     if let panel = PanelWindowService.shared.panelWindow {
                         var frame = panel.frame
                         frame.size.width = CGFloat(newValue)
-                        panel.setFrame(frame, display: true, animate: true)
+                        panel.setFrame(frame, display: true, animate: !store.settings.reduceAnimations)
                     }
                 }
             }
@@ -1079,6 +1084,107 @@ struct SettingsView: View {
         .padding(.vertical, 8)
     }
     
+    // MARK: - About Tab
+    
+    private var aboutTab: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            sectionTitle(L10n.string(.tabAbout))
+            
+            VStack(alignment: .center, spacing: 16) {
+                HStack(spacing: 8) {
+                    Image(systemName: "doc.on.clipboard")
+                        .font(.system(size: 28))
+                        .foregroundColor(.accentColor)
+                    Text(L10n.string(.aboutTitle))
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                }
+                
+                let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+                Text(L10n.string(.aboutVersionTemplate, version))
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            
+            VStack(spacing: 0) {
+                aboutLinkRow(
+                    icon: "globe",
+                    title: L10n.string(.aboutWebsiteTitle),
+                    subtitle: L10n.string(.aboutWebsiteSubtitle),
+                    url: "https://hanazargames.com"
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                aboutLinkRow(
+                    icon: "logo.github",
+                    title: L10n.string(.aboutGithubTitle),
+                    subtitle: L10n.string(.aboutGithubSubtitle),
+                    url: "https://github.com/hanazargames"
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                aboutLinkRow(
+                    icon: "exclamationmark.bubble",
+                    title: L10n.string(.aboutIssuesTitle),
+                    subtitle: L10n.string(.aboutIssuesSubtitle),
+                    url: "https://github.com/hanazargames/clipo/issues"
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                aboutLinkRow(
+                    icon: "arrow.down.circle",
+                    title: L10n.string(.aboutUpdatesTitle),
+                    subtitle: L10n.string(.aboutUpdatesSubtitle),
+                    url: "https://github.com/hanazargames/clipo/releases"
+                )
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(NSColor.controlBackgroundColor))
+            )
+            
+            Spacer()
+        }
+    }
+    
+    private func aboutLinkRow(icon: String, title: String, subtitle: String, url: String) -> some View {
+        Button(action: {
+            if let url = URL(string: url) {
+                NSWorkspace.shared.open(url)
+            }
+        }) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                    .foregroundColor(.accentColor)
+                    .frame(width: 24)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.primary)
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary.opacity(0.7))
+                }
+                
+                Spacer()
+                
+                Image(systemName: "arrow.up.right.square")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary.opacity(0.4))
+            }
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
     // MARK: - Data Tab
     
     private var dataTab: some View {
@@ -1243,6 +1349,9 @@ struct SettingsView: View {
                 settings: imported.settings
             )
             HotkeyService.shared.registerAllHotkeys()
+            if let appDelegate = NSApp.delegate as? AppDelegate {
+                appDelegate.setupStatusItem()
+            }
             let policy: NSApplication.ActivationPolicy = store.settings.showDockIcon ? .regular : .accessory
             let policyApplied = NSApp.setActivationPolicy(policy)
             if policyApplied {

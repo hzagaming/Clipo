@@ -1,5 +1,5 @@
 struct AppSettings: Codable, Equatable {
-    var launchAtLogin: Bool = false
+    var launchAtLogin: Bool = true
     var restoreClipboardAfterPaste: Bool = true
     var restoreClipboardAfterSave: Bool = true
     var maxHistoryItems: Int = 200
@@ -64,7 +64,7 @@ struct AppSettings: Codable, Equatable {
     /// ensuring old data files load gracefully after adding new settings.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.launchAtLogin = try container.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? false
+        self.launchAtLogin = try container.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? true
         self.restoreClipboardAfterPaste = try container.decodeIfPresent(Bool.self, forKey: .restoreClipboardAfterPaste) ?? true
         self.restoreClipboardAfterSave = try container.decodeIfPresent(Bool.self, forKey: .restoreClipboardAfterSave) ?? true
         self.maxHistoryItems = max(0, try container.decodeIfPresent(Int.self, forKey: .maxHistoryItems) ?? 200)

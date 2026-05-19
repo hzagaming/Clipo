@@ -147,8 +147,12 @@ struct ClipoPanelView: View {
                 }
                 .onChange(of: selectedIndex) { newValue in
                     let targetId = newValue < allNavigableItems.count ? allNavigableItems[newValue].id : "\(newValue)"
-                    withAnimation(.easeInOut(duration: 0.15)) {
+                    if store.settings.reduceAnimations {
                         proxy.scrollTo(targetId, anchor: .center)
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            proxy.scrollTo(targetId, anchor: .center)
+                        }
                     }
                 }
             }
@@ -160,8 +164,12 @@ struct ClipoPanelView: View {
         .onAppear(perform: onAppear)
         .onDisappear(perform: onDisappear)
         .onChange(of: searchText) { _ in
-            withAnimation(.easeOut(duration: 0.2)) {
+            if store.settings.reduceAnimations {
                 selectedIndex = 0
+            } else {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    selectedIndex = 0
+                }
             }
         }
         .onChange(of: store.settings.showEmptySlots) { _ in
@@ -169,6 +177,18 @@ struct ClipoPanelView: View {
                 selectedIndex = 0
             } else if selectedIndex >= allNavigableItems.count {
                 selectedIndex = allNavigableItems.count - 1
+            }
+        }
+        .onChange(of: store.settings.showSlotSection) { _ in
+            if allNavigableItems.isEmpty {
+                selectedIndex = 0
+            } else if selectedIndex >= allNavigableItems.count {
+                selectedIndex = allNavigableItems.count - 1
+            }
+        }
+        .onChange(of: store.settings.showTypeFilterBar) { newValue in
+            if !newValue {
+                selectedTypeFilter = nil
             }
         }
         .onReceive(store.$history) { _ in
@@ -179,8 +199,12 @@ struct ClipoPanelView: View {
             }
         }
         .onChange(of: selectedTypeFilter) { _ in
-            withAnimation(.easeOut(duration: 0.2)) {
+            if store.settings.reduceAnimations {
                 selectedIndex = 0
+            } else {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    selectedIndex = 0
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .panelKeyboardEvent)) { notification in
@@ -214,9 +238,14 @@ struct ClipoPanelView: View {
         isSearchFocused = true
         selectedIndex = 0
         startPermissionCheck()
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+        if store.settings.reduceAnimations {
             searchFieldScale = 1.0
             searchFieldOpacity = 1.0
+        } else {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                searchFieldScale = 1.0
+                searchFieldOpacity = 1.0
+            }
         }
     }
     
@@ -411,7 +440,7 @@ struct ClipoPanelView: View {
         .padding(.bottom, 6)
         .scaleEffect(searchFieldScale)
         .opacity(searchFieldOpacity)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSearchFocused)
+        .animation(store.settings.reduceAnimations ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: isSearchFocused)
     }
     
     @ViewBuilder
@@ -672,8 +701,12 @@ struct ClipoPanelView: View {
                     item: row.item,
                     slotNumber: num,
                     onDelete: {
-                        withAnimation(.easeOut(duration: 0.2)) {
+                        if store.settings.reduceAnimations {
                             store.deleteSlot(number: num)
+                        } else {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                store.deleteSlot(number: num)
+                            }
                         }
                         if selectedIndex >= allNavigableItems.count {
                             selectedIndex = max(0, allNavigableItems.count - 1)
@@ -721,8 +754,12 @@ struct ClipoPanelView: View {
         .id(row.id)
         .transition(.opacity.combined(with: .scale(scale: 0.97)))
         .onTapGesture {
-            withAnimation(.easeOut(duration: 0.15)) {
+            if store.settings.reduceAnimations {
                 selectedIndex = globalIndex
+            } else {
+                withAnimation(.easeOut(duration: 0.15)) {
+                    selectedIndex = globalIndex
+                }
             }
             if store.settings.pasteOnSelection {
                 pasteItem(row.item)
@@ -746,8 +783,12 @@ struct ClipoPanelView: View {
                 }
                 .keyboardShortcut("p", modifiers: .command)
                 Button(L10n.string(.contextMenuDelete)) {
-                    withAnimation(.easeOut(duration: 0.2)) {
+                    if store.settings.reduceAnimations {
                         store.deleteHistoryItem(id: row.item.id)
+                    } else {
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            store.deleteHistoryItem(id: row.item.id)
+                        }
                     }
                     if selectedIndex >= allNavigableItems.count {
                         selectedIndex = max(0, allNavigableItems.count - 1)
@@ -756,13 +797,17 @@ struct ClipoPanelView: View {
                 .keyboardShortcut(.delete, modifiers: [])
             }
         }
-        .animation(.spring(response: 0.2, dampingFraction: 0.8), value: selectedIndex)
+        .animation(store.settings.reduceAnimations ? nil : .spring(response: 0.2, dampingFraction: 0.8), value: selectedIndex)
     }
     
     private func performDelete(row: PanelListItem) {
         guard !row.isSlot else { return }
-        withAnimation(.easeOut(duration: 0.2)) {
+        if store.settings.reduceAnimations {
             store.deleteHistoryItem(id: row.item.id)
+        } else {
+            withAnimation(.easeOut(duration: 0.2)) {
+                store.deleteHistoryItem(id: row.item.id)
+            }
         }
         if selectedIndex >= allNavigableItems.count {
             selectedIndex = max(0, allNavigableItems.count - 1)
@@ -775,26 +820,45 @@ struct ClipoPanelView: View {
         guard !allNavigableItems.isEmpty else { return }
         switch event.keyCode {
         case 126: // Up arrow
+            PanelWindowService.shared.resetAutoHideTimer()
             if selectedIndex > 0 {
-                withAnimation(.easeOut(duration: 0.1)) {
+                if store.settings.reduceAnimations {
                     selectedIndex -= 1
+                } else {
+                    withAnimation(.easeOut(duration: 0.1)) {
+                        selectedIndex -= 1
+                    }
                 }
             } else if store.settings.keyboardWrapAround, !allNavigableItems.isEmpty {
-                withAnimation(.easeOut(duration: 0.1)) {
+                if store.settings.reduceAnimations {
                     selectedIndex = allNavigableItems.count - 1
+                } else {
+                    withAnimation(.easeOut(duration: 0.1)) {
+                        selectedIndex = allNavigableItems.count - 1
+                    }
                 }
             }
         case 125: // Down arrow
+            PanelWindowService.shared.resetAutoHideTimer()
             if selectedIndex < allNavigableItems.count - 1 {
-                withAnimation(.easeOut(duration: 0.1)) {
+                if store.settings.reduceAnimations {
                     selectedIndex += 1
+                } else {
+                    withAnimation(.easeOut(duration: 0.1)) {
+                        selectedIndex += 1
+                    }
                 }
             } else if store.settings.keyboardWrapAround, !allNavigableItems.isEmpty {
-                withAnimation(.easeOut(duration: 0.1)) {
+                if store.settings.reduceAnimations {
                     selectedIndex = 0
+                } else {
+                    withAnimation(.easeOut(duration: 0.1)) {
+                        selectedIndex = 0
+                    }
                 }
             }
         case 36: // Return
+            PanelWindowService.shared.resetAutoHideTimer()
             guard selectedIndex < allNavigableItems.count else { return }
             let row = allNavigableItems[selectedIndex]
             let shouldPaste = store.settings.pasteOnSelection != isOnlyCommandPressed(event)
@@ -805,10 +869,12 @@ struct ClipoPanelView: View {
                 PanelWindowService.shared.hidePanel()
             }
         case 53: // Esc
+            PanelWindowService.shared.resetAutoHideTimer()
             if store.settings.escapeClosesPanel {
                 PanelWindowService.shared.hidePanel()
             }
         case 51: // Delete (Backspace)
+            PanelWindowService.shared.resetAutoHideTimer()
             guard searchText.isEmpty else { return }
             guard selectedIndex < allNavigableItems.count else { return }
             let row = allNavigableItems[selectedIndex]
@@ -911,7 +977,7 @@ struct FilterPill: View {
                 )
         }
         .buttonStyle(PressableButtonStyle(scale: 0.95))
-        .animation(.spring(response: 0.25, dampingFraction: 0.8), value: isSelected)
+        .animation(ClipStore.shared.settings.reduceAnimations ? nil : .spring(response: 0.25, dampingFraction: 0.8), value: isSelected)
     }
 }
 

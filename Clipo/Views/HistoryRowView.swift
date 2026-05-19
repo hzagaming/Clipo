@@ -75,10 +75,10 @@ struct HistoryRowView: View {
                         .frame(width: 24, height: 24)
                         .contentShape(Rectangle())
                         .rotationEffect(.degrees(item.isPinned ? 0 : -45))
-                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: item.isPinned)
+                        .animation(ClipStore.shared.settings.reduceAnimations ? nil : .spring(response: 0.3, dampingFraction: 0.6), value: item.isPinned)
                 }
                 .buttonStyle(HistoryRowButtonStyle())
-                .help(item.isPinned ? "Unpin" : "Pin")
+                .help(item.isPinned ? L10n.string(.contextMenuUnpin) : L10n.string(.contextMenuPin))
                 
                 Button(action: onDelete) {
                     Image(systemName: "trash")
@@ -88,22 +88,26 @@ struct HistoryRowView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(HistoryRowButtonStyle())
-                .help("Delete")
+                .help(L10n.string(.contextMenuDelete))
             }
             .opacity(isHovering ? 1 : 0)
-            .animation(.easeInOut(duration: 0.15), value: isHovering)
+            .animation(ClipStore.shared.settings.reduceAnimations ? nil : .easeInOut(duration: 0.15), value: isHovering)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, ClipStore.shared.settings.rowHeightCompact ? 2 : 6)
         .background(
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(isHovering ? Color.secondary.opacity(0.04) : Color.clear)
-                .animation(.easeInOut(duration: 0.15), value: isHovering)
+                .animation(ClipStore.shared.settings.reduceAnimations ? nil : .easeInOut(duration: 0.15), value: isHovering)
         )
         .contentShape(Rectangle())
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.12)) {
+            if ClipStore.shared.settings.reduceAnimations {
                 isHovering = hovering
+            } else {
+                withAnimation(.easeInOut(duration: 0.12)) {
+                    isHovering = hovering
+                }
             }
         }
     }
@@ -133,7 +137,7 @@ private struct HistoryRowButtonStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.92 : 1)
             .opacity(configuration.isPressed ? 0.7 : 1)
-            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+            .animation(ClipStore.shared.settings.reduceAnimations ? nil : .easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
