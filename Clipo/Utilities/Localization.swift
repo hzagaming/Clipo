@@ -201,7 +201,18 @@ enum LocKey: String {
     case panelAnimationSpeedTitle, panelAnimationSpeedSubtitle
     case notificationDurationTitle, notificationDurationSubtitle
     case searchCaseSensitiveTitle, searchCaseSensitiveSubtitle
+    case searchFuzzyMatchingTitle, searchFuzzyMatchingSubtitle
     case pasteDelayTitle, pasteDelaySubtitle
+    case panelOpacityTitle, panelOpacitySubtitle
+    case rowHeightCompactTitle, rowHeightCompactSubtitle
+    case autoClearOnScreenLockTitle, autoClearOnScreenLockSubtitle
+    case keyboardWrapAroundTitle, keyboardWrapAroundSubtitle
+    case showTimestampTitle, showTimestampSubtitle
+    case showTypeBadgeTitle, showTypeBadgeSubtitle
+    case showFooterShortcutsTitle, showFooterShortcutsSubtitle
+    case clickOutsideClosesPanelTitle, clickOutsideClosesPanelSubtitle
+    case confirmBeforeDeleteTitle, confirmBeforeDeleteSubtitle
+    case confirmDeleteTitle, confirmDeleteMessage, confirmDeleteButton
     case okButton
 }
 
@@ -3107,6 +3118,282 @@ struct L10n {
             "es": "Esperar antes de simular pulsaciones de pegado",
             "ru": "Ожидание перед имитацией нажатий вставки",
             "pt": "Aguardar antes de simular teclas de colar"
+        ],
+        "searchFuzzyMatchingTitle": [
+            "en": "Fuzzy Search",
+            "zh-Hans": "模糊搜索",
+            "zh-Hant": "模糊搜尋",
+            "ja": "あいまい検索",
+            "ko": "퍼지 검색",
+            "fr": "Recherche floue",
+            "de": "Fuzzy-Suche",
+            "es": "Búsqueda difusa",
+            "ru": "Нечёткий поиск",
+            "pt": "Pesquisa Fuzzy"
+        ],
+        "searchFuzzyMatchingSubtitle": [
+            "en": "Match fragments out of order (e.g. 'ghr' → 'GitHub Repo')",
+            "zh-Hans": "按顺序匹配字符片段（如 ghr → GitHub Repo）",
+            "zh-Hant": "按順序匹配字元片段（如 ghr → GitHub Repo）",
+            "ja": "文字の順序で一致（例: ghr → GitHub Repo）",
+            "ko": "문자 순서로 일치 (예: ghr → GitHub Repo)",
+            "fr": "Correspondance par fragments de caractères (ex: ghr → GitHub Repo)",
+            "de": "Zeichenfolgen in Reihenfolge matchen (z.B. ghr → GitHub Repo)",
+            "es": "Coincidir fragmentos de caracteres (ej. ghr → GitHub Repo)",
+            "ru": "Посимвольное совпадение по порядку (например, ghr → GitHub Repo)",
+            "pt": "Corresponder fragmentos de caracteres (ex: ghr → GitHub Repo)"
+        ],
+        "panelOpacityTitle": [
+            "en": "Panel Opacity",
+            "zh-Hans": "面板不透明度",
+            "zh-Hant": "面板不透明度",
+            "ja": "パネルの不透明度",
+            "ko": "패널 불투명도",
+            "fr": "Opacité du panneau",
+            "de": "Panel-Deckkraft",
+            "es": "Opacidad del panel",
+            "ru": "Непрозрачность панели",
+            "pt": "Opacidade do Painel"
+        ],
+        "panelOpacitySubtitle": [
+            "en": "Make the panel background translucent",
+            "zh-Hans": "使面板背景半透明",
+            "zh-Hant": "使面板背景半透明",
+            "ja": "パネルの背景を半透明にする",
+            "ko": "패널 배경을 반투명하게",
+            "fr": "Rendre l'arrière-plan du panneau translucide",
+            "de": "Panel-Hintergrund halbtransparent machen",
+            "es": "Hacer el fondo del panel translúcido",
+            "ru": "Сделать фон панели полупрозрачным",
+            "pt": "Tornar o fundo do painel translúcido"
+        ],
+        "rowHeightCompactTitle": [
+            "en": "Compact Rows",
+            "zh-Hans": "紧凑行高",
+            "zh-Hant": "緊湊行高",
+            "ja": "コンパクトな行",
+            "ko": "콤팩트 행",
+            "fr": "Lignes compactes",
+            "de": "Kompakte Zeilen",
+            "es": "Filas compactas",
+            "ru": "Компактные строки",
+            "pt": "Linhas Compactas"
+        ],
+        "rowHeightCompactSubtitle": [
+            "en": "Show more items at once with less padding",
+            "zh-Hans": "减少内边距以显示更多条目",
+            "zh-Hant": "減少內邊距以顯示更多項目",
+            "ja": "パディングを減らして一度に更多のアイテムを表示",
+            "ko": "패딩을 줄여 한 번에 더 많은 항목 표시",
+            "fr": "Afficher plus d'éléments en réduisant l'espacement",
+            "de": "Mehr Elemente gleichzeitig mit weniger Abstand anzeigen",
+            "es": "Mostrar más elementos a la vez con menos relleno",
+            "ru": "Показывать больше элементов за раз с меньшими отступами",
+            "pt": "Mostrar mais itens de uma vez com menos preenchimento"
+        ],
+        "autoClearOnScreenLockTitle": [
+            "en": "Auto-Clear on Lock",
+            "zh-Hans": "锁屏时自动清除",
+            "zh-Hant": "鎖屏時自動清除",
+            "ja": "ロック時に自動クリア",
+            "ko": "잠금 시 자동 지우기",
+            "fr": "Effacer auto. au verrouillage",
+            "de": "Bei Sperre automatisch löschen",
+            "es": "Borrar automáticamente al bloquear",
+            "ru": "Автоочистка при блокировке",
+            "pt": "Limpar Automaticamente ao Bloquear"
+        ],
+        "autoClearOnScreenLockSubtitle": [
+            "en": "Erase clipboard history when the screen locks",
+            "zh-Hans": "屏幕锁定时清除剪贴板历史",
+            "zh-Hant": "螢幕鎖定時清除剪貼簿歷史",
+            "ja": "画面ロック時にクリップボード履歴を消去",
+            "ko": "화면 잠금 시 클립보드 기록 삭제",
+            "fr": "Effacer l'historique du presse-papiers lors du verrouillage",
+            "de": "Zwischenablage-Verlauf bei Bildschirmsperre löschen",
+            "es": "Borrar historial del portapapeles al bloquear pantalla",
+            "ru": "Стирать историю буфера обмена при блокировке экрана",
+            "pt": "Apagar histórico da área de transferência ao bloquear tela"
+        ],
+        "keyboardWrapAroundTitle": [
+            "en": "Wrap Around Navigation",
+            "zh-Hans": "循环导航",
+            "zh-Hant": "循環導航",
+            "ja": "循環ナビゲーション",
+            "ko": "순환 탐색",
+            "fr": "Navigation circulaire",
+            "de": "Zyklische Navigation",
+            "es": "Navegación circular",
+            "ru": "Циклическая навигация",
+            "pt": "Navegação Circular"
+        ],
+        "keyboardWrapAroundSubtitle": [
+            "en": "Jump from first to last item and vice versa with arrow keys",
+            "zh-Hans": "使用方向键在首末项之间跳转",
+            "zh-Hant": "使用方向鍵在首末項之間跳轉",
+            "ja": "矢印キーで先頭と末尾を循環させる",
+            "ko": "화살표 키로 첫 항목과 마지막 항목 사이를 순환",
+            "fr": "Passer du premier au dernier élément et vice versa avec les flèches",
+            "de": "Mit Pfeiltasten vom ersten zum letzten Element springen und umgekehrt",
+            "es": "Saltar del primer al último elemento y viceversa con las flechas",
+            "ru": "Переходить от первого к последнему элементу и наоборот стрелками",
+            "pt": "Pular do primeiro para o último item e vice-versa com as setas"
+        ],
+        "showTimestampTitle": [
+            "en": "Show Timestamp",
+            "zh-Hans": "显示时间戳",
+            "zh-Hant": "顯示時間戳",
+            "ja": "タイムスタンプを表示",
+            "ko": "타임스탬프 표시",
+            "fr": "Afficher l'horodatage",
+            "de": "Zeitstempel anzeigen",
+            "es": "Mostrar marca de tiempo",
+            "ru": "Показывать метку времени",
+            "pt": "Mostrar Carimbo de Data/Hora"
+        ],
+        "showTimestampSubtitle": [
+            "en": "Display relative time for each history item",
+            "zh-Hans": "为每条历史记录显示相对时间",
+            "zh-Hant": "為每條歷史記錄顯示相對時間",
+            "ja": "各履歴項目の相対時間を表示",
+            "ko": "각 기록 항목의 상대 시간 표시",
+            "fr": "Afficher l'heure relative pour chaque élément d'historique",
+            "de": "Relative Zeit für jeden Verlaufseintrag anzeigen",
+            "es": "Mostrar hora relativa para cada elemento del historial",
+            "ru": "Показывать относительное время для каждого элемента истории",
+            "pt": "Exibir hora relativa para cada item do histórico"
+        ],
+        "showTypeBadgeTitle": [
+            "en": "Show Type Badge",
+            "zh-Hans": "显示类型徽章",
+            "zh-Hant": "顯示類型徽章",
+            "ja": "タイプバッジを表示",
+            "ko": "유형 배지 표시",
+            "fr": "Afficher le badge de type",
+            "de": "Typ-Badge anzeigen",
+            "es": "Mostrar insignia de tipo",
+            "ru": "Показывать значок типа",
+            "pt": "Mostrar Distintivo de Tipo"
+        ],
+        "showTypeBadgeSubtitle": [
+            "en": "Display a color-coded label for each clip type",
+            "zh-Hans": "为每种剪贴类型显示彩色标签",
+            "zh-Hant": "為每種剪貼類型顯示彩色標籤",
+            "ja": "各クリップタイプに色分けラベルを表示",
+            "ko": "각 클립 유형에 색상 라벨 표시",
+            "fr": "Afficher une étiquette colorée pour chaque type de clip",
+            "de": "Farbkodiertes Label für jeden Clip-Typ anzeigen",
+            "es": "Mostrar etiqueta codificada por color para cada tipo de clip",
+            "ru": "Показывать цветную метку для каждого типа клипа",
+            "pt": "Exibir etiqueta codificada por cor para cada tipo de clipe"
+        ],
+        "showFooterShortcutsTitle": [
+            "en": "Show Footer Shortcuts",
+            "zh-Hans": "显示底部快捷键",
+            "zh-Hant": "顯示底部快捷鍵",
+            "ja": "フッターのショートカットを表示",
+            "ko": "하단 단축키 표시",
+            "fr": "Afficher les raccourcis du pied de page",
+            "de": "Fußzeilen-Tastenkürzel anzeigen",
+            "es": "Mostrar atajos del pie de página",
+            "ru": "Показывать горячие клавиши в подвале",
+            "pt": "Mostrar Atalhos no Rodapé"
+        ],
+        "showFooterShortcutsSubtitle": [
+            "en": "Display keyboard shortcut hints at the bottom of the panel",
+            "zh-Hans": "在面板底部显示键盘快捷键提示",
+            "zh-Hant": "在面板底部顯示鍵盤快捷鍵提示",
+            "ja": "パネルの下部にキーボードショートカットのヒントを表示",
+            "ko": "패널 하단에 키보드 단축키 힌트 표시",
+            "fr": "Afficher les astuces de raccourcis clavier en bas du panneau",
+            "de": "Tastenkürzel-Hinweise am unteren Rand des Panels anzeigen",
+            "es": "Mostrar sugerencias de atajos de teclado en la parte inferior del panel",
+            "ru": "Показывать подсказки горячих клавиш внизу панели",
+            "pt": "Exibir dicas de atalhos de teclado na parte inferior do painel"
+        ],
+        "clickOutsideClosesPanelTitle": [
+            "en": "Click Outside to Close",
+            "zh-Hans": "点击外部关闭",
+            "zh-Hant": "點擊外部關閉",
+            "ja": "外部クリックで閉じる",
+            "ko": "외부 클릭으로 닫기",
+            "fr": "Cliquer à l'extérieur pour fermer",
+            "de": "Klick außerhalb zum Schließen",
+            "es": "Clic fuera para cerrar",
+            "ru": "Закрывать кликом за пределами",
+            "pt": "Clique Fora para Fechar"
+        ],
+        "clickOutsideClosesPanelSubtitle": [
+            "en": "Close the panel when clicking outside of it",
+            "zh-Hans": "点击面板外部时关闭面板",
+            "zh-Hant": "點擊面板外部時關閉面板",
+            "ja": "パネル外をクリックしたときに閉じる",
+            "ko": "패널 외부를 클릭할 때 닫기",
+            "fr": "Fermer le panneau en cliquant à l'extérieur",
+            "de": "Panel schließen, wenn außerhalb geklickt wird",
+            "es": "Cerrar el panel al hacer clic fuera de él",
+            "ru": "Закрывать панель при клике за её пределами",
+            "pt": "Fechar o painel ao clicar fora dele"
+        ],
+        "confirmBeforeDeleteTitle": [
+            "en": "Confirm Before Delete",
+            "zh-Hans": "删除前确认",
+            "zh-Hant": "刪除前確認",
+            "ja": "削除前に確認",
+            "ko": "삭제 전 확인",
+            "fr": "Confirmer avant suppression",
+            "de": "Vor dem Löschen bestätigen",
+            "es": "Confirmar antes de eliminar",
+            "ru": "Подтверждать перед удалением",
+            "pt": "Confirmar Antes de Excluir"
+        ],
+        "confirmBeforeDeleteSubtitle": [
+            "en": "Show a confirmation dialog before deleting history items",
+            "zh-Hans": "删除历史记录前显示确认对话框",
+            "zh-Hant": "刪除歷史記錄前顯示確認對話框",
+            "ja": "履歴項目を削除する前に確認ダイアログを表示",
+            "ko": "기록 항목을 삭제하기 전에 확인 대화 상자 표시",
+            "fr": "Afficher une boîte de dialogue de confirmation avant de supprimer des éléments d'historique",
+            "de": "Vor dem Löschen von Verlaufseinträgen einen Bestätigungsdialog anzeigen",
+            "es": "Mostrar un diálogo de confirmación antes de eliminar elementos del historial",
+            "ru": "Показывать диалог подтверждения перед удалением элементов истории",
+            "pt": "Exibir caixa de diálogo de confirmação antes de excluir itens do histórico"
+        ],
+        "confirmDeleteTitle": [
+            "en": "Delete History Item",
+            "zh-Hans": "删除历史记录",
+            "zh-Hant": "刪除歷史記錄",
+            "ja": "履歴項目を削除",
+            "ko": "기록 항목 삭제",
+            "fr": "Supprimer l'élément d'historique",
+            "de": "Verlaufseintrag löschen",
+            "es": "Eliminar elemento del historial",
+            "ru": "Удалить элемент истории",
+            "pt": "Excluir Item do Histórico"
+        ],
+        "confirmDeleteMessage": [
+            "en": "Are you sure you want to delete this item? This action cannot be undone.",
+            "zh-Hans": "确定要删除此项目吗？此操作无法撤销。",
+            "zh-Hant": "確定要刪除此項目嗎？此操作無法復原。",
+            "ja": "この項目を削除してもよろしいですか？この操作は元に戻せません。",
+            "ko": "이 항목을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+            "fr": "Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.",
+            "de": "Sind Sie sicher, dass Sie diesen Eintrag löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+            "es": "¿Está seguro de que desea eliminar este elemento? Esta acción no se puede deshacer.",
+            "ru": "Вы уверены, что хотите удалить этот элемент? Это действие нельзя отменить.",
+            "pt": "Tem certeza de que deseja excluir este item? Esta ação não pode ser desfeita."
+        ],
+        "confirmDeleteButton": [
+            "en": "Delete",
+            "zh-Hans": "删除",
+            "zh-Hant": "刪除",
+            "ja": "削除",
+            "ko": "삭제",
+            "fr": "Supprimer",
+            "de": "Löschen",
+            "es": "Eliminar",
+            "ru": "Удалить",
+            "pt": "Excluir"
         ],
         "okButton": [
             "en": "OK",

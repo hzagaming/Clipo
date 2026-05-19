@@ -360,6 +360,80 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 8)
                 .opacity(store.settings.reduceAnimations ? 0.5 : 1.0)
+                
+                Divider().padding(.leading, 44)
+                
+                HStack(spacing: 12) {
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.string(.panelOpacityTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        Text(L10n.string(.panelOpacitySubtitle))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    
+                    Spacer()
+                    
+                    Text("\(Int((store.settings.panelOpacity * 100).rounded()))%")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .frame(width: 32, alignment: .trailing)
+                    
+                    Slider(value: $store.settings.panelOpacity, in: 0.5...1.0, step: 0.05)
+                        .frame(width: 100)
+                        .controlSize(.small)
+                }
+                .padding(.vertical, 8)
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "arrow.up.and.down.compress",
+                    title: L10n.string(.rowHeightCompactTitle),
+                    subtitle: L10n.string(.rowHeightCompactSubtitle),
+                    isOn: $store.settings.rowHeightCompact
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "clock",
+                    title: L10n.string(.showTimestampTitle),
+                    subtitle: L10n.string(.showTimestampSubtitle),
+                    isOn: $store.settings.showTimestamp
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "tag",
+                    title: L10n.string(.showTypeBadgeTitle),
+                    subtitle: L10n.string(.showTypeBadgeSubtitle),
+                    isOn: $store.settings.showTypeBadge
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "command",
+                    title: L10n.string(.showFooterShortcutsTitle),
+                    subtitle: L10n.string(.showFooterShortcutsSubtitle),
+                    isOn: $store.settings.showFooterShortcuts
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "cursorarrow.click",
+                    title: L10n.string(.clickOutsideClosesPanelTitle),
+                    subtitle: L10n.string(.clickOutsideClosesPanelSubtitle),
+                    isOn: $store.settings.clickOutsideClosesPanel
+                )
             }
             .padding(12)
             .background(
@@ -418,6 +492,20 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal, 4)
             }
+            
+            VStack(spacing: 0) {
+                ToggleRow(
+                    icon: "arrow.2.circlepath",
+                    title: L10n.string(.keyboardWrapAroundTitle),
+                    subtitle: L10n.string(.keyboardWrapAroundSubtitle),
+                    isOn: $store.settings.keyboardWrapAround
+                )
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(NSColor.controlBackgroundColor))
+            )
             
             Button(action: {
                 store.settings.hotkeyPreferences.resetToDefaults()
@@ -553,6 +641,24 @@ struct SettingsView: View {
                     subtitle: L10n.string(.searchCaseSensitiveSubtitle),
                     isOn: $store.settings.searchCaseSensitive
                 )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "sparkle.magnifyingglass",
+                    title: L10n.string(.searchFuzzyMatchingTitle),
+                    subtitle: L10n.string(.searchFuzzyMatchingSubtitle),
+                    isOn: $store.settings.searchFuzzyMatching
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "exclamationmark.triangle",
+                    title: L10n.string(.confirmBeforeDeleteTitle),
+                    subtitle: L10n.string(.confirmBeforeDeleteSubtitle),
+                    isOn: $store.settings.confirmBeforeDelete
+                )
             }
             .padding(12)
             .background(
@@ -670,6 +776,15 @@ struct SettingsView: View {
                     title: L10n.string(.ignoreSensitiveAppsTitle),
                     subtitle: L10n.string(.ignoreSensitiveAppsSubtitle),
                     isOn: $store.settings.ignoreSensitiveApps
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "lock.shield",
+                    title: L10n.string(.autoClearOnScreenLockTitle),
+                    subtitle: L10n.string(.autoClearOnScreenLockSubtitle),
+                    isOn: $store.settings.autoClearOnScreenLock
                 )
             }
             .padding(12)

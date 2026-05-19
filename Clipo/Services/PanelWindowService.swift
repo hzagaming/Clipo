@@ -64,6 +64,7 @@ class PanelWindowService {
             self.startClickOutsideMonitoring()
         }
         
+        NotificationCenter.default.post(name: .panelDidShow, object: nil)
         SoundService.shared.playOpen()
         
         // Fade + slide in
@@ -84,6 +85,7 @@ class PanelWindowService {
         guard let panel = panelWindow, panel.isVisible, !isHiding else { return }
         isHiding = true
         
+        NotificationCenter.default.post(name: .panelWillHide, object: nil)
         SoundService.shared.playClose()
         stopKeyboardMonitoring()
         stopClickOutsideMonitoring()
@@ -185,6 +187,7 @@ class PanelWindowService {
     }
     
     private func handleOutsideClick() {
+        guard ClipStore.shared.settings.clickOutsideClosesPanel else { return }
         guard Date() >= ignoreOutsideClicksUntil else { return }
         guard let panel = panelWindow, panel.isVisible, !isHiding else { return }
         let mouse = NSEvent.mouseLocation

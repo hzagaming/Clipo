@@ -66,6 +66,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
             object: nil
         )
         
+        // Listen for screen lock to optionally clear history.
+        DistributedNotificationCenter.default.addObserver(
+            self,
+            selector: #selector(screenDidLock),
+            name: NSNotification.Name("com.apple.screenIsLocked"),
+            object: nil
+        )
+        
         showSplashScreen()
     }
     
@@ -264,6 +272,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     }
     
     // MARK: - Menu Actions
+    
+    @objc private func screenDidLock() {
+        guard ClipStore.shared.settings.autoClearOnScreenLock else { return }
+        ClipStore.shared.clearHistory()
+        SoundService.shared.playReset()
+        NotificationService.shared.showNotification(
+            title: L10n.string(.notificationHistoryClearedTitle),
+            body: L10n.string(.notificationHistoryClearedBody)
+        )
+    }
     
     @objc func slotCopyClicked(_ sender: NSMenuItem) {
         let slotNumber = sender.tag

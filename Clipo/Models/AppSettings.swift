@@ -37,6 +37,20 @@ struct AppSettings: Codable, Equatable {
     var showSourceApp: Bool = true
     var panelAnimationSpeed: Double = 1.0
     
+    // MARK: - Deep Customization (v1.8.1+)
+    var panelOpacity: Double = 1.0
+    var autoClearOnScreenLock: Bool = false
+    var searchFuzzyMatching: Bool = false
+    var rowHeightCompact: Bool = false
+    
+    // MARK: - Deep Customization (v1.8.2+)
+    var keyboardWrapAround: Bool = true
+    var showTimestamp: Bool = true
+    var showTypeBadge: Bool = true
+    var showFooterShortcuts: Bool = true
+    var clickOutsideClosesPanel: Bool = true
+    var confirmBeforeDelete: Bool = false
+    
     // MARK: - Backward Compatibility
     
     /// Custom decoder that provides default values for missing fields,
@@ -78,6 +92,16 @@ struct AppSettings: Codable, Equatable {
         self.pasteDelay = max(0, try container.decodeIfPresent(Double.self, forKey: .pasteDelay) ?? 0.0)
         self.showSourceApp = try container.decodeIfPresent(Bool.self, forKey: .showSourceApp) ?? true
         self.panelAnimationSpeed = max(0.5, min(2.0, try container.decodeIfPresent(Double.self, forKey: .panelAnimationSpeed) ?? 1.0))
+        self.panelOpacity = max(0.5, min(1.0, try container.decodeIfPresent(Double.self, forKey: .panelOpacity) ?? 1.0))
+        self.autoClearOnScreenLock = try container.decodeIfPresent(Bool.self, forKey: .autoClearOnScreenLock) ?? false
+        self.searchFuzzyMatching = try container.decodeIfPresent(Bool.self, forKey: .searchFuzzyMatching) ?? false
+        self.rowHeightCompact = try container.decodeIfPresent(Bool.self, forKey: .rowHeightCompact) ?? false
+        self.keyboardWrapAround = try container.decodeIfPresent(Bool.self, forKey: .keyboardWrapAround) ?? true
+        self.showTimestamp = try container.decodeIfPresent(Bool.self, forKey: .showTimestamp) ?? true
+        self.showTypeBadge = try container.decodeIfPresent(Bool.self, forKey: .showTypeBadge) ?? true
+        self.showFooterShortcuts = try container.decodeIfPresent(Bool.self, forKey: .showFooterShortcuts) ?? true
+        self.clickOutsideClosesPanel = try container.decodeIfPresent(Bool.self, forKey: .clickOutsideClosesPanel) ?? true
+        self.confirmBeforeDelete = try container.decodeIfPresent(Bool.self, forKey: .confirmBeforeDelete) ?? false
     }
     
     init() {}

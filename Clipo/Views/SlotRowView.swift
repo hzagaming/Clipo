@@ -55,7 +55,7 @@ struct SlotRowView: View {
             
             if let item = item {
                 // Filled slot
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: ClipStore.shared.settings.rowHeightCompact ? 1 : 3) {
                     Text(item.preview)
                         .lineLimit(1)
                         .font(.system(size: 13, weight: .medium, design: .rounded))

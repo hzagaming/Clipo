@@ -4,6 +4,8 @@ import AppKit
 extension Notification.Name {
     static let panelKeyboardEvent = Notification.Name("panelKeyboardEvent")
     static let openClipoSettings = Notification.Name("openClipoSettings")
+    static let panelWillHide = Notification.Name("panelWillHide")
+    static let panelDidShow = Notification.Name("panelDidShow")
 }
 
 struct ClipoPanelView: View {
@@ -18,6 +20,7 @@ struct ClipoPanelView: View {
     @State private var isWaitingForPermissionGrant = PermissionService.shared.isWaitingForAccessibilityGrant
     @State private var permissionCheckTimer: Timer?
     @State private var selectedTypeFilter: ClipType? = nil
+    @State private var itemToDelete: PanelListItem? = nil
     
     // MARK: - Data
     
@@ -25,9 +28,26 @@ struct ClipoPanelView: View {
         !searchText.isEmpty || selectedTypeFilter != nil
     }
     
+    private func fuzzyMatches(_ text: String, query: String) -> Bool {
+        let lowerText = text.lowercased()
+        let lowerQuery = query.lowercased()
+        var queryIndex = lowerQuery.startIndex
+        for char in lowerText {
+            if char == lowerQuery[queryIndex] {
+                queryIndex = lowerQuery.index(after: queryIndex)
+                if queryIndex == lowerQuery.endIndex {
+                    return true
+                }
+            }
+        }
+        return queryIndex == lowerQuery.endIndex
+    }
+    
     private var filteredHistory: [ClipItem] {
         var items = searchText.isEmpty ? store.history : store.history.filter {
-            if store.settings.searchCaseSensitive {
+            if store.settings.searchFuzzyMatching {
+                return fuzzyMatches($0.content, query: searchText) || fuzzyMatches($0.preview, query: searchText)
+            } else if store.settings.searchCaseSensitive {
                 return $0.content.contains(searchText) || $0.preview.contains(searchText)
             } else {
                 return $0.content.localizedCaseInsensitiveContains(searchText) ||
@@ -134,7 +154,7 @@ struct ClipoPanelView: View {
             footerBar
         }
         .frame(minWidth: 580, minHeight: 480)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color(NSColor.windowBackgroundColor).opacity(store.settings.panelOpacity))
         .onAppear(perform: onAppear)
         .onDisappear(perform: onDisappear)
         .onChange(of: searchText) { _ in
@@ -167,6 +187,22 @@ struct ClipoPanelView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .accessibilityPermissionChanged)) { _ in
             refreshPermissionStatus(animated: true)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .panelDidShow)) { _ in
+            startPermissionCheck()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .panelWillHide)) { _ in
+            stopPermissionCheck()
+        }
+        .alert(item: $itemToDelete) { row in
+            Alert(
+                title: Text(L10n.string(.confirmDeleteTitle)),
+                message: Text(L10n.string(.confirmDeleteMessage)),
+                primaryButton: .destructive(Text(L10n.string(.confirmDeleteButton))) {
+                    performDelete(row: row)
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
     
@@ -593,27 +629,30 @@ struct ClipoPanelView: View {
         .padding(.horizontal, 10)
     }
     
+    @ViewBuilder
     private var footerBar: some View {
-        HStack(spacing: 14) {
-            FooterShortcut(keys: "↑↓", label: L10n.string(.footerSelect))
-            FooterShortcut(keys: "↵", label: store.settings.pasteOnSelection ? L10n.string(.footerPaste) : L10n.string(.footerCopy))
-            FooterShortcut(keys: "⌘↵", label: store.settings.pasteOnSelection ? L10n.string(.footerCopy) : L10n.string(.footerPaste))
-            FooterShortcut(keys: "⌘P", label: L10n.string(.footerPin))
-            FooterShortcut(keys: "⌫", label: L10n.string(.footerDelete))
-            Spacer()
-            FooterShortcut(keys: "esc", label: L10n.string(.footerClose))
+        if store.settings.showFooterShortcuts {
+            HStack(spacing: 14) {
+                FooterShortcut(keys: "↑↓", label: L10n.string(.footerSelect))
+                FooterShortcut(keys: "↵", label: store.settings.pasteOnSelection ? L10n.string(.footerPaste) : L10n.string(.footerCopy))
+                FooterShortcut(keys: "⌘↵", label: store.settings.pasteOnSelection ? L10n.string(.footerCopy) : L10n.string(.footerPaste))
+                FooterShortcut(keys: "⌘P", label: L10n.string(.footerPin))
+                FooterShortcut(keys: "⌫", label: L10n.string(.footerDelete))
+                Spacer()
+                FooterShortcut(keys: "esc", label: L10n.string(.footerClose))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(
+                Color(NSColor.controlBackgroundColor).opacity(0.5)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 0.5)
+                            .foregroundColor(Color.secondary.opacity(0.1)),
+                        alignment: .top
+                    )
+            )
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(
-            Color(NSColor.controlBackgroundColor).opacity(0.5)
-                .overlay(
-                    Rectangle()
-                        .frame(height: 0.5)
-                        .foregroundColor(Color.secondary.opacity(0.1)),
-                    alignment: .top
-                )
-        )
     }
     
     private func rowView(for row: PanelListItem, globalIndex: Int) -> some View {
@@ -641,11 +680,10 @@ struct ClipoPanelView: View {
                     item: row.item,
                     onTogglePin: { store.togglePin(id: row.item.id) },
                     onDelete: {
-                        withAnimation(.easeOut(duration: 0.2)) {
-                            store.deleteHistoryItem(id: row.item.id)
-                        }
-                        if selectedIndex >= allNavigableItems.count {
-                            selectedIndex = max(0, allNavigableItems.count - 1)
+                        if store.settings.confirmBeforeDelete {
+                            itemToDelete = row
+                        } else {
+                            performDelete(row: row)
                         }
                     },
                     onCopy: {
@@ -711,6 +749,16 @@ struct ClipoPanelView: View {
         .animation(.spring(response: 0.2, dampingFraction: 0.8), value: selectedIndex)
     }
     
+    private func performDelete(row: PanelListItem) {
+        guard !row.isSlot else { return }
+        withAnimation(.easeOut(duration: 0.2)) {
+            store.deleteHistoryItem(id: row.item.id)
+        }
+        if selectedIndex >= allNavigableItems.count {
+            selectedIndex = max(0, allNavigableItems.count - 1)
+        }
+    }
+    
     // MARK: - Keyboard Handling
     
     func handleKeyEvent(_ event: NSEvent) {
@@ -721,11 +769,19 @@ struct ClipoPanelView: View {
                 withAnimation(.easeOut(duration: 0.1)) {
                     selectedIndex -= 1
                 }
+            } else if store.settings.keyboardWrapAround, !allNavigableItems.isEmpty {
+                withAnimation(.easeOut(duration: 0.1)) {
+                    selectedIndex = allNavigableItems.count - 1
+                }
             }
         case 125: // Down arrow
             if selectedIndex < allNavigableItems.count - 1 {
                 withAnimation(.easeOut(duration: 0.1)) {
                     selectedIndex += 1
+                }
+            } else if store.settings.keyboardWrapAround, !allNavigableItems.isEmpty {
+                withAnimation(.easeOut(duration: 0.1)) {
+                    selectedIndex = 0
                 }
             }
         case 36: // Return
@@ -745,11 +801,10 @@ struct ClipoPanelView: View {
             guard selectedIndex < allNavigableItems.count else { return }
             let row = allNavigableItems[selectedIndex]
             if !row.isSlot {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    store.deleteHistoryItem(id: row.item.id)
-                }
-                if selectedIndex >= allNavigableItems.count {
-                    selectedIndex = max(0, allNavigableItems.count - 1)
+                if store.settings.confirmBeforeDelete {
+                    itemToDelete = row
+                } else {
+                    performDelete(row: row)
                 }
             }
         case 35: // 'P'

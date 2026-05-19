@@ -52,13 +52,17 @@ struct HistoryRowView: View {
                             .lineLimit(1)
                     }
                     
-                    TypeBadge(type: item.type)
+                    if ClipStore.shared.settings.showTypeBadge {
+                        TypeBadge(type: item.type)
+                    }
                     
                     Spacer()
                     
-                    Text(DateFormatterUtility.formattedString(from: item.createdAt))
-                        .font(.caption2)
-                        .foregroundColor(.secondary.opacity(0.5))
+                    if ClipStore.shared.settings.showTimestamp {
+                        Text(DateFormatterUtility.formattedString(from: item.createdAt))
+                            .font(.caption2)
+                            .foregroundColor(.secondary.opacity(0.5))
+                    }
                 }
             }
             
@@ -90,7 +94,7 @@ struct HistoryRowView: View {
             .animation(.easeInOut(duration: 0.15), value: isHovering)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.vertical, ClipStore.shared.settings.rowHeightCompact ? 2 : 6)
         .background(
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(isHovering ? Color.secondary.opacity(0.04) : Color.clear)
