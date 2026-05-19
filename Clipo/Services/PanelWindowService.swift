@@ -16,6 +16,7 @@ class PanelWindowService {
     private var clickOutsideMonitor: Any?
     private var isHiding = false
     private var ignoreOutsideClicksUntil = Date.distantPast
+    private var autoHideTimer: Timer?
     
     func showPanel() {
         if panelWindow == nil {
@@ -65,6 +66,7 @@ class PanelWindowService {
         }
         
         NotificationCenter.default.post(name: .panelDidShow, object: nil)
+        startAutoHideTimer()
         SoundService.shared.playOpen()
         
         // Fade + slide in
@@ -86,6 +88,7 @@ class PanelWindowService {
         isHiding = true
         
         NotificationCenter.default.post(name: .panelWillHide, object: nil)
+        stopAutoHideTimer()
         SoundService.shared.playClose()
         stopKeyboardMonitoring()
         stopClickOutsideMonitoring()
@@ -194,6 +197,20 @@ class PanelWindowService {
         let inside = panel.frame.contains(mouse)
         guard !inside else { return }
         hidePanel()
+    }
+    
+    private func startAutoHideTimer() {
+        stopAutoHideTimer()
+        let delay = ClipStore.shared.settings.autoHideDelay
+        guard delay > 0 else { return }
+        autoHideTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            self?.hidePanel()
+        }
+    }
+    
+    private func stopAutoHideTimer() {
+        autoHideTimer?.invalidate()
+        autoHideTimer = nil
     }
     
     private func createPanel() {

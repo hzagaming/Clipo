@@ -457,6 +457,35 @@ struct SettingsView: View {
                     subtitle: L10n.string(.clickOutsideClosesPanelSubtitle),
                     isOn: $store.settings.clickOutsideClosesPanel
                 )
+                
+                Divider().padding(.leading, 44)
+                
+                HStack(spacing: 12) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.string(.autoHideDelayTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        Text(L10n.string(.autoHideDelaySubtitle))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    
+                    Spacer()
+                    
+                    Text(store.settings.autoHideDelay == 0 ? L10n.string(.autoHideNever) : String(format: "%.1fs", store.settings.autoHideDelay))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .frame(width: 40, alignment: .trailing)
+                    
+                    Slider(value: $store.settings.autoHideDelay, in: 0.0...10.0, step: 0.5)
+                        .frame(width: 100)
+                        .controlSize(.small)
+                }
+                .padding(.vertical, 8)
             }
             .padding(12)
             .background(

@@ -216,6 +216,8 @@ enum LocKey: String {
     case showMenuBarIconTitle, showMenuBarIconSubtitle
     case escapeClosesPanelTitle, escapeClosesPanelSubtitle
     case showSlotSectionTitle, showSlotSectionSubtitle
+    case autoHideDelayTitle, autoHideDelaySubtitle
+    case autoHideNever
     case okButton
 }
 
@@ -3469,6 +3471,42 @@ struct L10n {
             "es": "Mostrar el área de ranuras guardadas en el panel",
             "ru": "Показывать область сохранённых слотов на панели",
             "pt": "Exibir a área de slots salvos no painel"
+        ],
+        "autoHideDelayTitle": [
+            "en": "Auto-Hide Delay",
+            "zh-Hans": "自动隐藏延迟",
+            "zh-Hant": "自動隱藏延遲",
+            "ja": "自動非表示の遅延",
+            "ko": "자동 숨김 지연",
+            "fr": "Délai de masquage auto",
+            "de": "Auto-Ausblend-Verzögerung",
+            "es": "Retraso de ocultación automática",
+            "ru": "Задержка автоскрытия",
+            "pt": "Atraso de Ocultação Automática"
+        ],
+        "autoHideDelaySubtitle": [
+            "en": "Automatically close the panel after a period of inactivity",
+            "zh-Hans": "在一段时间无操作后自动关闭面板",
+            "zh-Hant": "在一段時間無操作後自動關閉面板",
+            "ja": "一定時間操作がないとパネルを自動的に閉じる",
+            "ko": "일정 시간 동안 작업이 없으면 패널을 자동으로 닫기",
+            "fr": "Fermer automatiquement le panneau après une période d'inactivité",
+            "de": "Panel nach einer Zeit der Inaktivität automatisch schließen",
+            "es": "Cerrar automáticamente el panel después de un período de inactividad",
+            "ru": "Автоматически закрывать панель после периода бездействия",
+            "pt": "Fechar o painel automaticamente após um período de inatividade"
+        ],
+        "autoHideNever": [
+            "en": "Never",
+            "zh-Hans": "永不",
+            "zh-Hant": "永不",
+            "ja": "なし",
+            "ko": "사용 안 함",
+            "fr": "Jamais",
+            "de": "Nie",
+            "es": "Nunca",
+            "ru": "Никогда",
+            "pt": "Nunca"
         ],
         "okButton": [
             "en": "OK",
