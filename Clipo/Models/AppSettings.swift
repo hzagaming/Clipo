@@ -52,6 +52,7 @@ struct AppSettings: Codable, Equatable {
     var confirmBeforeDelete: Bool = false
     var showMenuBarIcon: Bool = true
     var escapeClosesPanel: Bool = true
+    var showSlotSection: Bool = true
     
     // MARK: - Backward Compatibility
     
@@ -106,6 +107,7 @@ struct AppSettings: Codable, Equatable {
         self.confirmBeforeDelete = try container.decodeIfPresent(Bool.self, forKey: .confirmBeforeDelete) ?? false
         self.showMenuBarIcon = try container.decodeIfPresent(Bool.self, forKey: .showMenuBarIcon) ?? true
         self.escapeClosesPanel = try container.decodeIfPresent(Bool.self, forKey: .escapeClosesPanel) ?? true
+        self.showSlotSection = try container.decodeIfPresent(Bool.self, forKey: .showSlotSection) ?? true
     }
     
     init() {}

@@ -307,6 +307,15 @@ struct SettingsView: View {
                 Divider().padding(.leading, 44)
                 
                 ToggleRow(
+                    icon: "number.square",
+                    title: L10n.string(.showSlotSectionTitle),
+                    subtitle: L10n.string(.showSlotSectionSubtitle),
+                    isOn: $store.settings.showSlotSection
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
                     icon: "app.badge",
                     title: L10n.string(.showSourceAppTitle),
                     subtitle: L10n.string(.showSourceAppSubtitle),

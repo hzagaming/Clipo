@@ -70,9 +70,11 @@ struct ClipoPanelView: View {
     
     private var allNavigableItems: [PanelListItem] {
         var items: [PanelListItem] = []
-        for i in 1...9 {
-            if let item = store.slots[i] {
-                items.append(PanelListItem(isSlot: true, slotNumber: i, item: item))
+        if store.settings.showSlotSection {
+            for i in 1...9 {
+                if let item = store.slots[i] {
+                    items.append(PanelListItem(isSlot: true, slotNumber: i, item: item))
+                }
             }
         }
         if isSearchActive {
@@ -90,7 +92,7 @@ struct ClipoPanelView: View {
     }
     
     private var filledSlotCount: Int {
-        store.slots.values.compactMap { $0 }.count
+        store.settings.showSlotSection ? store.slots.values.compactMap { $0 }.count : 0
     }
     
     private var groupedHistoryOffsets: [Int] {
@@ -478,7 +480,9 @@ struct ClipoPanelView: View {
         .padding(.bottom, 4)
     }
     
+    @ViewBuilder
     private var slotSectionView: some View {
+        if store.settings.showSlotSection {
         VStack(alignment: .leading, spacing: 0) {
             let filledCount = store.slots.values.compactMap { $0 }.count
             sectionHeader(L10n.string(.slotsSection), count: filledCount, total: store.settings.showEmptySlots ? 9 : nil)
@@ -505,6 +509,7 @@ struct ClipoPanelView: View {
                     .fill(Color(NSColor.controlBackgroundColor).opacity(0.35))
             )
             .padding(.horizontal, 10)
+            }
         }
     }
     

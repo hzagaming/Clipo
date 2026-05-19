@@ -215,6 +215,7 @@ enum LocKey: String {
     case confirmDeleteTitle, confirmDeleteMessage, confirmDeleteButton
     case showMenuBarIconTitle, showMenuBarIconSubtitle
     case escapeClosesPanelTitle, escapeClosesPanelSubtitle
+    case showSlotSectionTitle, showSlotSectionSubtitle
     case okButton
 }
 
@@ -3444,6 +3445,30 @@ struct L10n {
             "es": "Presione Escape para cerrar el panel de Clipo",
             "ru": "Нажмите Escape, чтобы закрыть панель Clipo",
             "pt": "Pressione Esc para fechar o painel do Clipo"
+        ],
+        "showSlotSectionTitle": [
+            "en": "Show Slot Section",
+            "zh-Hans": "显示槽位区域",
+            "zh-Hant": "顯示槽位區域",
+            "ja": "スロットセクションを表示",
+            "ko": "슬롯 영역 표시",
+            "fr": "Afficher la section des emplacements",
+            "de": "Slot-Bereich anzeigen",
+            "es": "Mostrar sección de ranuras",
+            "ru": "Показывать раздел слотов",
+            "pt": "Mostrar Seção de Slots"
+        ],
+        "showSlotSectionSubtitle": [
+            "en": "Display the saved slots area in the panel",
+            "zh-Hans": "在面板中显示已保存的槽位区域",
+            "zh-Hant": "在面板中顯示已儲存的槽位區域",
+            "ja": "パネルに保存済みスロットエリアを表示",
+            "ko": "패널에 저장된 슬롯 영역 표시",
+            "fr": "Afficher la zone des emplacements enregistrés dans le panneau",
+            "de": "Den gespeicherten Slot-Bereich im Panel anzeigen",
+            "es": "Mostrar el área de ranuras guardadas en el panel",
+            "ru": "Показывать область сохранённых слотов на панели",
+            "pt": "Exibir a área de slots salvos no painel"
         ],
         "okButton": [
             "en": "OK",
