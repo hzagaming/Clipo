@@ -65,12 +65,19 @@ struct ClipoPanelView: View {
         return items
     }
     
-    private var historySectionIndexMap: [String: Int] {
-        var map: [String: Int] = [:]
-        for (index, item) in allNavigableItems.enumerated() {
-            map[item.id] = index
+    private var filledSlotCount: Int {
+        store.slots.values.compactMap { $0 }.count
+    }
+    
+    private var groupedHistoryOffsets: [Int] {
+        let base = filledSlotCount
+        var offsets: [Int] = []
+        var current = base
+        for group in groupedFilteredHistory {
+            offsets.append(current)
+            current += group.items.count
         }
-        return map
+        return offsets
     }
     
     private var slotNavigableIndices: [Int: Int] {
@@ -132,6 +139,13 @@ struct ClipoPanelView: View {
             }
         }
         .onChange(of: store.settings.showEmptySlots) { _ in
+            if allNavigableItems.isEmpty {
+                selectedIndex = 0
+            } else if selectedIndex >= allNavigableItems.count {
+                selectedIndex = allNavigableItems.count - 1
+            }
+        }
+        .onReceive(store.$history) { _ in
             if allNavigableItems.isEmpty {
                 selectedIndex = 0
             } else if selectedIndex >= allNavigableItems.count {
@@ -463,14 +477,14 @@ struct ClipoPanelView: View {
                     historyOnboardingView
                 }
             } else if isSearchActive {
-                ForEach(groupedFilteredHistory, id: \.type) { group in
+                ForEach(Array(groupedFilteredHistory.enumerated()), id: \.element.type) { groupIndex, group in
+                    let offset = groupedHistoryOffsets[groupIndex]
                     VStack(alignment: .leading, spacing: 0) {
                         sectionHeader(group.type.displayName, count: group.items.count)
                         VStack(spacing: 2) {
-                            ForEach(Array(group.items.enumerated()), id: \.element.id) { _, item in
+                            ForEach(Array(group.items.enumerated()), id: \.element.id) { index, item in
                                 let row = PanelListItem(isSlot: false, slotNumber: nil, item: item)
-                                let globalIndex = historySectionIndexMap[row.id] ?? 0
-                                rowView(for: row, globalIndex: globalIndex)
+                                rowView(for: row, globalIndex: offset + index)
                             }
                         }
                         .padding(.vertical, 4)
@@ -484,7 +498,7 @@ struct ClipoPanelView: View {
             } else {
                 sectionHeader(L10n.string(.recentHistorySection), count: historySection.count)
                 VStack(spacing: 2) {
-                    let offset = slotNavigableIndices.count
+                    let offset = filledSlotCount
                     ForEach(Array(historySection.enumerated()), id: \.element.id) { index, row in
                         rowView(for: row, globalIndex: offset + index)
                     }
@@ -813,7 +827,7 @@ struct FilterPill: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
-                .foregroundColor(isSelected ? .white : .secondary.opacity(0.7))
+                .foregroundColor(isSelected ? Color.primary : .secondary.opacity(0.7))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
                 .background(

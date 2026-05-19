@@ -103,23 +103,25 @@ class NotificationService {
     }
     
     private func positionWindow(_ window: NSWindow) {
-        // Use the screen that currently contains the mouse cursor so
-        // the toast always appears on the active display.
-        let screen: NSScreen
-        if let mouseLocation = NSEvent.mouseLocation as NSPoint?,
-           let targetScreen = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) {
-            screen = targetScreen
-        } else {
-            screen = NSScreen.main ?? NSScreen.screens.first!
-        }
-        
-        let visibleFrame = screen.visibleFrame
         let size = window.frame.size
         let padding: CGFloat = 20
         
+        // Use the screen that currently contains the mouse cursor so
+        // the toast always appears on the active display.
+        let targetFrame: NSRect
+        if let mouseLocation = NSEvent.mouseLocation as NSPoint?,
+           let screen = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) {
+            targetFrame = screen.visibleFrame
+        } else if let screen = NSScreen.main ?? NSScreen.screens.first {
+            targetFrame = screen.visibleFrame
+        } else {
+            // Headless / remote-desktop fallback
+            targetFrame = NSRect(x: 0, y: 0, width: 1920, height: 1080)
+        }
+        
         let origin = NSPoint(
-            x: visibleFrame.maxX - size.width - padding,
-            y: visibleFrame.maxY - size.height - padding
+            x: targetFrame.maxX - size.width - padding,
+            y: targetFrame.maxY - size.height - padding
         )
         window.setFrameOrigin(origin)
     }

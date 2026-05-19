@@ -86,6 +86,7 @@ class ClipStore: ObservableObject {
             var existing = history.remove(at: index)
             existing.lastUsedAt = Date()
             history.insert(existing, at: 0)
+            trimHistory()
             return
         }
         

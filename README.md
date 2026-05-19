@@ -248,17 +248,32 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-## What's New in v1.7.2
+## What's New in v1.7.3
 
-- **Search by category**: The panel search now groups results by their content type (Text, URL, Code, Image, File, etc.) instead of flattening everything into one list.
-- **Stable search IDs**: Fixed view-identity instability that caused flashing and duplicate-ID warnings while typing in the search box.
-- **No-results state**: Searching with no matches now shows a clean "No matching results" message instead of the full onboarding tutorial.
-- **Type badge localization**: History row type badges (URL, Code, Text, etc.) now respect the selected app language.
-- **Volume slider performance**: Dragging the SFX volume slider no longer triggers a full store save on every pixel.
-- **SFX accessibility**: Volume slider and per-sound toggles now have VoiceOver labels.
-- **Menu-bar empty slot copy**: Copying an empty slot from the menu bar now shows the same toast notification as paste.
+- **Search grouping reliability**: Replaced the `historySectionIndexMap` lookup with precise pre-computed offsets, eliminating the `?? 0` fallback that could corrupt selection visuals.
+- **History integrity**: Duplicate-history reordering now correctly calls `trimHistory()`, preventing pinned-sort desync.
+- **Selection stability**: `selectedIndex` is now auto-clamped when the history list changes spontaneously (new clipboard item, trim, import).
+- **Volume rounding**: Percentage label now rounds correctly (0.73 → 73%, 0.999 → 100%).
+- **Volume sync**: Slider value syncs automatically when volume is changed externally (e.g., JSON import).
+- **Master toggle accessibility**: The "Enable Sound Effects" master switch now has a VoiceOver label.
+- **Crash prevention**: Removed `NSScreen.screens.first!` force-unwrap in toast positioning; headless Macs no longer risk a crash.
+- **Dead code cleanup**: Removed unused `MenuBarView.swift` placeholder.
+- **Filter pill contrast**: Selected filter pills now use adaptive `.primary` text instead of hardcoded white.
+- **History limit safety**: `maxHistoryItems` is now clamped to ≥0 during decoding.
 
 ## Version History
+
+### v1.7.3
+- Replace historySectionIndexMap with groupedHistoryOffsets for precise selection indexing
+- Fix addToHistory duplicate path skipping trimHistory()
+- Auto-clamp selectedIndex on spontaneous history mutations
+- Fix volume percentage truncation (now rounds correctly)
+- Sync volume slider on external volume changes
+- Add VoiceOver label to master SFX toggle
+- Remove NSScreen.screens.first! crash risk
+- Delete unused MenuBarView placeholder
+- Use adaptive primary color for selected FilterPill text
+- Clamp maxHistoryItems to non-negative on decode
 
 ### v1.7.2
 - Grouped search results by ClipType with section headers

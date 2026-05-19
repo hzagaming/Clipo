@@ -39,7 +39,7 @@ struct AppSettings: Codable, Equatable {
         self.launchAtLogin = try container.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? false
         self.restoreClipboardAfterPaste = try container.decodeIfPresent(Bool.self, forKey: .restoreClipboardAfterPaste) ?? true
         self.restoreClipboardAfterSave = try container.decodeIfPresent(Bool.self, forKey: .restoreClipboardAfterSave) ?? true
-        self.maxHistoryItems = try container.decodeIfPresent(Int.self, forKey: .maxHistoryItems) ?? 200
+        self.maxHistoryItems = max(0, try container.decodeIfPresent(Int.self, forKey: .maxHistoryItems) ?? 200)
         self.ignoreSensitiveApps = try container.decodeIfPresent(Bool.self, forKey: .ignoreSensitiveApps) ?? true
         self.sensitiveAppBundleIdentifiers = try container.decodeIfPresent([String].self, forKey: .sensitiveAppBundleIdentifiers) ?? [
             "com.1password.1password",
