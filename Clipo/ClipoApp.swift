@@ -190,7 +190,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDele
     @objc func setupStatusItem() {
         if let existing = statusItem {
             NSStatusBar.system.removeStatusItem(existing)
+            statusItem = nil
         }
+        guard ClipStore.shared.settings.showMenuBarIcon else { return }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         let button = statusItem?.button
         button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clipo")

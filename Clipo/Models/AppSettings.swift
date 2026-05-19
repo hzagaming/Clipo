@@ -50,6 +50,8 @@ struct AppSettings: Codable, Equatable {
     var showFooterShortcuts: Bool = true
     var clickOutsideClosesPanel: Bool = true
     var confirmBeforeDelete: Bool = false
+    var showMenuBarIcon: Bool = true
+    var escapeClosesPanel: Bool = true
     
     // MARK: - Backward Compatibility
     
@@ -102,6 +104,8 @@ struct AppSettings: Codable, Equatable {
         self.showFooterShortcuts = try container.decodeIfPresent(Bool.self, forKey: .showFooterShortcuts) ?? true
         self.clickOutsideClosesPanel = try container.decodeIfPresent(Bool.self, forKey: .clickOutsideClosesPanel) ?? true
         self.confirmBeforeDelete = try container.decodeIfPresent(Bool.self, forKey: .confirmBeforeDelete) ?? false
+        self.showMenuBarIcon = try container.decodeIfPresent(Bool.self, forKey: .showMenuBarIcon) ?? true
+        self.escapeClosesPanel = try container.decodeIfPresent(Bool.self, forKey: .escapeClosesPanel) ?? true
     }
     
     init() {}

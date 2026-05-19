@@ -221,6 +221,20 @@ struct SettingsView: View {
                         )
                     }
                 }
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "menubar.rectangle",
+                    title: L10n.string(.showMenuBarIconTitle),
+                    subtitle: L10n.string(.showMenuBarIconSubtitle),
+                    isOn: $store.settings.showMenuBarIcon
+                )
+                .onChange(of: store.settings.showMenuBarIcon) { _ in
+                    if let appDelegate = NSApp.delegate as? AppDelegate {
+                        appDelegate.setupStatusItem()
+                    }
+                }
             }
             .padding(12)
             .background(
@@ -499,6 +513,15 @@ struct SettingsView: View {
                     title: L10n.string(.keyboardWrapAroundTitle),
                     subtitle: L10n.string(.keyboardWrapAroundSubtitle),
                     isOn: $store.settings.keyboardWrapAround
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "escape",
+                    title: L10n.string(.escapeClosesPanelTitle),
+                    subtitle: L10n.string(.escapeClosesPanelSubtitle),
+                    isOn: $store.settings.escapeClosesPanel
                 )
             }
             .padding(12)

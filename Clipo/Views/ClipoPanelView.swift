@@ -795,7 +795,9 @@ struct ClipoPanelView: View {
                 PanelWindowService.shared.hidePanel()
             }
         case 53: // Esc
-            PanelWindowService.shared.hidePanel()
+            if store.settings.escapeClosesPanel {
+                PanelWindowService.shared.hidePanel()
+            }
         case 51: // Delete (Backspace)
             guard searchText.isEmpty else { return }
             guard selectedIndex < allNavigableItems.count else { return }

@@ -213,6 +213,8 @@ enum LocKey: String {
     case clickOutsideClosesPanelTitle, clickOutsideClosesPanelSubtitle
     case confirmBeforeDeleteTitle, confirmBeforeDeleteSubtitle
     case confirmDeleteTitle, confirmDeleteMessage, confirmDeleteButton
+    case showMenuBarIconTitle, showMenuBarIconSubtitle
+    case escapeClosesPanelTitle, escapeClosesPanelSubtitle
     case okButton
 }
 
@@ -3394,6 +3396,54 @@ struct L10n {
             "es": "Eliminar",
             "ru": "Удалить",
             "pt": "Excluir"
+        ],
+        "showMenuBarIconTitle": [
+            "en": "Show Menu Bar Icon",
+            "zh-Hans": "显示菜单栏图标",
+            "zh-Hant": "顯示選單列圖示",
+            "ja": "メニューバーアイコンを表示",
+            "ko": "메뉴 표시줄 아이콘 표시",
+            "fr": "Afficher l'icône dans la barre de menus",
+            "de": "Menüleisten-Symbol anzeigen",
+            "es": "Mostrar icono en la barra de menús",
+            "ru": "Показывать значок в строке меню",
+            "pt": "Mostrar Ícone na Barra de Menus"
+        ],
+        "showMenuBarIconSubtitle": [
+            "en": "Display Clipo in the menu bar for quick access",
+            "zh-Hans": "在菜单栏中显示 Clipo 以便快速访问",
+            "zh-Hant": "在選單列中顯示 Clipo 以便快速存取",
+            "ja": "メニューバーに Clipo を表示して素早くアクセス",
+            "ko": "빠른 접근을 위해 메뉴 표시줄에 Clipo 표시",
+            "fr": "Afficher Clipo dans la barre de menus pour un accès rapide",
+            "de": "Clipo in der Menüleiste für schnellen Zugriff anzeigen",
+            "es": "Mostrar Clipo en la barra de menús para acceso rápido",
+            "ru": "Отображать Clipo в строке меню для быстрого доступа",
+            "pt": "Exibir o Clipo na barra de menus para acesso rápido"
+        ],
+        "escapeClosesPanelTitle": [
+            "en": "Esc Closes Panel",
+            "zh-Hans": "Esc 关闭面板",
+            "zh-Hant": "Esc 關閉面板",
+            "ja": "Esc でパネルを閉じる",
+            "ko": "Esc로 패널 닫기",
+            "fr": "Échap ferme le panneau",
+            "de": "Esc schließt das Panel",
+            "es": "Esc cierra el panel",
+            "ru": "Esc закрывает панель",
+            "pt": "Esc Fecha o Painel"
+        ],
+        "escapeClosesPanelSubtitle": [
+            "en": "Press Escape to close the Clipo panel",
+            "zh-Hans": "按 Escape 键关闭 Clipo 面板",
+            "zh-Hant": "按 Escape 鍵關閉 Clipo 面板",
+            "ja": "Escape キーで Clipo パネルを閉じる",
+            "ko": "Escape 키로 Clipo 패널 닫기",
+            "fr": "Appuyez sur Échap pour fermer le panneau Clipo",
+            "de": "Drücken Sie Esc, um das Clipo-Panel zu schließen",
+            "es": "Presione Escape para cerrar el panel de Clipo",
+            "ru": "Нажмите Escape, чтобы закрыть панель Clipo",
+            "pt": "Pressione Esc para fechar o painel do Clipo"
         ],
         "okButton": [
             "en": "OK",
