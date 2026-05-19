@@ -541,7 +541,9 @@ struct ClipoPanelView: View {
                     }
                 }
             } else {
-                sectionHeader(L10n.string(.recentHistorySection), count: historySection.count)
+                if store.settings.showHistorySectionHeader {
+                    sectionHeader(L10n.string(.recentHistorySection), count: historySection.count)
+                }
                 VStack(spacing: 2) {
                     let offset = filledSlotCount
                     ForEach(Array(historySection.enumerated()), id: \.element.id) { index, row in

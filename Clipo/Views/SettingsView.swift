@@ -316,6 +316,15 @@ struct SettingsView: View {
                 Divider().padding(.leading, 44)
                 
                 ToggleRow(
+                    icon: "doc.text.magnifyingglass",
+                    title: L10n.string(.showHistorySectionHeaderTitle),
+                    subtitle: L10n.string(.showHistorySectionHeaderSubtitle),
+                    isOn: $store.settings.showHistorySectionHeader
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
                     icon: "app.badge",
                     title: L10n.string(.showSourceAppTitle),
                     subtitle: L10n.string(.showSourceAppSubtitle),

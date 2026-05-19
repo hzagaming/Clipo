@@ -32,7 +32,7 @@ struct HistoryRowView: View {
                         HStack(spacing: 2) {
                             Image(systemName: "pin.fill")
                                 .font(.system(size: 8, weight: .bold))
-                            Text(L10n.string(.pinnedLabel))
+                            Text("Pinned")
                                 .font(.system(size: 9, weight: .medium))
                         }
                         .foregroundColor(.accentColor)
@@ -77,8 +77,8 @@ struct HistoryRowView: View {
                         .rotationEffect(.degrees(item.isPinned ? 0 : -45))
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: item.isPinned)
                 }
-                .buttonStyle(PressableButtonStyle())
-                .help(item.isPinned ? L10n.string(.contextMenuUnpin) : L10n.string(.contextMenuPin))
+                .buttonStyle(HistoryRowButtonStyle())
+                .help(item.isPinned ? "Unpin" : "Pin")
                 
                 Button(action: onDelete) {
                     Image(systemName: "trash")
@@ -87,8 +87,8 @@ struct HistoryRowView: View {
                         .frame(width: 24, height: 24)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(PressableButtonStyle())
-                .help(L10n.string(.contextMenuDelete))
+                .buttonStyle(HistoryRowButtonStyle())
+                .help("Delete")
             }
             .opacity(isHovering ? 1 : 0)
             .animation(.easeInOut(duration: 0.15), value: isHovering)
@@ -110,21 +110,30 @@ struct HistoryRowView: View {
     
     private func iconName(for type: ClipType) -> String {
         switch type {
-        case .url:
+        case ClipType.url:
             return "link"
-        case .codeLikeText:
+        case ClipType.codeLikeText:
             return "chevron.left.forwardslash.chevron.right"
-        case .plainText:
+        case ClipType.plainText:
             return "doc.text"
-        case .image:
+        case ClipType.image:
             return "photo"
-        case .file:
+        case ClipType.file:
             return "doc"
-        case .richText:
+        case ClipType.richText:
             return "textformat"
-        case .data:
+        case ClipType.data:
             return "shippingbox"
         }
+    }
+}
+
+private struct HistoryRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1)
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -144,18 +153,26 @@ struct TypeBadge: View {
     }
     
     private var typeLabel: String {
-        type.displayName
+        switch type {
+        case ClipType.plainText: return "Text"
+        case ClipType.url: return "URL"
+        case ClipType.codeLikeText: return "Code"
+        case ClipType.image: return "Image"
+        case ClipType.file: return "File"
+        case ClipType.richText: return "Rich"
+        case ClipType.data: return "Data"
+        }
     }
     
     private var typeColor: Color {
         switch type {
-        case .url: return .blue
-        case .codeLikeText: return .orange
-        case .plainText: return .gray
-        case .image: return .purple
-        case .file: return .green
-        case .richText: return .pink
-        case .data: return .secondary
+        case ClipType.url: return .blue
+        case ClipType.codeLikeText: return .orange
+        case ClipType.plainText: return .gray
+        case ClipType.image: return .purple
+        case ClipType.file: return .green
+        case ClipType.richText: return .pink
+        case ClipType.data: return .secondary
         }
     }
 }

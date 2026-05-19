@@ -219,6 +219,7 @@ enum LocKey: String {
     case autoHideDelayTitle, autoHideDelaySubtitle
     case autoHideNever
     case panelWidthTitle, panelWidthSubtitle
+    case showHistorySectionHeaderTitle, showHistorySectionHeaderSubtitle
     case okButton
 }
 
@@ -3532,6 +3533,30 @@ struct L10n {
             "es": "Ajustar el ancho del panel de Clipo",
             "ru": "Настроить ширину панели Clipo",
             "pt": "Ajustar a largura do painel do Clipo"
+        ],
+        "showHistorySectionHeaderTitle": [
+            "en": "Show History Header",
+            "zh-Hans": "显示历史标题",
+            "zh-Hant": "顯示歷史標題",
+            "ja": "履歴ヘッダーを表示",
+            "ko": "기록 헤더 표시",
+            "fr": "Afficher l'en-tête de l'historique",
+            "de": "Verlaufs-Header anzeigen",
+            "es": "Mostrar encabezado del historial",
+            "ru": "Показывать заголовок истории",
+            "pt": "Mostrar Cabeçalho do Histórico"
+        ],
+        "showHistorySectionHeaderSubtitle": [
+            "en": "Display the 'Recent History' section title in the panel",
+            "zh-Hans": "在面板中显示「最近历史」区域标题",
+            "zh-Hant": "在面板中顯示「最近歷史」區域標題",
+            "ja": "パネルに「最近の履歴」セクションタイトルを表示",
+            "ko": "패널에 \"최근 기록\" 섹션 제목 표시",
+            "fr": "Afficher le titre de la section 'Historique récent' dans le panneau",
+            "de": "Den Titel des Abschnitts 'Letzter Verlauf' im Panel anzeigen",
+            "es": "Mostrar el título de la sección 'Historial reciente' en el panel",
+            "ru": "Показывать заголовок раздела 'Недавняя история' на панели",
+            "pt": "Exibir o título da seção 'Histórico Recente' no painel"
         ],
         "okButton": [
             "en": "OK",
