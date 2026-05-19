@@ -72,7 +72,7 @@ class NotificationService {
             window.animator().setFrameOrigin(finalOrigin)
         }
         
-        let displayDuration = isError ? 3.5 : 2.5
+        let displayDuration = isError ? ClipStore.shared.settings.notificationDuration + 1.0 : ClipStore.shared.settings.notificationDuration
         dismissTimer = Timer.scheduledTimer(withTimeInterval: displayDuration, repeats: false) { [weak self] _ in
             self?.dismissToast()
         }

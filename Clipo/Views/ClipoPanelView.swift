@@ -27,8 +27,12 @@ struct ClipoPanelView: View {
     
     private var filteredHistory: [ClipItem] {
         var items = searchText.isEmpty ? store.history : store.history.filter {
-            $0.content.localizedCaseInsensitiveContains(searchText) ||
-            $0.preview.localizedCaseInsensitiveContains(searchText)
+            if store.settings.searchCaseSensitive {
+                return $0.content.contains(searchText) || $0.preview.contains(searchText)
+            } else {
+                return $0.content.localizedCaseInsensitiveContains(searchText) ||
+                       $0.preview.localizedCaseInsensitiveContains(searchText)
+            }
         }
         if let filter = selectedTypeFilter {
             items = items.filter { $0.type == filter }

@@ -197,6 +197,11 @@ enum LocKey: String {
     case hourlyStartLabel
     case hourlyEndLabel
     case slotUtilEmptyLabel
+    case showSourceAppTitle, showSourceAppSubtitle
+    case panelAnimationSpeedTitle, panelAnimationSpeedSubtitle
+    case notificationDurationTitle, notificationDurationSubtitle
+    case searchCaseSensitiveTitle, searchCaseSensitiveSubtitle
+    case pasteDelayTitle, pasteDelaySubtitle
     case okButton
 }
 
@@ -2982,6 +2987,126 @@ struct L10n {
             "es": "—",
             "ru": "—",
             "pt": "—"
+        ],
+        "showSourceAppTitle": [
+            "en": "Show Source App",
+            "zh-Hans": "显示来源应用",
+            "zh-Hant": "顯示來源應用程式",
+            "ja": "ソースアプリを表示",
+            "ko": "원본 앱 표시",
+            "fr": "Afficher l'app source",
+            "de": "Quell-App anzeigen",
+            "es": "Mostrar app de origen",
+            "ru": "Показывать исходное приложение",
+            "pt": "Mostrar App de Origem"
+        ],
+        "showSourceAppSubtitle": [
+            "en": "Display which app copied the item",
+            "zh-Hans": "显示复制该条目的应用",
+            "zh-Hant": "顯示複製該項目的應用程式",
+            "ja": "アイテムをコピーしたアプリを表示",
+            "ko": "항목을 복사한 앱 표시",
+            "fr": "Afficher l'application qui a copié l'élément",
+            "de": "Anzeigen, welche App den Eintrag kopiert hat",
+            "es": "Mostrar qué app copió el elemento",
+            "ru": "Показывать, какое приложение скопировало элемент",
+            "pt": "Exibir qual app copiou o item"
+        ],
+        "panelAnimationSpeedTitle": [
+            "en": "Animation Speed",
+            "zh-Hans": "动画速度",
+            "zh-Hant": "動畫速度",
+            "ja": "アニメーション速度",
+            "ko": "애니메이션 속도",
+            "fr": "Vitesse d'animation",
+            "de": "Animationsgeschwindigkeit",
+            "es": "Velocidad de animación",
+            "ru": "Скорость анимации",
+            "pt": "Velocidade da Animação"
+        ],
+        "panelAnimationSpeedSubtitle": [
+            "en": "Adjust panel open/close animation pace",
+            "zh-Hans": "调整面板打开/关闭动画速度",
+            "zh-Hant": "調整面板開啟/關閉動畫速度",
+            "ja": "パネルの開閉アニメーション速度を調整",
+            "ko": "패널 열기/닫기 애니메이션 속도 조절",
+            "fr": "Ajuster la vitesse d'ouverture/fermeture du panneau",
+            "de": "Geschwindigkeit der Panel-Öffnungs-/Schließanimation anpassen",
+            "es": "Ajustar velocidad de apertura/cierre del panel",
+            "ru": "Настроить скорость анимации открытия/закрытия панели",
+            "pt": "Ajustar velocidade de abertura/fechamento do painel"
+        ],
+        "notificationDurationTitle": [
+            "en": "Notification Duration",
+            "zh-Hans": "通知时长",
+            "zh-Hant": "通知時長",
+            "ja": "通知表示時間",
+            "ko": "알림 지속 시간",
+            "fr": "Durée des notifications",
+            "de": "Benachrichtigungsdauer",
+            "es": "Duración de notificaciones",
+            "ru": "Длительность уведомлений",
+            "pt": "Duração da Notificação"
+        ],
+        "notificationDurationSubtitle": [
+            "en": "How long toast alerts stay visible",
+            "zh-Hans": "弹窗提醒显示多久",
+            "zh-Hant": "彈窗提醒顯示多久",
+            "ja": "トースト通知の表示時間",
+            "ko": "토스트 알림 표시 시간",
+            "fr": "Temps d'affichage des alertes toast",
+            "de": "Wie lange Toast-Benachrichtigungen sichtbar bleiben",
+            "es": "Cuánto tiempo permanecen visibles las alertas toast",
+            "ru": "Как долго отображаются тост-уведомления",
+            "pt": "Quanto tempo os alertas toast permanecem visíveis"
+        ],
+        "searchCaseSensitiveTitle": [
+            "en": "Case-Sensitive Search",
+            "zh-Hans": "区分大小写搜索",
+            "zh-Hant": "區分大小寫搜尋",
+            "ja": "大文字と小文字を区別して検索",
+            "ko": "대소문자 구분 검색",
+            "fr": "Recherche sensible à la casse",
+            "de": "Groß-/Kleinschreibung beachten",
+            "es": "Búsqueda sensible a mayúsculas",
+            "ru": "Поиск с учётом регистра",
+            "pt": "Pesquisa Diferenciando Maiúsculas"
+        ],
+        "searchCaseSensitiveSubtitle": [
+            "en": "Match exact letter case when searching history",
+            "zh-Hans": "搜索历史时精确匹配字母大小写",
+            "zh-Hant": "搜尋歷史時精確匹配字母大小寫",
+            "ja": "履歴検索時に大文字と小文字を正確に一致",
+            "ko": "기록 검색 시 대소문자 정확히 일치",
+            "fr": "Respecter la casse lors de la recherche dans l'historique",
+            "de": "Bei Verlaufssuche exakte Groß-/Kleinschreibung verwenden",
+            "es": "Coincidir mayúsculas/minúsculas al buscar en historial",
+            "ru": "Точное совпадение регистра при поиске в истории",
+            "pt": "Coincidir maiúsculas/minúsculas ao pesquisar histórico"
+        ],
+        "pasteDelayTitle": [
+            "en": "Paste Delay",
+            "zh-Hans": "粘贴延迟",
+            "zh-Hant": "貼上延遲",
+            "ja": "貼り付け遅延",
+            "ko": "붙여넣기 지연",
+            "fr": "Délai de collage",
+            "de": "Einfügeverzögerung",
+            "es": "Retraso al pegar",
+            "ru": "Задержка вставки",
+            "pt": "Atraso ao Colar"
+        ],
+        "pasteDelaySubtitle": [
+            "en": "Wait before simulating paste keystrokes",
+            "zh-Hans": "模拟粘贴按键前的等待时间",
+            "zh-Hant": "模擬貼上按鍵前的等待時間",
+            "ja": "貼り付けキー入力をシミュレートする前の待機時間",
+            "ko": "붙여넣기 키 입력 시뮬레이션 전 대기 시간",
+            "fr": "Attendre avant de simuler les frappes de collage",
+            "de": "Wartezeit vor Simulation der Einfügetasten",
+            "es": "Esperar antes de simular pulsaciones de pegado",
+            "ru": "Ожидание перед имитацией нажатий вставки",
+            "pt": "Aguardar antes de simular teclas de colar"
         ],
         "okButton": [
             "en": "OK",

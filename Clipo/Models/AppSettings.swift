@@ -30,6 +30,13 @@ struct AppSettings: Codable, Equatable {
     var pasteOnSelection: Bool = false
     var hotkeyPreferences: HotkeyPreferences = HotkeyPreferences()
     
+    // MARK: - Deep Customization (v1.8.0+)
+    var searchCaseSensitive: Bool = false
+    var notificationDuration: Double = 2.5
+    var pasteDelay: Double = 0.0
+    var showSourceApp: Bool = true
+    var panelAnimationSpeed: Double = 1.0
+    
     // MARK: - Backward Compatibility
     
     /// Custom decoder that provides default values for missing fields,
@@ -66,6 +73,11 @@ struct AppSettings: Codable, Equatable {
         self.ignoreDuplicateHistory = try container.decodeIfPresent(Bool.self, forKey: .ignoreDuplicateHistory) ?? false
         self.pasteOnSelection = try container.decodeIfPresent(Bool.self, forKey: .pasteOnSelection) ?? false
         self.hotkeyPreferences = try container.decodeIfPresent(HotkeyPreferences.self, forKey: .hotkeyPreferences) ?? HotkeyPreferences()
+        self.searchCaseSensitive = try container.decodeIfPresent(Bool.self, forKey: .searchCaseSensitive) ?? false
+        self.notificationDuration = try container.decodeIfPresent(Double.self, forKey: .notificationDuration) ?? 2.5
+        self.pasteDelay = max(0, try container.decodeIfPresent(Double.self, forKey: .pasteDelay) ?? 0.0)
+        self.showSourceApp = try container.decodeIfPresent(Bool.self, forKey: .showSourceApp) ?? true
+        self.panelAnimationSpeed = max(0.5, min(2.0, try container.decodeIfPresent(Double.self, forKey: .panelAnimationSpeed) ?? 1.0))
     }
     
     init() {}

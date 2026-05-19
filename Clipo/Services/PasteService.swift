@@ -70,7 +70,8 @@ class PasteService {
         ClipboardHistoryService.shared.ignoreChangeCount(changeCount)
         ClipStore.shared.recordHistoryItem(item)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        let pasteDelay = ClipStore.shared.settings.pasteDelay
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(0.05, pasteDelay)) {
             ClipboardHistoryService.shared.ignorePasteEvents(for: 0.6)
             self.simulateCommandV()
             

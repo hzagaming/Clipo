@@ -248,20 +248,23 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-## What's New in v1.7.3
+## What's New in v1.8.0
 
-- **Search grouping reliability**: Replaced the `historySectionIndexMap` lookup with precise pre-computed offsets, eliminating the `?? 0` fallback that could corrupt selection visuals.
-- **History integrity**: Duplicate-history reordering now correctly calls `trimHistory()`, preventing pinned-sort desync.
-- **Selection stability**: `selectedIndex` is now auto-clamped when the history list changes spontaneously (new clipboard item, trim, import).
-- **Volume rounding**: Percentage label now rounds correctly (0.73 → 73%, 0.999 → 100%).
-- **Volume sync**: Slider value syncs automatically when volume is changed externally (e.g., JSON import).
-- **Master toggle accessibility**: The "Enable Sound Effects" master switch now has a VoiceOver label.
-- **Crash prevention**: Removed `NSScreen.screens.first!` force-unwrap in toast positioning; headless Macs no longer risk a crash.
-- **Dead code cleanup**: Removed unused `MenuBarView.swift` placeholder.
-- **Filter pill contrast**: Selected filter pills now use adaptive `.primary` text instead of hardcoded white.
-- **History limit safety**: `maxHistoryItems` is now clamped to ≥0 during decoding.
+- **Case-sensitive search**: New toggle in Clipboard settings lets you search with exact letter-case matching.
+- **Paste delay**: Adjustable delay (0–1s) before simulating paste keystrokes — useful for remote desktops and slow apps.
+- **Notification duration**: Control how long toast alerts stay visible (1.0–5.0s).
+- **Animation speed**: Fine-tune panel open/close animation speed (0.5×–2.0×).
+- **Show source app**: Toggle whether each history row displays the app that copied it.
 
 ## Version History
+
+### v1.8.0
+- Add search case-sensitivity toggle
+- Add adjustable paste delay (0–1s)
+- Add configurable notification duration (1.0–5.0s)
+- Add panel animation speed multiplier (0.5×–2.0×)
+- Add show/hide source app toggle for history rows
+- Sync all 5 new settings across 10 languages
 
 ### v1.7.3
 - Replace historySectionIndexMap with groupedHistoryOffsets for precise selection indexing

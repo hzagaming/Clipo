@@ -45,7 +45,7 @@ struct HistoryRowView: View {
                         .transition(.scale(scale: 0.5, anchor: .leading).combined(with: .opacity))
                     }
                     
-                    if let app = item.sourceApp {
+                    if let app = item.sourceApp, ClipStore.shared.settings.showSourceApp {
                         Text(app)
                             .font(.caption2)
                             .foregroundColor(.secondary.opacity(0.7))

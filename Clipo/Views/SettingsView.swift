@@ -289,6 +289,77 @@ struct SettingsView: View {
                     subtitle: L10n.string(.showEmptySlotsSubtitle),
                     isOn: $store.settings.showEmptySlots
                 )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "app.badge",
+                    title: L10n.string(.showSourceAppTitle),
+                    subtitle: L10n.string(.showSourceAppSubtitle),
+                    isOn: $store.settings.showSourceApp
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                HStack(spacing: 12) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.string(.notificationDurationTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        Text(L10n.string(.notificationDurationSubtitle))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    
+                    Spacer()
+                    
+                    Text(String(format: "%.1fs", store.settings.notificationDuration))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .frame(width: 40, alignment: .trailing)
+                    
+                    Slider(value: $store.settings.notificationDuration, in: 1.0...5.0, step: 0.5)
+                        .frame(width: 100)
+                        .controlSize(.small)
+                        .disabled(!store.settings.showNotifications)
+                }
+                .padding(.vertical, 8)
+                .opacity(store.settings.showNotifications ? 1.0 : 0.5)
+                
+                Divider().padding(.leading, 44)
+                
+                HStack(spacing: 12) {
+                    Image(systemName: "gauge.with.dots.needle.67percent")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.string(.panelAnimationSpeedTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        Text(L10n.string(.panelAnimationSpeedSubtitle))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    
+                    Spacer()
+                    
+                    Text(String(format: "%.1fx", store.settings.panelAnimationSpeed))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .frame(width: 40, alignment: .trailing)
+                    
+                    Slider(value: $store.settings.panelAnimationSpeed, in: 0.5...2.0, step: 0.1)
+                        .frame(width: 100)
+                        .controlSize(.small)
+                        .disabled(store.settings.reduceAnimations)
+                }
+                .padding(.vertical, 8)
+                .opacity(store.settings.reduceAnimations ? 0.5 : 1.0)
             }
             .padding(12)
             .background(
@@ -420,6 +491,35 @@ struct SettingsView: View {
                     subtitle: L10n.string(.restoreAfterSaveSubtitle),
                     isOn: $store.settings.restoreClipboardAfterSave
                 )
+                
+                Divider().padding(.leading, 44)
+                
+                HStack(spacing: 12) {
+                    Image(systemName: "hourglass")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.string(.pasteDelayTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        Text(L10n.string(.pasteDelaySubtitle))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    
+                    Spacer()
+                    
+                    Text(String(format: "%.2fs", store.settings.pasteDelay))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .frame(width: 48, alignment: .trailing)
+                    
+                    Slider(value: $store.settings.pasteDelay, in: 0.0...1.0, step: 0.05)
+                        .frame(width: 100)
+                        .controlSize(.small)
+                }
+                .padding(.vertical, 8)
             }
             .padding(12)
             .background(
@@ -443,6 +543,15 @@ struct SettingsView: View {
                     title: L10n.string(.pasteOnSelectionTitle),
                     subtitle: L10n.string(.pasteOnSelectionSubtitle),
                     isOn: $store.settings.pasteOnSelection
+                )
+                
+                Divider().padding(.leading, 44)
+                
+                ToggleRow(
+                    icon: "text.magnifyingglass",
+                    title: L10n.string(.searchCaseSensitiveTitle),
+                    subtitle: L10n.string(.searchCaseSensitiveSubtitle),
+                    isOn: $store.settings.searchCaseSensitive
                 )
             }
             .padding(12)

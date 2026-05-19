@@ -43,6 +43,7 @@ class PanelWindowService {
         }
         
         let reduceAnimations = ClipStore.shared.settings.reduceAnimations
+        let animSpeed = ClipStore.shared.settings.panelAnimationSpeed
         
         // Slightly offset downward for entrance animation.
         let finalOrigin = panel.frame.origin
@@ -71,7 +72,7 @@ class PanelWindowService {
             panel.setFrameOrigin(finalOrigin)
         } else {
             CATransaction.begin()
-            CATransaction.setAnimationDuration(0.2)
+            CATransaction.setAnimationDuration(0.2 * animSpeed)
             CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeOut))
             panel.animator().alphaValue = 1
             panel.animator().setFrameOrigin(finalOrigin)
@@ -90,6 +91,7 @@ class PanelWindowService {
         // Fade + slide out then orderOut. Capture the local panel reference so the
         // completion block never accesses a deallocated or replaced window.
         let reduceAnimations = ClipStore.shared.settings.reduceAnimations
+        let animSpeed = ClipStore.shared.settings.panelAnimationSpeed
         let currentOrigin = panel.frame.origin
         if reduceAnimations {
             panel.alphaValue = 0
@@ -98,7 +100,7 @@ class PanelWindowService {
         } else {
             let exitOrigin = NSPoint(x: currentOrigin.x, y: currentOrigin.y - 6)
             CATransaction.begin()
-            CATransaction.setAnimationDuration(0.18)
+            CATransaction.setAnimationDuration(0.18 * animSpeed)
             CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeIn))
             CATransaction.setCompletionBlock { [weak self] in
                 // If showPanel() cancelled the hide in the meantime, don't orderOut.
