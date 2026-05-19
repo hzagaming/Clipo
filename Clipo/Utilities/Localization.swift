@@ -218,6 +218,7 @@ enum LocKey: String {
     case showSlotSectionTitle, showSlotSectionSubtitle
     case autoHideDelayTitle, autoHideDelaySubtitle
     case autoHideNever
+    case panelWidthTitle, panelWidthSubtitle
     case okButton
 }
 
@@ -3507,6 +3508,30 @@ struct L10n {
             "es": "Nunca",
             "ru": "Никогда",
             "pt": "Nunca"
+        ],
+        "panelWidthTitle": [
+            "en": "Panel Width",
+            "zh-Hans": "面板宽度",
+            "zh-Hant": "面板寬度",
+            "ja": "パネルの幅",
+            "ko": "패널 너비",
+            "fr": "Largeur du panneau",
+            "de": "Panel-Breite",
+            "es": "Ancho del panel",
+            "ru": "Ширина панели",
+            "pt": "Largura do Painel"
+        ],
+        "panelWidthSubtitle": [
+            "en": "Adjust the width of the Clipo panel",
+            "zh-Hans": "调整 Clipo 面板的宽度",
+            "zh-Hant": "調整 Clipo 面板的寬度",
+            "ja": "Clipo パネルの幅を調整",
+            "ko": "Clipo 패널의 너비 조정",
+            "fr": "Ajuster la largeur du panneau Clipo",
+            "de": "Breite des Clipo-Panels anpassen",
+            "es": "Ajustar el ancho del panel de Clipo",
+            "ru": "Настроить ширину панели Clipo",
+            "pt": "Ajustar a largura do painel do Clipo"
         ],
         "okButton": [
             "en": "OK",

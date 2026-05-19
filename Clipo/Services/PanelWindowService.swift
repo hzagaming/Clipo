@@ -214,8 +214,9 @@ class PanelWindowService {
     }
     
     private func createPanel() {
+        let width = CGFloat(ClipStore.shared.settings.panelWidth)
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 620, height: 640),
+            contentRect: NSRect(x: 0, y: 0, width: width, height: 640),
             styleMask: [.nonactivatingPanel, .titled, .closable],
             backing: .buffered,
             defer: false

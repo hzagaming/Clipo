@@ -486,6 +486,45 @@ struct SettingsView: View {
                         .controlSize(.small)
                 }
                 .padding(.vertical, 8)
+                
+                Divider().padding(.leading, 44)
+                
+                HStack(spacing: 12) {
+                    Image(systemName: "arrow.left.and.right.square")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.string(.panelWidthTitle))
+                            .font(.system(size: 13, weight: .medium))
+                        Text(L10n.string(.panelWidthSubtitle))
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    
+                    Spacer()
+                    
+                    Text("\(store.settings.panelWidth)px")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .frame(width: 44, alignment: .trailing)
+                    
+                    Slider(value: Binding(
+                        get: { Double(store.settings.panelWidth) },
+                        set: { store.settings.panelWidth = Int($0) }
+                    ), in: 400.0...800.0, step: 20.0)
+                        .frame(width: 100)
+                        .controlSize(.small)
+                }
+                .padding(.vertical, 8)
+                .onChange(of: store.settings.panelWidth) { newValue in
+                    if let panel = PanelWindowService.shared.panelWindow {
+                        var frame = panel.frame
+                        frame.size.width = CGFloat(newValue)
+                        panel.setFrame(frame, display: true, animate: true)
+                    }
+                }
             }
             .padding(12)
             .background(

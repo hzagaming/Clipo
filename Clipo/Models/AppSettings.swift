@@ -54,6 +54,7 @@ struct AppSettings: Codable, Equatable {
     var escapeClosesPanel: Bool = true
     var showSlotSection: Bool = true
     var autoHideDelay: Double = 0.0
+    var panelWidth: Int = 620
     
     // MARK: - Backward Compatibility
     
@@ -110,6 +111,7 @@ struct AppSettings: Codable, Equatable {
         self.escapeClosesPanel = try container.decodeIfPresent(Bool.self, forKey: .escapeClosesPanel) ?? true
         self.showSlotSection = try container.decodeIfPresent(Bool.self, forKey: .showSlotSection) ?? true
         self.autoHideDelay = max(0, try container.decodeIfPresent(Double.self, forKey: .autoHideDelay) ?? 0.0)
+        self.panelWidth = max(400, min(800, try container.decodeIfPresent(Int.self, forKey: .panelWidth) ?? 620))
     }
     
     init() {}

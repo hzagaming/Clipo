@@ -155,7 +155,7 @@ struct ClipoPanelView: View {
             
             footerBar
         }
-        .frame(minWidth: 580, minHeight: 480)
+        .frame(minWidth: CGFloat(store.settings.panelWidth), minHeight: 480)
         .background(Color(NSColor.windowBackgroundColor).opacity(store.settings.panelOpacity))
         .onAppear(perform: onAppear)
         .onDisappear(perform: onDisappear)
