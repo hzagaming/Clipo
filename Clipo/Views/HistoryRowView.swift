@@ -78,7 +78,7 @@ struct HistoryRowView: View {
                         .animation(ClipStore.shared.settings.reduceAnimations ? nil : .spring(response: 0.3, dampingFraction: 0.6), value: item.isPinned)
                 }
                 .buttonStyle(HistoryRowButtonStyle())
-                .help(item.isPinned ? L10n.string(.contextMenuUnpin) : L10n.string(.contextMenuPin))
+                .help(item.isPinned ? "Unpin" : "Pin")
                 
                 Button(action: onDelete) {
                     Image(systemName: "trash")
@@ -88,7 +88,7 @@ struct HistoryRowView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(HistoryRowButtonStyle())
-                .help(L10n.string(.contextMenuDelete))
+                .help("Delete")
             }
             .opacity(isHovering ? 1 : 0)
             .animation(ClipStore.shared.settings.reduceAnimations ? nil : .easeInOut(duration: 0.15), value: isHovering)
@@ -189,7 +189,7 @@ struct HistoryRowView_Previews: PreviewProvider {
             HistoryRowView(
                 item: ClipItem(
                     content: "import Foundation\nprint(\"Hello\")",
-                    type: .codeLikeText,
+                    type: ClipType.codeLikeText,
                     sourceApp: "Xcode",
                     isPinned: true
                 )
@@ -197,14 +197,14 @@ struct HistoryRowView_Previews: PreviewProvider {
             HistoryRowView(
                 item: ClipItem(
                     content: "https://github.com/hanazar/clipo",
-                    type: .url,
+                    type: ClipType.url,
                     sourceApp: "Safari"
                 )
             )
             HistoryRowView(
                 item: ClipItem(
                     content: "Meeting notes for tomorrow",
-                    type: .plainText
+                    type: ClipType.plainText
                 )
             )
         }
